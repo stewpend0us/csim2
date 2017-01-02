@@ -9,10 +9,10 @@ typedef void * user_output;
 typedef void * user_system_constants;
 
 // user defined system functions
-typedef void(*user_dstate_function)(double t, user_state, user_input, user_output, user_system_constants, user_dstate);
-typedef void(*user_input_function)(double t, user_state, user_input, user_system_constants);
-typedef void(*user_output_function)(double t, user_state, user_input, user_output, user_system_constants);
-typedef void(*user_once_per_step_function)(double t, user_state, user_input, user_output, user_system_constants);
+typedef void(*user_dstate_function)(double t, user_state, user_input, user_output, user_system_constants, user_dstate); // updates user_dstate
+typedef void(*user_input_function)(double t, user_state, user_input, user_system_constants); // updates user_input
+typedef void(*user_output_function)(double t, user_state, user_input, user_output, user_system_constants); // updates user_output
+typedef void(*user_once_per_step_function)(double t, user_state, user_input, user_output, user_system_constants); // produces side effects
 
 // user defined functions to convert between user defined types and double array
 typedef void(*user_state_to_state)(double * state, user_state, user_system_constants);
