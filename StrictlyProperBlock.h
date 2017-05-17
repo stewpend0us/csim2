@@ -12,5 +12,17 @@ struct StrictlyProperBlock
 };
 
 struct StrictlyProperBlock integrator(size_t numSignals);
-struct StrictlyProperBlock system_new(size_t numInputs, size_t numOutputs, struct StrictlyProperBlock * blocks, void(*updateInputs)(double ** inputs, double const ** const outputs));
-void system_free(struct StrictlyProperBlock * system);
+
+struct SystemStorage
+{
+	size_t numBlocks;
+	struct StrictlyProperBlock const * const blocks;
+	double * const * const blockInputs;
+	double * const * const blockOutputs;
+	void(*updateInputs)(double * const * const inputs, double const * const * const outputs);
+};
+
+struct SystemStorage system_storage_new(size_t numBlocks, struct StrictlyProperBlock const * const blocks, void(*updateInputs)(double * const * const inputs, double const * const * const outputs));
+void system_storage_free(struct SystemStorage const * const storage);
+
+struct StrictlyProperBlock blockSystem(size_t numInputs, size_t numOutputs, struct SystemStorage * const storage);
