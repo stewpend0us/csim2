@@ -1,3 +1,4 @@
 *.suo
 *.opendb
 *.db
+x64/
