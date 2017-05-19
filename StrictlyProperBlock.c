@@ -101,6 +101,9 @@ struct StrictlyProperBlock blockSystem(size_t numInputs, size_t numOutputs, stru
 
 	return (struct StrictlyProperBlock)
 	{
-		.numStates = totalBlockStates, .numInputs = numInputs, .numOutputs = numOutputs, .f = blockSystem_f, .h = blockSystem_h, .storage = storage,
+		.numStates = totalBlockStates,
+			.numInputs = numInputs,
+			.numOutputs = numOutputs,
+			.f = blockSystem_f, .h = blockSystem_h, .storage = storage,
 	};
 }

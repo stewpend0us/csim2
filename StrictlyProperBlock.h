@@ -30,3 +30,5 @@ struct SystemStorage system_storage_new(size_t numBlocks, struct StrictlyProperB
 void system_storage_free(struct SystemStorage const * const storage);
 
 struct StrictlyProperBlock blockSystem(size_t numInputs, size_t numOutputs, struct SystemStorage * const storage);
+
+void rk4(double * Y, struct StrictlyProperBlock const * const block, double const * const Xi, size_t num_t, double const * const t, double const * const U);
