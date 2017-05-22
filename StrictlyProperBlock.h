@@ -1,9 +1,33 @@
 #pragma once
 #include <stdlib.h>
 
-typedef void(*PhysicsFunction)(size_t const numDstates, double * const dState, double const t, size_t const numStates, double const * const state, size_t const numInputs, double const * const input, void * const storage);
-typedef void(*OutputFunction)(size_t const numOutputs, double * const output, double const t, size_t const numStates, double const * const state, void * const storage);
+// function pointer types:
 
+// update dState as a function of time, state, and input
+typedef void(*PhysicsFunction)(
+	size_t const numDstates,
+	double * const dState,
+	double const time,
+	size_t const numStates,
+	double const * const state,
+	size_t const numInputs,
+	double const * const input,
+	void * const storage
+	);
+
+// update output as a function of time, and state
+typedef void(*OutputFunction)(
+	size_t const numOutputs,
+	double * const output,
+	double const time,
+	size_t const numStates,
+	double const * const state,
+	void * const storage
+	);
+
+// data types:
+
+// StrictlyProperBlock data
 struct StrictlyProperBlock
 {
 	size_t const numStates;
@@ -14,24 +38,17 @@ struct StrictlyProperBlock
 	void * const storage;
 };
 
-struct StrictlyProperBlock integrator(size_t const numSignals);
+// euler solver
+void euler
+();
 
-typedef void(*UpdateBlockInputsFunction)(size_t const numBlocks, struct StrictlyProperBlock const * const blocks, double * const * const inputs, double const * const * const outputs, size_t const numSystemInputs, double const * const systemInput);
-typedef void(*CalcSystemOutputFunction)(size_t const numOutputs, double * const outputs, double const * const * const blockOutputs);
-
-struct SystemStorage
-{
-	size_t numBlocks;
-	struct StrictlyProperBlock const * const blocks;
-	double * const * const blockInputs;
-	double * const * const blockOutputs;
-	UpdateBlockInputsFunction const updateInputs;
-	CalcSystemOutputFunction const calcOutput;
-};
-
-struct SystemStorage system_storage_new(size_t const numBlocks, struct StrictlyProperBlock const * const blocks, UpdateBlockInputsFunction const updateInputs, CalcSystemOutputFunction const calcOutputs);
-void system_storage_free(struct SystemStorage const * const storage);
-
-struct StrictlyProperBlock blockSystem(size_t const numInputs, size_t const numOutputs, struct SystemStorage * const storage);
-
-void rk4(double * const Y, double * const Xi, struct StrictlyProperBlock const * const block, size_t const num_t, double const * const t, double const * const U);
+// rk4 solver
+void rk4
+(
+	double * const Y,
+	double * const Xi,
+	struct StrictlyProperBlock const * const block,
+	size_t const num_t,
+	double const * const t,
+	double const * const U
+);

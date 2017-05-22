@@ -19,10 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="blockSystem.c" />
     <ClCompile Include="csim2.c" />
+    <ClCompile Include="integrator.c" />
     <ClCompile Include="StrictlyProperBlock.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blockSystem.h" />
+    <ClInclude Include="integrator.h" />
     <ClInclude Include="StrictlyProperBlock.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
