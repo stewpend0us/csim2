@@ -8,7 +8,30 @@ void euler
 
 }
 
-static void rk4_physics_step
+void rk4
+(
+	struct StrictlyProperBlock const * const block,
+	double ti,
+	double const dt,
+	double const tf
+)
+{
+	OutputFunction const h = block->h;
+	PhysicsFunction const f = block->f;
+	size_t const xi = block->numStates;
+	size_t const yi = block->numOutputs;
+	size_t const ui = block->numInputs;
+	void * const storage = block->storage;
+	double const dt2 = dt / 2;
+
+	while (ti <= tf)
+	{
+		h(yi, &Y[], ti, xi, Xi, storage);
+		rk4_step_(xi, dX, Xi, ti, dt, dt2, ui, U, f, storage);
+	}
+}
+
+static void rk4_step_
 (
 	size_t const xi,
 	double * const dX, // 5 * num_X buffer for rk4 algorithm
