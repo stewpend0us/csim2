@@ -2,3 +2,5 @@
 *.opendb
 *.db
 x64/
+Release/
+Debug/

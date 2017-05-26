@@ -46,19 +46,18 @@ struct StrictlyProperBlock
 
 // euler solver
 void euler
-();
+(
+	struct StrictlyProperBlock const * const block,
+	double const ti,
+	double const dt,
+	double const tf
+);
 
 // rk4 solver
 void rk4
 (
-	size_t const xi,
-	double * const dX, // 5 * num_X buffer for rk4 algorithm
-	double * const Xi, // 1 * num_X current state
-	double const t, // current time
-	double const dt, // time step
-	double const dt2, // time step / 2
-	size_t const ui,
-	double const * const U, // 3 * num_U input at time t, t + dt2, t + dt
-	PhysicsFunction const f,
-	void * const storage
+	struct StrictlyProperBlock const * const block,
+	double ti,
+	double const dt,
+	double const tf
 );
