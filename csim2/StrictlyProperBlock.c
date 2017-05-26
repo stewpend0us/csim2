@@ -3,147 +3,83 @@
 #include <math.h>
 #include "StrictlyProperBlock.h"
 
-void euler
+void euler_f_step
 (
-	struct StrictlyProperBlock const * const block,
-	double const ti,
-	double const dt,
-	double const tf,
-	InputFunction const uf,
-	size_t const xi,
-	double * const Xi
-)
-{
-	assert(xi == block->numStates);
-	OutputFunction const h = block->h;
-	PhysicsFunction const f = block->f;
-	//size_t const xi = block->numStates;
-	size_t const yi = block->numOutputs;
-	size_t const ui = block->numInputs;
-	void * const storage = block->storage;
-	size_t const num_steps = (size_t const)floor((tf - ti) / dt) + 1;
-	double t;
-
-	double * const Y = malloc(num_steps * yi * sizeof(double));
-	assert(Y != NULL);
-	double * const U = malloc(ui * sizeof(double));
-	assert(U != NULL);
-	double * const dX = malloc(xi * sizeof(double));
-	assert(dX != NULL);
-
-	for (size_t i = 0; i < num_steps; i++)
-	{
-		t = ti + i*dt;
-		h(yi, &Y[i*yi], t, xi, Xi, storage);
-		uf(ui, U, t);
-		f(xi, dX, t, xi, Xi, ui, U, storage);
-		for (size_t j = 0; j < xi; j++)
-			Xi[j] += dX[j] * dt;
-	}
-	free(Y);
-	free(U);
-	free(dX);
-}
-
-void rk4
-(
-	struct StrictlyProperBlock const * const block,
-	double const ti,
-	double const dt,
-	double const tf,
-	size_t const xi,
-	double * const Xi,
-	InputFunction const u
-)
-{
-	assert(xi == block->numStates);
-	OutputFunction const h = block->h;
-	PhysicsFunction const f = block->f;
-	size_t const yi = block->numOutputs;
-	size_t const ui = block->numInputs;
-	void * const storage = block->storage;
-	double const dt2 = dt / 2;
-	double t = ti;
-
-	double * const U = malloc(3 * ui * sizeof(double));
-	assert(U != NULL);
-	double * const dX = malloc(5 * xi * sizeof(double));
-	assert(dX != NULL);
-
-	double * const Uti = &U[0 * ui];
-	double * const Ut2 = &U[1 * ui];
-	double * const Ut1 = &U[2 * ui];
-	size_t const num_steps = floor((tf - ti) / dt + 1);
-
-	h(yi, Y, t, xi, Xi, storage);
-	u(ui, Uti, t);
-	u(ui, Ut2, t + dt2);
-	u(ui, Ut1, t + dt);
-	for (size_t i = 1; i < num_steps; i++)
-	{
-		rk4_step_(xi, dX, Xi, ti, dt, dt2, ui, U, f, storage);
-		t = ti + i * dt;
-		h(yi, &Y[i*yi], ti, xi, Xi, storage);
-		memcpy(Uti, Ut1, ui * sizeof(double));
-		u(ui, Ut2, t + dt2);
-		u(ui, Ut1, t + dt);
-	}
-	free(U);
-	free(dX);
-}
-
-static void rk4_step_
-(
-	size_t const xi,
-	double * const dX, // 5 * num_X buffer for rk4 algorithm
-	double * const Xi, // 1 * num_X current state
 	double const ti, // current time
 	double const dt, // time step
-	double const dt2, // time step / 2
+	size_t const xi,
+	double * const Xt1, // (1 * xi) next State
+	double * const A, // (1 * xi) current dstate
+	double const * const Xti, // (1 * xi) current state/initial conditions
 	size_t const ui,
-	double const * const U, // 3 * num_U input at time t, t + dt/2, t + dt
+	double const * const Uti, // (1 * ui) input at time ti
 	PhysicsFunction const f,
 	void * const storage
 )
 {
 	size_t i;
-	double * const A = &dX[0 * xi];
-	double * const B = &dX[1 * xi];
-	double * const C = &dX[2 * xi];
-	double * const D = &dX[3 * xi];
-	double * const Xt = &dX[4 * xi];
-	double const * const Uti = &U[0 * ui];
-	double const * const Ut2 = &U[1 * ui];
-	double const * const Ut1 = &U[2 * ui];
+
+	f(xi, A, ti, xi, Xti, ui, Uti, storage);
+	for (i = 0; i < xi; i++)
+		Xt1[i] = Xti[i] + A[i] * dt;
+}
+
+void rk4_f_step
+(
+	double const ti, // current time
+	double const dt, // time step
+	size_t const xi,
+	double * const Xt1, // (1 * xi) next State
+	double * const A, // (1 * xi) current dstate
+	double * const B, // (1 * xi) solver storage/temp
+	double * const C, // (1 * xi) solver storage/temp
+	double * const D, // (1 * xi) solver storage/temp
+	double * const Xtmp, // (1 * xi) solver storage/temp
+	double const * const Xti, // (1 * xi) current state/initial conditions
+	size_t const ui,
+	double const * const Uti, // (1 * ui) input at time ti
+	double const * const Ut2, // (1 * ui) input at time ti + dt/2
+	double const * const Ut1, // (1 * ui) input at time ti + dt
+	PhysicsFunction const f,
+	void * const storage
+)
+{
+	assert(Xtmp != Xt1);
+	assert(Xtmp != A);
+	assert(Xtmp != B);
+	assert(Xtmp != C);
+	assert(Xtmp != D);
+	assert(Xtmp != Xti);
+
+	size_t i;
+	double const dt2 = dt / 2;
 	double const t2 = ti + dt2;
 	double const t1 = ti + dt;
 
-	f(xi, A, ti, xi, Xi, ui, Uti, storage);
-	for (i = 0; i < xi; i++)
-		Xt[i] = Xi[i] + A[i] * dt2;
-	f(xi, B, t2, xi, Xt, ui, Ut2, storage);
-	for (i = 0; i < xi; i++)
-		Xt[i] = Xi[i] + B[i] * dt2;
-	f(xi, C, t2, xi, Xt, ui, Ut2, storage);
-	for (i = 0; i < xi; i++)
-		Xt[i] = Xi[i] + C[i] * dt;
-	f(xi, D, t1, xi, Xt, ui, Ut1, storage);
-	for (i = 0; i < xi; i++)
-		Xi[i] += dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
+	f(xi, A, ti, xi, Xti, ui, Uti, storage);
 
-	//for i = 1:numpts - 1
-	//	[A, output(i, :)] = f.physics(time(i), state(i, :), input(i, :));
+	for (i = 0; i < xi; i++)
+		Xtmp[i] = Xti[i] + A[i] * dt2;
+	f(xi, B, t2, xi, Xtmp, ui, Ut2, storage);
 
-	//B = f.physics(t2(i), state(i, :) + A*dt2, input2(i, :));
-	//C = f.physics(t2(i), state(i, :) + B*dt2, input2(i, :));
-	//D = f.physics(time(i + 1), state(i, :) + C*dt, input(i + 1, :));
+	for (i = 0; i < xi; i++)
+		Xtmp[i] = Xti[i] + B[i] * dt2;
+	f(xi, C, t2, xi, Xtmp, ui, Ut2, storage);
 
-	//state(i + 1, :) = state(i, :) + dt*(A + 2 * B + 2 * C + D) / 6;
-	//dstate(i, :) = A;
+	for (i = 0; i < xi; i++)
+		Xtmp[i] = Xti[i] + C[i] * dt;
+	f(xi, D, t1, xi, Xtmp, ui, Ut1, storage);
 
-	//if any(isnan(state(i, :))) && ~beenWarned
-	//	warning('state contains NaN at time %g', time(i));
-	//beenWarned = true;
-	//end
-	//	end
+	for (i = 0; i < xi; i++)
+		Xt1[i] = Xti[i] + dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
+}
+
+size_t numSteps
+(
+	double const ti,
+	double const dt,
+	double const tf
+)
+{
+	return (size_t)floor((tf - ti) / dt + 1);
 }
