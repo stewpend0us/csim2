@@ -48,24 +48,48 @@ void euler
 void rk4
 (
 	struct StrictlyProperBlock const * const block,
-	double ti,
+	double const ti,
 	double const dt,
-	double const tf
+	double const tf,
+	size_t const xi,
+	double * const Xi,
+	InputFunction const u
 )
 {
+	assert(xi == block->numStates);
 	OutputFunction const h = block->h;
 	PhysicsFunction const f = block->f;
-	size_t const xi = block->numStates;
 	size_t const yi = block->numOutputs;
 	size_t const ui = block->numInputs;
 	void * const storage = block->storage;
 	double const dt2 = dt / 2;
+	double t = ti;
 
-	while (ti <= tf)
+	double * const U = malloc(3 * ui * sizeof(double));
+	assert(U != NULL);
+	double * const dX = malloc(5 * xi * sizeof(double));
+	assert(dX != NULL);
+
+	double * const Uti = &U[0 * ui];
+	double * const Ut2 = &U[1 * ui];
+	double * const Ut1 = &U[2 * ui];
+	size_t const num_steps = floor((tf - ti) / dt + 1);
+
+	h(yi, Y, t, xi, Xi, storage);
+	u(ui, Uti, t);
+	u(ui, Ut2, t + dt2);
+	u(ui, Ut1, t + dt);
+	for (size_t i = 1; i < num_steps; i++)
 	{
-		//h(yi, &Y[], ti, xi, Xi, storage);
-		//rk4_step_(xi, dX, Xi, ti, dt, dt2, ui, U, f, storage);
+		rk4_step_(xi, dX, Xi, ti, dt, dt2, ui, U, f, storage);
+		t = ti + i * dt;
+		h(yi, &Y[i*yi], ti, xi, Xi, storage);
+		memcpy(Uti, Ut1, ui * sizeof(double));
+		u(ui, Ut2, t + dt2);
+		u(ui, Ut1, t + dt);
 	}
+	free(U);
+	free(dX);
 }
 
 static void rk4_step_

@@ -44,6 +44,14 @@ struct StrictlyProperBlock
 	void * const storage;
 };
 
+// SolverStorage data
+struct SolverStorage
+{
+	double * const dX;
+	double * const U;
+	double * const Y;
+};
+
 // euler solver
 void euler
 (
