@@ -8,26 +8,41 @@ void euler
 	struct StrictlyProperBlock const * const block,
 	double const ti,
 	double const dt,
-	double const tf
+	double const tf,
+	InputFunction const uf,
+	size_t const xi,
+	double * const Xi
 )
 {
+	assert(xi == block->numStates);
 	OutputFunction const h = block->h;
 	PhysicsFunction const f = block->f;
-	size_t const xi = block->numStates;
+	//size_t const xi = block->numStates;
 	size_t const yi = block->numOutputs;
 	size_t const ui = block->numInputs;
 	void * const storage = block->storage;
-
 	size_t const num_steps = (size_t const)floor((tf - ti) / dt) + 1;
+	double t;
+
+	double * const Y = malloc(num_steps * yi * sizeof(double));
+	assert(Y != NULL);
+	double * const U = malloc(ui * sizeof(double));
+	assert(U != NULL);
+	double * const dX = malloc(xi * sizeof(double));
+	assert(dX != NULL);
 
 	for (size_t i = 0; i < num_steps; i++)
 	{
-		double const t = ti + i*dt;
-		//h(yi, &Y[i*yi], t, xi, Xi, storage);
-		//f(xi, dX, t, xi, Xi, ui, U, storage);
-		//for (size_t j = 0; j < xi; j++)
-			//Xi[j] += dX[j] * dt;
+		t = ti + i*dt;
+		h(yi, &Y[i*yi], t, xi, Xi, storage);
+		uf(ui, U, t);
+		f(xi, dX, t, xi, Xi, ui, U, storage);
+		for (size_t j = 0; j < xi; j++)
+			Xi[j] += dX[j] * dt;
 	}
+	free(Y);
+	free(U);
+	free(dX);
 }
 
 void rk4
