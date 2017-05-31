@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include <math.h>
-#include "StrictlyProperBlock.h"
+#include "solvers.h"
 
 void euler_f_step
 (

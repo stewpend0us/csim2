@@ -1,20 +1,5 @@
-/*==========================================================
-* arrayProduct.c - example in MATLAB External Interfaces
-*
-* Multiplies an input scalar (multiplier)
-* times a 1xN matrix (inMatrix)
-* and outputs a 1xN matrix (outMatrix)
-*
-* The calling syntax is:
-*
-*		outMatrix = arrayProduct(multiplier, inMatrix)
-*
-* This is a MEX-file for MATLAB.
-* Copyright 2007-2012 The MathWorks, Inc.
-*
-*========================================================*/
-
 #include "mex.h"
+#include "../csim2/solvers.h"
 
 /* The computational routine */
 void arrayProduct(double x, double *y, double *z, mwSize n)

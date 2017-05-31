@@ -13,6 +13,11 @@
   <ItemGroup>
     <ClCompile Include="mexeuler.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\csim2\csim2.vcxproj">
+      <Project>{1e802af7-e608-42ed-a2d0-bb119f40e884}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AD7AEA80-6320-4042-B681-958F31967344}</ProjectGuid>
     <RootNamespace>mexeuler</RootNamespace>

@@ -21,11 +21,12 @@
   <ItemGroup>
     <ClCompile Include="blockSystem.c" />
     <ClCompile Include="integrator.c" />
-    <ClCompile Include="StrictlyProperBlock.c" />
+    <ClCompile Include="solvers.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blockSystem.h" />
     <ClInclude Include="integrator.h" />
+    <ClInclude Include="solvers.h" />
     <ClInclude Include="StrictlyProperBlock.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

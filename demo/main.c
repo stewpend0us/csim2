@@ -1,4 +1,4 @@
-#include "../csim2/StrictlyProperBlock.h"
+#include "../csim2/solvers.h"
 
 int main(int argc, char* argv[])
 {
