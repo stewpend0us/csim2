@@ -1,65 +1,166 @@
+#include <string.h>
+#include <stdbool.h>
 #include "mex.h"
 #include "../csim2/solvers.h"
+#include "../csim2/integrator.h"
 
-/* The computational routine */
-void arrayProduct(double x, double *y, double *z, mwSize n)
+#define STR1 32
+#define STR2 (STR1 + 64)
+#define TOOLBOX "csim2"
+#define FUNCTION "mexeuler"
+#define SIGNATURE "[output, state, dstate] = " FUNCTION "(dt, time, Xi, input)"
+#define ERROR(reason, msg) mexErrMsgIdAndTxt(TOOLBOX ":" FUNCTION ":" reason, msg)
+#define ASSERT(istrue, reason, msg) if (!(istrue)) { ERROR(reason, msg); }
+
+static double assertIsScalar(char const name[STR1], mxArray const * const pr)
 {
-	mwSize i;
-	/* multiply each element y by x */
-	for (i = 0; i<n; i++) {
-		z[i] = x * y[i];
+	char msg[STR2];
+	if (
+		!mxIsDouble(pr) ||
+		mxIsComplex(pr) ||
+		mxGetNumberOfElements(pr) != 1
+		)
+	{
+		strcpy(msg, name);
+		strcat(msg, " must be a scalar.");
+		ERROR("notScalar", msg);
+	}
+	return mxGetScalar(pr);
+}
+
+static double * assertIsVector(char const name[STR1], mxArray const * const pr)
+{
+	char msg[STR2];
+	if (
+		!mxIsDouble(pr) ||
+		mxIsComplex(pr) ||
+		mxGetNumberOfDimensions(pr) != 2 ||
+		!(mxGetM(pr) == 1 || mxGetN(pr) == 1)
+		)
+	{
+		strcpy(msg, name);
+		strcat(msg, " must be a matrix.");
+		ERROR("notVector", msg);
+	}
+	return mxGetPr(pr);
+}
+
+static double * assertIsMatrix(char const name[STR1], mxArray const * const pr)
+{
+	char msg[STR2];
+	if (
+		!mxIsDouble(pr) ||
+		mxIsComplex(pr) ||
+		mxGetNumberOfDimensions(pr) != 2
+		)
+	{
+		strcpy(msg, name);
+		strcat(msg, " must be a matrix.");
+		ERROR("notMatrix", msg);
+	}
+	return mxGetPr(pr);
+}
+
+static struct StrictlyProperBlock getBlock()
+{
+	return integrator(1);
+}
+
+void mexFunction(
+	int nlhs,
+	mxArray *plhs[],
+	int nrhs,
+	const mxArray *prhs[]
+)
+{
+	ASSERT(nrhs == 4, "nrhs", "four inputs required: " SIGNATURE);
+	ASSERT(nlhs >= 1 && nlhs <= 3, "nlhs", "expected one to three outputs: " SIGNATURE);
+
+	double dt; // 1 x 1 time step
+	mwSize numSteps;
+	double * time; // numSteps x 1 time vector
+	mwSize numStates;
+	double * Xi; // numStates x 1 initial conditions vector
+	mwSize numInputs;
+	double * U; // numSteps x numInputs inputs
+
+	dt = assertIsScalar("dt", prhs[0]);
+	time = assertIsVector("time", prhs[1]);
+	Xi = assertIsVector("Xi", prhs[2]);
+	U = assertIsMatrix("input", prhs[3]);
+
+	numSteps = mxGetNumberOfElements(prhs[1]);
+	numStates = mxGetNumberOfElements(prhs[2]);
+	numInputs = mxGetN(prhs[3]);
+
+	ASSERT(mxGetM(prhs[3]) == numSteps, "inconsistentInput", "size(input,1) must equal numel(time).");
+
+	struct StrictlyProperBlock block = getBlock();
+
+	if (block.numStates != numStates)
+	{
+		char msg[STR2];
+		sprintf(msg, "Xi is expected to have %zu elements.", block.numStates);
+		ERROR("wrongNumStates", msg);
+	}
+	
+	if (block.numInputs != numInputs)
+	{
+		char msg[STR2];
+		sprintf(msg, "input is expected to have %zu columns.", block.numInputs);
+		ERROR("wrongNumInputs", msg);
+	}
+	
+	// done with checking the inputs. set up the outputs
+	bool const outputState = (nlhs >= 2);
+	bool const outputdState = (nlhs >= 3);
+
+	double * Y; // numSteps x numOutputs
+	double * X; // numSteps x numStates OR 1 x numStates
+	double * dX; // numSteps x numStates OR 1 x numStates
+
+	plhs[0] = mxCreateDoubleMatrix(numSteps, block.numOutputs, mxREAL);
+	Y = mxGetPr(plhs[0]);
+
+	if (outputState)
+	{
+		plhs[1] = mxCreateDoubleMatrix(numSteps, block.numStates, mxREAL);
+		X = mxGetPr(plhs[1]);
+		memcpy(X, Xi, block.numStates * sizeof(double));
+	}
+
+	if (outputdState)
+	{
+		plhs[2] = mxCreateDoubleMatrix(numSteps, block.numStates, mxREAL);
+		dX = mxGetPr(plhs[2]);
+	}
+	else
+	{
+		dX = mxMalloc(block.numStates * sizeof(double)); // matlab handles freeing this for us. how nice
+	}
+
+	double * nextState = Xi;
+	double const * currentState = Xi;
+	double * currentdState = dX;
+	double const * currentInput;
+
+	size_t i = 0;
+	block.h(block.numOutputs, &Y[i*block.numOutputs], time[i], block.numStates, currentState, block.storage);
+	i++;
+	for (; i < numSteps; i++)
+	{
+		if (outputState)
+		{
+			currentState = &X[(i - 1)*block.numStates];
+			nextState = &X[i*block.numStates];
+		}
+
+		if (outputdState)
+			currentdState = &dX[(i - 1)*block.numStates];
+
+		currentInput = &U[(i - 1)*block.numInputs];
+		euler_f_step(time[i], dt, block.numStates, nextState, currentdState, currentState, block.numInputs, currentInput, block.f, block.storage);
+		block.h(block.numOutputs, &Y[i*block.numOutputs], time[i], block.numStates, currentState, block.storage);
 	}
 }
 
-/* The gateway function */
-void mexFunction(int nlhs, mxArray *plhs[],
-	int nrhs, const mxArray *prhs[])
-{
-	double multiplier;              /* input scalar */
-	double *inMatrix;               /* 1xN input matrix */
-	size_t ncols;                   /* size of matrix */
-	double *outMatrix;              /* output matrix */
-
-									/* check for proper number of arguments */
-	if (nrhs != 2) {
-		mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nrhs", "Two inputs required.");
-	}
-	if (nlhs != 1) {
-		mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nlhs", "One output required.");
-	}
-	/* make sure the first input argument is scalar */
-	if (!mxIsDouble(prhs[0]) ||
-		mxIsComplex(prhs[0]) ||
-		mxGetNumberOfElements(prhs[0]) != 1) {
-		mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notScalar", "Input multiplier must be a scalar.");
-	}
-
-	/* make sure the second input argument is type double */
-	if (!mxIsDouble(prhs[1]) ||
-		mxIsComplex(prhs[1])) {
-		mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble", "Input matrix must be type double.");
-	}
-
-	/* check that number of rows in second input argument is 1 */
-	if (mxGetM(prhs[1]) != 1) {
-		mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notRowVector", "Input must be a row vector.");
-	}
-
-	/* get the value of the scalar input  */
-	multiplier = mxGetScalar(prhs[0]);
-
-	/* create a pointer to the real data in the input matrix  */
-	inMatrix = mxGetPr(prhs[1]);
-
-	/* get dimensions of the input matrix */
-	ncols = mxGetN(prhs[1]);
-
-	/* create the output matrix */
-	plhs[0] = mxCreateDoubleMatrix(1, (mwSize)ncols, mxREAL);
-
-	/* get a pointer to the real data in the output matrix */
-	outMatrix = mxGetPr(plhs[0]);
-
-	/* call the computational routine */
-	arrayProduct(multiplier, inMatrix, outMatrix, (mwSize)ncols);
-}
