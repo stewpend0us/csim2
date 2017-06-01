@@ -23,6 +23,9 @@ typedef void(*OutputFunction)(
 	void * const storage
 	);
 
+// constructor function to be exported by dlls
+typedef struct StrictlyProperBlock(*StrictlyProperBlockDLLConstructor)();
+
 // StrictlyProperBlock data
 struct StrictlyProperBlock
 {
