@@ -1,3 +1,5 @@
+#include <assert.h>
+#include <string.h>
 #include "../csim2/integrator.h"
 #include "../csim2/blockSystem.h"
 
@@ -41,10 +43,11 @@ static void fol_output
 	void const * const tau
 )
 {
+	assert(numStates == numOutputs);
 	memcpy(output, state, numStates * sizeof(double));
 }
 
-static double const tau = 3;
+static double tau = 3;
 __declspec(dllexport) struct StrictlyProperBlock getFirstOrderLag1()
 {
 	return (struct StrictlyProperBlock)
@@ -54,17 +57,40 @@ __declspec(dllexport) struct StrictlyProperBlock getFirstOrderLag1()
 }
 
 
-static struct BlockSystemStorage const storage = (struct BlockSystemStorage)
+void fol_blockInputs
+(
+	size_t const numBlocks,
+	struct StrictlyProperBlock const * const blocks,
+	double * const * const blockInputs,
+	double const time,
+	double const * const * const blockOutputs,
+	size_t const numSystemInputs,
+	double const * const systemInputs
+)
 {
-	.numBlocks = 1, .blocks =
-};
+	blockInputs[0][0] = (systemInputs[0] - blockOutputs[0][0]) / tau;
+}
+
+void fol_blockOutputs
+(
+	size_t const numSystemOutputs,
+	double * const systemOutputs,
+	double const time,
+	double const * const * const blockOutputs
+)
+{
+	memcpy(systemOutputs, blockOutputs[0], numSystemOutputs * sizeof(double));
+}
 
 __declspec(dllexport) struct StrictlyProperBlock getFirstOrderLag2()
 {
-	struct BlockSystemStorage * const storage = malloc(sizeof(struct BlockSystemStorage));
-	storage->numBlocks = 1;
-	storage->blocks = malloc(1 * sizeof(struct StrictlyProperBlock));
-	storage->blocks[0] = integrator(1);
+	struct StrictlyProperBlock temp = integrator(1);
+	struct StrictlyProperBlock * blocks = malloc(sizeof(struct StrictlyProperBlock));
+	memcpy(blocks, &temp, sizeof(struct StrictlyProperBlock));
+
+	struct BlockSystemStorage temp2 = blockSystemStorage_new(1, blocks, fol_blockInputs, fol_blockOutputs);
+	struct BlockSystemStorage * storage = malloc(sizeof(struct BlockSystemStorage));
+	memcpy(storage, &temp2, sizeof(struct BlockSystemStorage));
 
 	return blockSystem(1, 1, storage);
 }
