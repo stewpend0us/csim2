@@ -208,7 +208,7 @@ void mexFunction(
 
 	size_t i = 0;
 	size_t ic;
-	block.h(block.numOutputs, &Y[i*block.numOutputs], time[i], block.numStates, currentState, block.storage);
+	block.h(block.numStates, block.numOutputs, &Y[i*block.numOutputs], time[i], currentState, block.storage);
 	i++;
 	for (; i < numSteps; i++)
 	{
@@ -224,14 +224,14 @@ void mexFunction(
 
 		currentInput = &U_t[ic*block.numInputs];
 		
-		euler_f_step(time[ic], dt, block.numStates, nextState, currentdState, currentState, block.numInputs, currentInput, block.f, block.storage);
-		block.h(block.numOutputs, &Y[i*block.numOutputs], time[i], block.numStates, nextState, block.storage);
+		euler_f_step(block.numStates, block.numInputs, dt, time[ic], nextState, currentdState, currentState, currentInput, block.f, block.storage);
+		block.h(block.numStates, block.numOutputs, &Y[i*block.numOutputs], time[i], nextState, block.storage);
 	}
 
 	if (outputdState)
 	{
 		ic = i - 1;
-		block.f(block.numStates, &dX[ic*block.numStates], time[ic], block.numStates, nextState, block.numInputs, &U_t[ic*block.numInputs], block.storage);
+		block.f(block.numStates, block.numInputs, &dX[ic*block.numStates], time[ic], nextState, &U_t[ic*block.numInputs], block.storage);
 	}
 	else
 		mxFree(dX); // but the help says to do it anyway...

@@ -4,12 +4,11 @@
 
 static void integrator_physics
 (
-	size_t const numDstates,
+	size_t numStates,
+	size_t numInputs,
 	double * const dState,
 	double const time,
-	size_t const numStates,
 	double const * const state,
-	size_t const numInputs,
 	double const * const input,
 	void * const storage
 )
@@ -20,10 +19,10 @@ static void integrator_physics
 
 static void integrator_output
 (
-	size_t const numOutputs,
+	size_t numStates,
+	size_t numOutputs,
 	double * const output,
 	double const time,
-	size_t const numStates,
 	double const * const state,
 	void * const storage
 )

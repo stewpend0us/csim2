@@ -10,7 +10,8 @@ typedef void(*CalcBlockInputsFunction)(
 	double const time,
 	double const * const * const blockOutputs,
 	size_t const numSystemInputs,
-	double const * const systemInputs
+	double const * const systemInputs,
+	void * const systemStorage
 	);
 
 // update systemOutputs as a function of time, and blockOutputs
@@ -18,18 +19,20 @@ typedef void(*CalcSystemOutputFunction)(
 	size_t const numSystemOutputs,
 	double * const systemOutputs,
 	double const time,
-	double const * const * const blockOutputs
+	double const * const * const blockOutputs,
+	void * const systemStorage
 	);
 
 // BlockSystemStorage data
 struct BlockSystemStorage
 {
-	size_t const numBlocks;
-	struct StrictlyProperBlock const * const blocks;
-	double * const * const blockInputs;
-	double * const * const blockOutputs;
-	CalcBlockInputsFunction const updateInputs;
-	CalcSystemOutputFunction const calcOutput;
+	size_t numBlocks;
+	struct StrictlyProperBlock const * blocks;
+	double * const * blockInputs;
+	double * const * blockOutputs;
+	CalcBlockInputsFunction calcBlockInputs;
+	CalcSystemOutputFunction calcSystemOutput;
+	void * systemStorage;
 };
 
 // BlockSystemStorage constructor
@@ -37,12 +40,18 @@ struct BlockSystemStorage blockSystemStorage_new
 (
 	size_t const numBlocks,
 	struct StrictlyProperBlock const * const blocks,
-	CalcBlockInputsFunction const calcInputs,
-	CalcSystemOutputFunction const calcOutputs
+	CalcBlockInputsFunction const calcBlockInputs,
+	CalcSystemOutputFunction const calcSystemOutputs,
+	void * const systemStorage
 );
 
 // BlockSystemStorage destructor
 void blockSystemStorage_free(struct BlockSystemStorage const * const storage);
 
 // blockSystem constructor
-struct StrictlyProperBlock blockSystem(size_t const numInputs, size_t const numOutputs, struct BlockSystemStorage * const storage);
+struct StrictlyProperBlock blockSystem
+(
+	size_t const numSystemInputs,
+	size_t const numSystemOutputs,
+	struct BlockSystemStorage * const storage
+);
