@@ -21,9 +21,8 @@ static void blockSystem_physics
 	storage->calcBlockInputs(numBlocks, blocks, blockInputs, time, blockOutputs, numInputs, input, systemStorage);
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		struct StrictlyProperBlock const B = blocks[i];
-		B.f(B.numStates, B.numInputs, &dState[xi], time, &state[xi], blockInputs[i], B.storage);
-		xi += B.numStates;
+		blocks[i].f(blocks[i].numStates, blocks[i].numInputs, &dState[xi], time, &state[xi], blockInputs[i], blocks[i].storage);
+		xi += blocks[i].numStates;
 	}
 }
 
@@ -44,9 +43,8 @@ static void blockSystem_output
 	size_t xi = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		struct StrictlyProperBlock const B = blocks[i];
-		B.h(B.numStates, B.numOutputs, blockOutputs[i], time, &state[xi], B.storage);
-		xi += B.numStates;
+		blocks[i].h(blocks[i].numStates, blocks[i].numOutputs, blockOutputs[i], time, &state[xi], blocks[i].storage);
+		xi += blocks[i].numStates;
 	}
 	storage->calcSystemOutput(numOutputs, output, time, blockOutputs, systemStorage);
 }
@@ -64,9 +62,8 @@ struct BlockSystemStorage blockSystemStorage_new
 	size_t totalBlockOutputs = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		struct StrictlyProperBlock const B = blocks[i];
-		totalBlockInputs += B.numInputs;
-		totalBlockOutputs += B.numOutputs;
+		totalBlockInputs += blocks[i].numInputs;
+		totalBlockOutputs += blocks[i].numOutputs;
 	}
 
 	double * storage = malloc((totalBlockInputs + totalBlockOutputs) * sizeof(double));
@@ -80,11 +77,10 @@ struct BlockSystemStorage blockSystemStorage_new
 	size_t outputi = totalBlockInputs;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		struct StrictlyProperBlock const B = blocks[i];
 		input_storage[i] = &storage[inputi];
 		output_storage[i] = &storage[outputi];
-		inputi += B.numInputs;
-		outputi += B.numOutputs;
+		inputi += blocks[i].numInputs;
+		outputi += blocks[i].numOutputs;
 	}
 
 	return (struct BlockSystemStorage)
