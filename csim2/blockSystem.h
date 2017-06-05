@@ -23,21 +23,11 @@ typedef void(*CalcSystemOutputFunction)(
 	void * const systemStorage
 	);
 
-// BlockSystemStorage data
-struct BlockSystemStorage
-{
-	size_t numBlocks;
-	struct StrictlyProperBlock const * blocks;
-	double * const * blockInputs;
-	double * const * blockOutputs;
-	CalcBlockInputsFunction calcBlockInputs;
-	CalcSystemOutputFunction calcSystemOutput;
-	void * systemStorage;
-};
 
-// BlockSystemStorage constructor
-struct BlockSystemStorage blockSystemStorage_new
+struct StrictlyProperBlock * blockSystem_new
 (
+	size_t const numSystemInputs,
+	size_t const numSystemOutputs,
 	size_t const numBlocks,
 	struct StrictlyProperBlock const * const blocks,
 	CalcBlockInputsFunction const calcBlockInputs,
@@ -45,13 +35,4 @@ struct BlockSystemStorage blockSystemStorage_new
 	void * const systemStorage
 );
 
-// BlockSystemStorage destructor
-void blockSystemStorage_free(struct BlockSystemStorage const * const storage);
-
-// blockSystem constructor
-struct StrictlyProperBlock blockSystem
-(
-	size_t const numSystemInputs,
-	size_t const numSystemOutputs,
-	struct BlockSystemStorage * const storage
-);
+void blockSystem_free(struct StrictlyProperBlock * const blockSystem);

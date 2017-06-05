@@ -13,7 +13,6 @@ static void integrator_physics
 	void * const storage
 )
 {
-	assert(numStates == numInputs);
 	memcpy(dState, input, numStates * sizeof(double));
 }
 
@@ -27,14 +26,30 @@ static void integrator_output
 	void * const storage
 )
 {
-	assert(numStates == numOutputs);
 	memcpy(output, state, numStates * sizeof(double));
 }
 
 struct StrictlyProperBlock integrator(size_t const numSignals)
 {
-	return (struct StrictlyProperBlock)
-	{
-		.numStates = numSignals, .numInputs = numSignals, .numOutputs = numSignals, .f = integrator_physics, .h = integrator_output, .storage = NULL,
-	};
+	struct StrictlyProperBlock b;
+	b.numStates = numSignals;
+	b.numInputs = numSignals;
+	b.numOutputs = numSignals;
+	b.f = integrator_physics;
+	b.h = integrator_output;
+	b.storage = NULL;
+	return b;
+}
+
+struct StrictlyProperBlock * integrator_new(size_t const numSignals)
+{
+	struct StrictlyProperBlock stackb = integrator(numSignals);
+	struct StrictlyProperBlock * b = malloc(sizeof(struct StrictlyProperBlock));
+	memcpy(b, &stackb, sizeof(struct StrictlyProperBlock));
+	return b;
+}
+
+void integrator_free(struct StrictlyProperBlock * const b)
+{
+	free(b);
 }

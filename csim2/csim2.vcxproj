@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blockSystem.h" />
+    <ClInclude Include="dllInterface.h" />
     <ClInclude Include="integrator.h" />
     <ClInclude Include="solvers.h" />
     <ClInclude Include="StrictlyProperBlock.h" />

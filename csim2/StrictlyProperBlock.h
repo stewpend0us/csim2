@@ -1,7 +1,7 @@
 #pragma once
 #include <stdlib.h>
 
-// update dState as a function of time, state, and input
+// update dState as a function of time, state, input, and storage
 typedef void(*PhysicsFunction)(
 	size_t numStates,
 	size_t numInputs,
@@ -12,7 +12,7 @@ typedef void(*PhysicsFunction)(
 	void * const storage
 	);
 
-// update output as a function of time, and state
+// update output as a function of time, state, and storage
 typedef void(*OutputFunction)(
 	size_t numStates,
 	size_t numOutputs,
@@ -32,6 +32,3 @@ struct StrictlyProperBlock
 	OutputFunction h;
 	void * storage;
 };
-
-// constructor function to be exported by dlls
-typedef struct StrictlyProperBlock(*StrictlyProperBlockDLLConstructor)();

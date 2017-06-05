@@ -1,27 +1,25 @@
-#include <assert.h>
 #include <string.h>
+#include <errno.h>
 #include "../csim2/integrator.h"
 #include "../csim2/blockSystem.h"
+#include "../csim2/dllInterface.h"
 
 // few simple cases of just an integrator
-__declspec(dllexport) struct StrictlyProperBlock getInt1()
+static struct StrictlyProperBlock * getInt(char const * const options)
 {
-	return integrator(1);
+	errno = 0;
+	long numStates = strtol(options, NULL, 10); // convert the options string into an integer
+	if (errno == ERANGE)
+		return NULL;
+	if (numStates <= 0)
+		return NULL;
+	return integrator_new(numStates);
 }
 
-__declspec(dllexport) struct StrictlyProperBlock getInt2()
-{
-	return integrator(2);
-}
+__declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getInt, integrator_free };
 
-__declspec(dllexport) struct StrictlyProperBlock getInt10()
-{
-	return integrator(10);
-}
 
 // direct implementation of 1/(tau*s + 1)
-static double Gtau = 3;
-
 static void fol_physics
 (
 	size_t numStates,
@@ -46,17 +44,41 @@ static void fol_output
 	void const * const tau
 )
 {
-	assert(numStates == numOutputs);
 	memcpy(output, state, numStates * sizeof(double));
 }
 
-__declspec(dllexport) struct StrictlyProperBlock getFirstOrderLag1()
+static struct StrictlyProperBlock * getFirstOrderLag1(char const * const options)
 {
-	return (struct StrictlyProperBlock)
-	{
-		.numStates = 1, .numInputs = 1, .numOutputs = 1, .f = fol_physics, .h = fol_output, .storage = &Gtau,
-	};
+	errno = 0;
+	double tau = strtod(options, NULL);
+	if (errno == ERANGE)
+		return NULL;
+	if (tau <= 0)
+		return NULL;
+
+	double * taup = malloc(sizeof(double));
+	taup[0] = tau;
+
+	struct StrictlyProperBlock bstack;
+	bstack.numStates = 1;
+	bstack.numInputs = 1;
+	bstack.numOutputs = 1;
+	bstack.f = fol_physics;
+	bstack.h = fol_output;
+	bstack.storage = taup;
+
+	struct StrictlyProperBlock * bheap = malloc(sizeof(struct StrictlyProperBlock));
+	memcpy(bheap, &bstack, sizeof(struct StrictlyProperBlock));
+	return bheap;
 }
+
+static void freeFirstOrderLag1(struct StrictlyProperBlock * block)
+{
+	free(block->storage);
+	free(block);
+}
+
+__declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getFirstOrderLag1, freeFirstOrderLag1 };
 
 // blockSystem implementation of 1/(tau*s + 1)
 void fol_blockInputs
@@ -86,15 +108,25 @@ void fol_blockOutputs
 	memcpy(systemOutputs, blockOutputs[0], numSystemOutputs * sizeof(double));
 }
 
-__declspec(dllexport) struct StrictlyProperBlock getFirstOrderLag2()
+static struct StrictlyProperBlock * getFirstOrderLag2(char const * const options)
 {
-	struct StrictlyProperBlock temp = integrator(1);
-	struct StrictlyProperBlock * blocks = malloc(sizeof(struct StrictlyProperBlock));
-	memcpy(blocks, &temp, sizeof(struct StrictlyProperBlock));
+	errno = 0;
+	double tau = strtod(options, NULL);
+	if (errno == ERANGE)
+		return NULL;
+	if (tau <= 0)
+		return NULL;
 
-	struct BlockSystemStorage temp2 = blockSystemStorage_new(1, blocks, fol_blockInputs, fol_blockOutputs, &Gtau);
-	struct BlockSystemStorage * storage = malloc(sizeof(struct BlockSystemStorage));
-	memcpy(storage, &temp2, sizeof(struct BlockSystemStorage));
+	double * taup = malloc(sizeof(double));
+	taup[0] = tau;
 
-	return blockSystem(1, 1, storage);
+	struct StrictlyProperBlock * I = integrator_new(1);
+	struct StrictlyProperBlock * B = blockSystem_new(1, 1, 1, I, fol_blockInputs, fol_blockOutputs, taup);
+
+	return B;
+}
+
+static void freeFirstOrderLag2(struct StrictlyProperBlock * block)
+{
+	free();
 }
