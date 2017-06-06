@@ -17,6 +17,9 @@
     <ProjectReference Include="..\csim2\csim2.vcxproj">
       <Project>{1e802af7-e608-42ed-a2d0-bb119f40e884}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\mexshared\mexshared.vcxproj">
+      <Project>{f5087c67-79e0-41ec-9491-9efc12a7841e}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{99D9F467-B8D5-409D-B91C-3362A9C2E071}</ProjectGuid>

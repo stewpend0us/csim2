@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mexrk4", "mexrk4\mexrk4.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mexeuler", "mexeuler\mexeuler.vcxproj", "{AD7AEA80-6320-4042-B681-958F31967344}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mexshared", "mexshared\mexshared.vcxproj", "{F5087C67-79E0-41EC-9491-9EFC12A7841E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -47,6 +49,12 @@ Global
 		{AD7AEA80-6320-4042-B681-958F31967344}.Release|x64.ActiveCfg = Release|x64
 		{AD7AEA80-6320-4042-B681-958F31967344}.Release|x64.Build.0 = Release|x64
 		{AD7AEA80-6320-4042-B681-958F31967344}.Release|x86.ActiveCfg = Release|x64
+		{F5087C67-79E0-41EC-9491-9EFC12A7841E}.Debug|x64.ActiveCfg = Debug|x64
+		{F5087C67-79E0-41EC-9491-9EFC12A7841E}.Debug|x64.Build.0 = Debug|x64
+		{F5087C67-79E0-41EC-9491-9EFC12A7841E}.Debug|x86.ActiveCfg = Debug|x64
+		{F5087C67-79E0-41EC-9491-9EFC12A7841E}.Release|x64.ActiveCfg = Release|x64
+		{F5087C67-79E0-41EC-9491-9EFC12A7841E}.Release|x64.Build.0 = Release|x64
+		{F5087C67-79E0-41EC-9491-9EFC12A7841E}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
