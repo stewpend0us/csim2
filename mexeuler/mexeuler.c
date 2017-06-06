@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include "mex.h"
 #include "../csim2/solvers.h"
+#include "../csim2/dllInterface.h"
 
 #define TOOLBOX "csim2"
 #define FUNCTION "mexeuler"
@@ -12,16 +13,18 @@
 #define Ti 3
 #define ICi 4
 #define Ui 5
+#define Oi 6
 #define DLLname "dllPath"
 #define OBJname "objName"
 #define DTname "dt"
 #define Tname "time"
 #define ICname "Xi"
 #define Uname "input"
-#define SIGNATURE "[ output, state, dstate ] = " FUNCTION "( " DLLname ", " OBJname", " DTname ", " Tname ", " ICname ", " Uname " )"
+#define Oname "options"
+#define SIGNATURE "[ output, state, dstate ] = " FUNCTION "( " DLLname ", " OBJname", " DTname ", " Tname ", " ICname ", " Uname ", <" Oname "> )"
 
 #define STR1 32
-#define STR2 (STR1 + 64)
+#define STR2 (STR1 + 96)
 #define MATLABERROR(reason, msg) mexErrMsgIdAndTxt(TOOLBOX ":" FUNCTION ":" reason, msg)
 #define MATLABASSERT(istrue, reason, msg) if (!(istrue)) { MATLABERROR(reason, msg); }
 
@@ -104,7 +107,7 @@ void mexFunction(
 	const mxArray *prhs[]
 )
 {
-	MATLABASSERT(nrhs == 6, "nrhs", "6 inputs required: " SIGNATURE);
+	MATLABASSERT(nrhs == 6 || nrhs == 7, "nrhs", "expected 6 to 7 inputs: " SIGNATURE);
 	MATLABASSERT(nlhs >= 1 && nlhs <= 3, "nlhs", "expected 1 to 3 outputs: " SIGNATURE);
 
 	char * dll;
@@ -116,6 +119,8 @@ void mexFunction(
 	double * Xi; // numStates x 1 initial conditions vector
 	mwSize numInputs;
 	double * U_t; // numSteps x numInputs inputs
+	char * options;
+	char Empty = '\0';
 
 	dll = assertIsChar(DLLname, prhs[DLLi]);
 	obj = assertIsChar(OBJname, prhs[OBJi]);
@@ -123,6 +128,11 @@ void mexFunction(
 	time = assertIsVector(Tname, prhs[Ti]);
 	Xi = assertIsVector(ICname, prhs[ICi]);
 	U_t = assertIsMatrix(Uname, prhs[Ui]);
+
+	if (nrhs == 7)
+		options = assertIsChar(Oname, prhs[Oi]);
+	else
+		options = &Empty;
 
 	dllHandle = LoadLibrary(dll);
 	if (!dllHandle)
@@ -134,7 +144,7 @@ void mexFunction(
 	}
 	mexAtExit(onExitFreedllHandle);
 
-	StrictlyProperBlockDLLConstructor getBlock = (StrictlyProperBlockDLLConstructor)GetProcAddress(dllHandle, obj);
+	struct dllStrictlyProperBlock * getBlock = (struct dllStrictlyProperBlock *)GetProcAddress(dllHandle, obj);
 	if (!getBlock)
 	{
 		char msg[STR2] = "failed to load \"";
@@ -143,13 +153,22 @@ void mexFunction(
 		MATLABERROR("failedToLoadStrictlyProperBlock", msg);
 	}
 
+	struct StrictlyProperBlock * blockp = getBlock->constructor(options);
+	if (!blockp)
+	{
+		char msg[STR2] = "failed to construct \"";
+		strcat_s(msg, STR2, obj);
+		strcat_s(msg, STR2, "\" from dll");
+		MATLABERROR("failedToConstructStrictlyProperBlock", msg);
+	}
+
 	numSteps = mxGetNumberOfElements(prhs[Ti]);
 	numStates = mxGetNumberOfElements(prhs[ICi]);
 	numInputs = mxGetM(prhs[Ui]);
 
 	MATLABASSERT(mxGetN(prhs[Ui]) == numSteps, "inconsistentInput", "size("Uname", 2) must equal numel("Tname").");
 
-	struct StrictlyProperBlock const block = getBlock();
+	struct StrictlyProperBlock block = *blockp;
 
 	if (block.numStates != numStates)
 	{
@@ -208,7 +227,7 @@ void mexFunction(
 
 	size_t i = 0;
 	size_t ic;
-	block.h(block.numOutputs, &Y[i*block.numOutputs], time[i], block.numStates, currentState, block.storage);
+	block.h(block.numStates, block.numOutputs, &Y[i*block.numOutputs], time[i], currentState, block.storage);
 	i++;
 	for (; i < numSteps; i++)
 	{
@@ -224,16 +243,18 @@ void mexFunction(
 
 		currentInput = &U_t[ic*block.numInputs];
 		
-		euler_f_step(time[ic], dt, block.numStates, nextState, currentdState, currentState, block.numInputs, currentInput, block.f, block.storage);
-		block.h(block.numOutputs, &Y[i*block.numOutputs], time[i], block.numStates, nextState, block.storage);
+		euler_f_step(block.numStates, block.numInputs, dt, time[ic], nextState, currentdState, currentState, currentInput, block.f, block.storage);
+		block.h(block.numStates, block.numOutputs, &Y[i*block.numOutputs], time[i], nextState, block.storage);
 	}
 
 	if (outputdState)
 	{
 		ic = i - 1;
-		block.f(block.numStates, &dX[ic*block.numStates], time[ic], block.numStates, nextState, block.numInputs, &U_t[ic*block.numInputs], block.storage);
+		block.f(block.numStates, block.numInputs, &dX[ic*block.numStates], time[ic], nextState, &U_t[ic*block.numInputs], block.storage);
 	}
 	else
 		mxFree(dX); // but the help says to do it anyway...
+
+	getBlock->destructor(blockp);
 }
 
