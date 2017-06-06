@@ -4,7 +4,8 @@
 #include "../csim2/blockSystem.h"
 #include "../csim2/dllInterface.h"
 
-// simple case of just an integrator
+// DEMO 1 =================================================================================
+
 static struct StrictlyProperBlock * getInt(char const * const options)
 {
 	errno = 0;
@@ -18,6 +19,9 @@ static struct StrictlyProperBlock * getInt(char const * const options)
 
 __declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getInt, integrator_free };
 
+// DEMO 1 =================================================================================
+
+// DEMO 2 =================================================================================
 
 // direct implementation of 1/(tau*s + 1)
 static void fol_physics
@@ -80,6 +84,10 @@ static void freeFirstOrderLag1(struct StrictlyProperBlock * block)
 
 __declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag1 = { getFirstOrderLag1, freeFirstOrderLag1 };
 
+// DEMO 2 =================================================================================
+
+// DEMO 3 =================================================================================
+
 // blockSystem implementation of 1/(tau*s + 1)
 static void fol_blockInputs
 (
@@ -137,3 +145,5 @@ static void freeFirstOrderLag2(struct StrictlyProperBlock * block)
 }
 
 __declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag2 = { getFirstOrderLag2, freeFirstOrderLag2 };
+
+// DEMO 3 =================================================================================

@@ -27,15 +27,18 @@
 #define STR2 (STR1 + 96)
 #define MATLABERROR(reason, msg) mexErrMsgIdAndTxt(TOOLBOX ":" FUNCTION ":" reason, msg)
 #define MATLABASSERT(istrue, reason, msg) if (!(istrue)) { MATLABERROR(reason, msg); }
+#define MATLABASSERTf(f, istrue, reason, msg) if (!(istrue)) { f(); MATLABERROR(reason, msg); }
 
 static HINSTANCE dllHandle = NULL;
 
 static void onExitFreedllHandle(void)
 {
+	//mexPrintf("...\n");
 	if (dllHandle)
 	{
 		FreeLibrary(dllHandle);
 		dllHandle = NULL;
+		//mexPrintf("FreeLibrary\n");
 	}
 }
 
@@ -150,6 +153,7 @@ void mexFunction(
 		char msg[STR2] = "failed to load \"";
 		strcat_s(msg, STR2, obj);
 		strcat_s(msg, STR2, "\" from dll");
+		onExitFreedllHandle();
 		MATLABERROR("failedToLoadStrictlyProperBlock", msg);
 	}
 
@@ -159,6 +163,7 @@ void mexFunction(
 		char msg[STR2] = "failed to construct \"";
 		strcat_s(msg, STR2, obj);
 		strcat_s(msg, STR2, "\" from dll");
+		onExitFreedllHandle();
 		MATLABERROR("failedToConstructStrictlyProperBlock", msg);
 	}
 
@@ -166,7 +171,7 @@ void mexFunction(
 	numStates = mxGetNumberOfElements(prhs[ICi]);
 	numInputs = mxGetM(prhs[Ui]);
 
-	MATLABASSERT(mxGetN(prhs[Ui]) == numSteps, "inconsistentInput", "size("Uname", 2) must equal numel("Tname").");
+	MATLABASSERTf(onExitFreedllHandle, mxGetN(prhs[Ui]) == numSteps, "inconsistentInput", "size("Uname", 2) must equal numel("Tname").");
 
 	struct StrictlyProperBlock block = *blockp;
 
@@ -174,6 +179,7 @@ void mexFunction(
 	{
 		char msg[STR2];
 		sprintf_s(msg, STR2, ICname " is expected to have %zu elements.", block.numStates);
+		onExitFreedllHandle();
 		MATLABERROR("wrongSize_" ICname, msg);
 	}
 	
@@ -181,6 +187,7 @@ void mexFunction(
 	{
 		char msg[STR2];
 		sprintf_s(msg, STR2, Uname " is expected to have %zu columns.", block.numInputs);
+		onExitFreedllHandle();
 		MATLABERROR("wrongSize_" Uname, msg);
 	}
 	
