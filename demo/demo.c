@@ -4,7 +4,7 @@
 #include "../csim2/blockSystem.h"
 #include "../csim2/dllInterface.h"
 
-// few simple cases of just an integrator
+// simple case of just an integrator
 static struct StrictlyProperBlock * getInt(char const * const options)
 {
 	errno = 0;
@@ -22,8 +22,8 @@ __declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getInt, integrator_
 // direct implementation of 1/(tau*s + 1)
 static void fol_physics
 (
-	size_t numStates,
-	size_t numInputs,
+	size_t const numStates,
+	size_t const numInputs,
 	double * const dState,
 	double const time,
 	double const * const state,
@@ -36,8 +36,8 @@ static void fol_physics
 
 static void fol_output
 (
-	size_t numStates,
-	size_t numOutputs,
+	size_t const numStates,
+	size_t const numOutputs,
 	double * const output,
 	double const time,
 	double const * const state,

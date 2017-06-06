@@ -1,5 +1,4 @@
 #pragma once
-#include <stdlib.h>
 #include "StrictlyProperBlock.h"
 
 // update blockInputs as a function of time, blockOutputs, and systemInputs

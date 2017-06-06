@@ -213,12 +213,6 @@ void mexFunction(
 	{
 		dX = mxMalloc(block.numStates * sizeof(double)); // matlab handles freeing this for us. how nice
 	}
-
-	//double * U = mxMalloc(numSteps * block.numInputs * sizeof(double));
-	//for (size_t i = 0; i < numSteps; i++)
-	//	for (size_t j = 0; j < block.numInputs; j++)
-	//		U[i*block.numInputs + j] = U_t[i + j*numSteps];
-
 	
 	double * nextState = Xi;
 	double const * currentState = Xi;
@@ -256,5 +250,6 @@ void mexFunction(
 		mxFree(dX); // but the help says to do it anyway...
 
 	getBlock->destructor(blockp);
+	onExitFreedllHandle(); // unload the dll every time we call the function to avoid the reference count increasing forcing us to re-start matlab to re-build
 }
 

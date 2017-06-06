@@ -3,8 +3,8 @@
 
 // update dState as a function of time, state, input, and storage
 typedef void(*PhysicsFunction)(
-	size_t numStates,
-	size_t numInputs,
+	size_t const numStates,
+	size_t const numInputs,
 	double * const dState,
 	double const time,
 	double const * const state,
@@ -14,8 +14,8 @@ typedef void(*PhysicsFunction)(
 
 // update output as a function of time, state, and storage
 typedef void(*OutputFunction)(
-	size_t numStates,
-	size_t numOutputs,
+	size_t const numStates,
+	size_t const numOutputs,
 	double * const output,
 	double const time,
 	double const * const state,

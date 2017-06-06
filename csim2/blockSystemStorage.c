@@ -1,5 +1,6 @@
 #include "blockSystemStorage.h"
 #include <assert.h>
+#include <string.h>
 
 struct BlockSystemStorage * blockSystemStorage_new
 (
