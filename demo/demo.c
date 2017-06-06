@@ -78,10 +78,10 @@ static void freeFirstOrderLag1(struct StrictlyProperBlock * block)
 	free(block);
 }
 
-__declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getFirstOrderLag1, freeFirstOrderLag1 };
+__declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag1 = { getFirstOrderLag1, freeFirstOrderLag1 };
 
 // blockSystem implementation of 1/(tau*s + 1)
-void fol_blockInputs
+static void fol_blockInputs
 (
 	size_t const numBlocks,
 	struct StrictlyProperBlock const * const blocks,
@@ -96,7 +96,7 @@ void fol_blockInputs
 	blockInputs[0][0] = (systemInputs[0] - blockOutputs[0][0]) / tau[0];
 }
 
-void fol_blockOutputs
+static void fol_blockOutputs
 (
 	size_t const numSystemOutputs,
 	double * const systemOutputs,
@@ -121,12 +121,19 @@ static struct StrictlyProperBlock * getFirstOrderLag2(char const * const options
 	taup[0] = tau;
 
 	struct StrictlyProperBlock * I = integrator_new(1);
-	struct StrictlyProperBlock * B = blockSystem_new(1, 1, 1, I, fol_blockInputs, fol_blockOutputs, taup);
+	struct BlockSystemStorage * Bs = blockSystemStorage_new(1, I, fol_blockInputs, fol_blockOutputs, taup);
+	struct StrictlyProperBlock * B = blockSystem_new(1, 1, Bs);
 
 	return B;
 }
 
 static void freeFirstOrderLag2(struct StrictlyProperBlock * block)
 {
-	free();
+	struct BlockSystemStorage * Bs = block->storage;
+	free(Bs->systemStorage);
+	integrator_free(Bs->blocks);
+	blockSystemStorage_free(Bs);
+	blockSystem_free(block);
 }
+
+__declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag2 = { getFirstOrderLag2, freeFirstOrderLag2 };

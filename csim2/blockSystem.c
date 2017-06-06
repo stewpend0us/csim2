@@ -2,79 +2,14 @@
 #include <string.h>
 #include "blockSystem.h"
 
-// BlockSystemStorage
-struct BlockSystemStorage
-{
-	size_t numBlocks;
-	struct StrictlyProperBlock const * blocks;
-	double * const * blockInputs;
-	double * const * blockOutputs;
-	CalcBlockInputsFunction calcBlockInputs;
-	CalcSystemOutputFunction calcSystemOutput;
-	void * systemStorage;
-};
 
-struct BlockSystemStorage * const blockSystemStorage_new
-(
-	size_t const numBlocks,
-	struct StrictlyProperBlock const * const blocks,
-	CalcBlockInputsFunction const calcBlockInputs,
-	CalcSystemOutputFunction const calcSystemOutputs,
-	void * const systemStorage
-)
-{
-	size_t totalBlockInputs = 0;
-	size_t totalBlockOutputs = 0;
-	for (size_t i = 0; i < numBlocks; i++)
-	{
-		totalBlockInputs += blocks[i].numInputs;
-		totalBlockOutputs += blocks[i].numOutputs;
-	}
 
-	double * storage = malloc((totalBlockInputs + totalBlockOutputs) * sizeof(double));
-	double ** input_storage = malloc(numBlocks * sizeof(double*));
-	double ** output_storage = malloc(numBlocks * sizeof(double*));
-	assert(storage != NULL);
-	assert(input_storage != NULL);
-	assert(output_storage != NULL);
-
-	size_t inputi = 0;
-	size_t outputi = totalBlockInputs;
-	for (size_t i = 0; i < numBlocks; i++)
-	{
-		input_storage[i] = &storage[inputi];
-		output_storage[i] = &storage[outputi];
-		inputi += blocks[i].numInputs;
-		outputi += blocks[i].numOutputs;
-	}
-
-	struct BlockSystemStorage bstack;
-	bstack.numBlocks = numBlocks;
-	bstack.blocks = blocks;
-	bstack.blockInputs = input_storage;
-	bstack.blockOutputs = output_storage;
-	bstack.calcBlockInputs = calcBlockInputs;
-	bstack.calcSystemOutput = calcSystemOutputs;
-	bstack.systemStorage = systemStorage;
-
-	struct BlockSystemStorage * const bheap = malloc(sizeof(struct BlockSystemStorage));
-	memcpy(bheap, &bstack, sizeof(struct BlockSystemStorage));
-	return bheap;
-}
-
-void blockSystemStorage_free(struct BlockSystemStorage * const storage)
-{
-	free(storage->blockInputs[0]);
-	free(storage->blockInputs);
-	free(storage->blockOutputs);
-	free(storage);
-}
 
 // BlockSystem
 static void blockSystem_physics
 (
-	size_t numStates,
-	size_t numInputs,
+	size_t const numStates,
+	size_t const numInputs,
 	double * const dState,
 	double const time,
 	double const * const state,
@@ -98,8 +33,8 @@ static void blockSystem_physics
 
 static void blockSystem_output
 (
-	size_t numStates,
-	size_t numOutputs,
+	size_t const numStates,
+	size_t const numOutputs,
 	double * const output,
 	double const time,
 	double const * const state,
@@ -120,28 +55,16 @@ static void blockSystem_output
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-struct StrictlyProperBlock * blockSystem_new
+struct StrictlyProperBlock blockSystem
 (
 	size_t const numSystemInputs,
 	size_t const numSystemOutputs,
-	size_t const numBlocks,
-	struct StrictlyProperBlock const * const blocks,
-	CalcBlockInputsFunction const calcBlockInputs,
-	CalcSystemOutputFunction const calcSystemOutputs,
-	void * const systemStorage
+	struct BlockSystemStorage * const storage
 )
 {
+	size_t const numBlocks = storage->numBlocks;
+	struct StrictlyProperBlock const * const blocks = storage->blocks;
+
 	size_t totalBlockStates = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 		totalBlockStates += blocks[i].numStates;
@@ -152,11 +75,24 @@ struct StrictlyProperBlock * blockSystem_new
 	bstack.numOutputs = numSystemOutputs;
 	bstack.f = blockSystem_physics;
 	bstack.h = blockSystem_output;
-	bstack.storage = blockSystemStorage_new( numBlocks, blocks, calcBlockInputs, calcSystemOutputs, systemStorage );
+	bstack.storage = storage;
+	return bstack;
 }
 
-void blockSystem_free(struct StrictlyProperBlock * const b)
+struct StrictlyProperBlock * blockSystem_new
+(
+	size_t const numSystemInputs,
+	size_t const numSystemOutputs,
+	struct BlockSystemStorage * const storage
+)
 {
-	blockSystemStorage_free(b->storage);
+	struct StrictlyProperBlock stackb = blockSystem(numSystemInputs, numSystemOutputs, storage);
+	struct StrictlyProperBlock * heapb = malloc(sizeof(struct StrictlyProperBlock));
+	memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
+	return heapb;
+}
+
+void blockSystem_free(struct StrictlyProperBlock * b)
+{
 	free(b);
 }

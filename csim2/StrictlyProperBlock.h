@@ -22,6 +22,8 @@ typedef void(*OutputFunction)(
 	void * const storage
 	);
 
+typedef void(*FreeStrictlyProperBlockFunction)(struct StrictlyProperBlock * block);
+
 // StrictlyProperBlock data
 struct StrictlyProperBlock
 {
@@ -31,4 +33,5 @@ struct StrictlyProperBlock
 	PhysicsFunction f;
 	OutputFunction h;
 	void * storage;
+	FreeStrictlyProperBlockFunction free;
 };

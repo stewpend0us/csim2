@@ -38,18 +38,19 @@ struct StrictlyProperBlock integrator(size_t const numSignals)
 	b.f = integrator_physics;
 	b.h = integrator_output;
 	b.storage = NULL;
+	b.free = NULL;
 	return b;
 }
 
 struct StrictlyProperBlock * integrator_new(size_t const numSignals)
 {
 	struct StrictlyProperBlock stackb = integrator(numSignals);
-	struct StrictlyProperBlock * b = malloc(sizeof(struct StrictlyProperBlock));
-	memcpy(b, &stackb, sizeof(struct StrictlyProperBlock));
-	return b;
+	struct StrictlyProperBlock * heapb = malloc(sizeof(struct StrictlyProperBlock));
+	memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
+	return heapb;
 }
 
-void integrator_free(struct StrictlyProperBlock * const b)
+void integrator_free(struct StrictlyProperBlock * b)
 {
 	free(b);
 }
