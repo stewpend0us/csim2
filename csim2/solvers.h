@@ -28,7 +28,6 @@ void rk4_f_step
 	double * const B, // (1 x numStates) solver storage/temp
 	double * const C, // (1 x numStates) solver storage/temp
 	double * const D, // (1 x numStates) solver storage/temp
-	double * const Xtmp, // (1 x numStates) solver storage/temp
 	double const * const currentState, // (1 x numStates) also initial conditions
 	double const * const currentInput, // (1 x numInputs)
 	double const * const currentInput2, // (1 x numInputs) input at time ti + dt/2

@@ -161,11 +161,10 @@ void mexFunction(
 	{
 		dX = mxMalloc(block.numStates * sizeof(double)); // matlab handles freeing this for us. how nice
 	}
-	double * Xstorage = mxMalloc(block.numStates * 4 * sizeof(double));
+	double * Xstorage = mxMalloc(block.numStates * 3 * sizeof(double));
 	double * const B = &Xstorage[0 * block.numStates];
 	double * const C = &Xstorage[1 * block.numStates];
 	double * const D = &Xstorage[2 * block.numStates];
-	double * const Xtmp = &Xstorage[3 * block.numStates];
 
 	// done with setting up the outputs
 	// solve the problem
@@ -195,7 +194,7 @@ void mexFunction(
 		currentInput2 = &U2_t[ic*block.numInputs];
 		nextInput = &U_t[i*block.numInputs];
 
-		rk4_f_step(block.numStates, block.numInputs, dt, time[ic], nextState, currentdState, B, C, D, Xtmp, currentState, currentInput, currentInput2, nextInput, block.f, block.storage);
+		rk4_f_step(block.numStates, block.numInputs, dt, time[ic], nextState, currentdState, B, C, D, currentState, currentInput, currentInput2, nextInput, block.f, block.storage);
 		block.h(block.numStates, block.numOutputs, &Y[i*block.numOutputs], time[i], nextState, block.storage);
 	}
 
