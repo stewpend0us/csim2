@@ -139,7 +139,7 @@ void mexFunction(
 	bool const outputdState = (nlhs >= 3);
 
 	double * Y; // numSteps x numOutputs
-	double * X = NULL; // numSteps x numStates OR 1 x numStates
+	double * X; // numSteps x numStates OR 1 x numStates
 	double * dX; // numSteps x numStates OR 1 x numStates
 
 	plhs[0] = mxCreateDoubleMatrix(block.numOutputs, numSteps, mxREAL);
@@ -150,6 +150,10 @@ void mexFunction(
 		plhs[1] = mxCreateDoubleMatrix(block.numStates, numSteps, mxREAL);
 		X = mxGetPr(plhs[1]);
 		memcpy(X, Xi, block.numStates * sizeof(double));
+	}
+	else
+	{
+		X = mxMalloc(block.numStates * sizeof(double));
 	}
 
 	if (outputdState)
@@ -169,8 +173,8 @@ void mexFunction(
 	// done with setting up the outputs
 	// solve the problem
 
-	double * nextState = Xi;
-	double const * currentState = Xi;
+	double * nextState = X;
+	double * currentState = Xi;
 	double * currentdState = dX;
 	double const * currentInput;
 	double const * currentInput2;
@@ -186,6 +190,10 @@ void mexFunction(
 			currentState = &X[ic*block.numStates];
 			nextState = &X[i*block.numStates];
 		}
+		else
+		{
+			memcpy(currentState, nextState, block.numStates * sizeof(double));
+		}
 
 		if (outputdState)
 			currentdState = &dX[ic*block.numStates];
@@ -197,6 +205,9 @@ void mexFunction(
 		rk4_f_step(block.numStates, block.numInputs, dt, time[ic], nextState, currentdState, B, C, D, currentState, currentInput, currentInput2, nextInput, block.f, block.storage);
 		block.h(block.numStates, block.numOutputs, &Y[i*block.numOutputs], time[i], nextState, block.storage);
 	}
+
+	if (!outputState)
+		mxFree(X);
 
 	if (outputdState)
 	{

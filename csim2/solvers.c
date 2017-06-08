@@ -1,4 +1,5 @@
 #include <math.h>
+#include <assert.h>
 #include "solvers.h"
 
 void euler_f_step
@@ -45,6 +46,12 @@ void rk4_f_step
 	double const currentTime2 = currentTime + dt2;
 	double const nextTime = currentTime + dt;
 	double * const A = currentdState;
+
+	assert(currentState != nextState);
+	assert(A != B && A != C && A != D && A != nextState && A != currentState);
+	assert(B != C && B != D && B != nextState && B != currentState);
+	assert(C != D && C != nextState && C != currentState);
+	assert(D != nextState && D != currentState);
 
 	f(numStates, numInputs, A, currentTime, currentState, currentInput, storage);
 	for (i = 0; i < numStates; i++)
