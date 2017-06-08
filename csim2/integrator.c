@@ -38,7 +38,6 @@ struct StrictlyProperBlock integrator(size_t const numSignals)
 	b.f = integrator_physics;
 	b.h = integrator_output;
 	b.storage = NULL;
-	b.free = NULL;
 	return b;
 }
 
