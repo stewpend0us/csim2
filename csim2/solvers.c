@@ -3,73 +3,74 @@
 
 void euler_f_step
 (
-	size_t const xi,
-	size_t const ui,
+	size_t const numStates,
+	size_t const numInputs,
 	double const dt, // time step
-	double const ti, // current time
-	double * const Xt1, // (1 * xi) next State
-	double * const A, // (1 * xi) current dstate
-	double const * const Xti, // (1 * xi) current state/initial conditions
-	double const * const Uti, // (1 * ui) input at time ti
+	double const currentTime,
+	double * const nextState, // (1 x numStates)
+	double * const currentdState, // (1 x numStates)
+	double const * const currentState, // (1 x numStates) also initial conditions
+	double const * const currentInput, // (1 x numInputs)
 	PhysicsFunction const f,
 	void * const storage
 )
 {
 	size_t i;
-	f(xi, ui, A, ti, Xti, Uti, storage);
-	for (i = 0; i < xi; i++)
-		Xt1[i] = Xti[i] + A[i] * dt;
+	f(numStates, numInputs, currentdState, currentTime, currentState, currentInput, storage);
+	for (i = 0; i < numStates; i++)
+		nextState[i] = currentState[i] + currentdState[i] * dt;
 }
 
 void rk4_f_step
 (
-	size_t const xi,
-	size_t const ui,
+	size_t const numStates,
+	size_t const numInputs,
 	double const dt, // time step
-	double const ti, // current time
-	double * const Xt1, // (1 * xi) next State
-	double * const A, // (1 * xi) current dstate
-	double * const B, // (1 * xi) solver storage/temp
-	double * const C, // (1 * xi) solver storage/temp
-	double * const D, // (1 * xi) solver storage/temp
-	double * const Xtmp, // (1 * xi) solver storage/temp
-	double const * const Xti, // (1 * xi) current state/initial conditions
-	double const * const Uti, // (1 * ui) input at time ti
-	double const * const Ut2, // (1 * ui) input at time ti + dt/2
-	double const * const Ut1, // (1 * ui) input at time ti + dt
+	double const currentTime, // current time
+	double * const nextState, // (1 x numStates)
+	double * const currentdState, // (1 x numStates)
+	double * const B, // (1 x numStates) solver storage/temp
+	double * const C, // (1 x numStates) solver storage/temp
+	double * const D, // (1 x numStates) solver storage/temp
+	double * const Xtmp, // (1 x numStates) solver storage/temp
+	double const * const currentState, // (1 x numStates) also initial conditions
+	double const * const currentInput, // (1 x numInputs)
+	double const * const currentInput2, // (1 x numInputs) input at time ti + dt/2
+	double const * const nextInput, // (1 x numInputs) input at time ti + dt
 	PhysicsFunction const f,
 	void * const storage
 )
 {
 	size_t i;
 	double const dt2 = dt / 2;
-	double const t2 = ti + dt2;
-	double const t1 = ti + dt;
-	
-	f(xi, ui, A, ti, Xti, Uti, storage);
+	double const currentTime2 = currentTime + dt2;
+	double const nextTime = currentTime + dt;
+	double * const A = currentdState;
 
-	for (i = 0; i < xi; i++)
-		Xtmp[i] = Xti[i] + A[i] * dt2;
-	f(xi, ui, B, t2, Xtmp, Ut2, storage);
+	f(numStates, numInputs, A, currentTime, currentState, currentInput, storage);
 
-	for (i = 0; i < xi; i++)
-		Xtmp[i] = Xti[i] + B[i] * dt2;
-	f(xi, ui, C, t2, Xtmp, Ut2, storage);
+	for (i = 0; i < numStates; i++)
+		Xtmp[i] = currentState[i] + A[i] * dt2;
+	f(numStates, numInputs, B, currentTime2, Xtmp, currentInput2, storage);
 
-	for (i = 0; i < xi; i++)
-		Xtmp[i] = Xti[i] + C[i] * dt;
-	f(xi, ui, D, t1, Xtmp, Ut1, storage);
+	for (i = 0; i < numStates; i++)
+		Xtmp[i] = currentState[i] + B[i] * dt2;
+	f(numStates, numInputs, C, currentTime2, Xtmp, currentInput2, storage);
 
-	for (i = 0; i < xi; i++)
-		Xt1[i] = Xti[i] + dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
+	for (i = 0; i < numStates; i++)
+		Xtmp[i] = currentState[i] + C[i] * dt;
+	f(numStates, numInputs, D, nextTime, Xtmp, nextInput, storage);
+
+	for (i = 0; i < numStates; i++)
+		nextState[i] = currentState[i] + dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
 }
 
-size_t numSteps
-(
-	double const ti,
-	double const dt,
-	double const tf
-)
-{
-	return (size_t)floor((tf - ti) / dt + 1);
-}
+//size_t numSteps
+//(
+//	double const ti,
+//	double const dt,
+//	double const tf
+//)
+//{
+//	return (size_t)floor((tf - ti) / dt + 1);
+//}

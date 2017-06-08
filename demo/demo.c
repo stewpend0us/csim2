@@ -76,13 +76,13 @@ static struct StrictlyProperBlock * getFirstOrderLag1(char const * const options
 	return bheap;
 }
 
-static void freeFirstOrderLag1(struct StrictlyProperBlock * block)
+static void FirstOrderLag1_free(struct StrictlyProperBlock * block)
 {
 	free(block->storage);
 	free(block);
 }
 
-__declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag1 = { getFirstOrderLag1, freeFirstOrderLag1 };
+__declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag1 = { getFirstOrderLag1, FirstOrderLag1_free };
 
 // DEMO 2 =================================================================================
 
@@ -135,7 +135,7 @@ static struct StrictlyProperBlock * getFirstOrderLag2(char const * const options
 	return B;
 }
 
-static void freeFirstOrderLag2(struct StrictlyProperBlock * block)
+static void FirstOrderLag2_free(struct StrictlyProperBlock * block)
 {
 	struct BlockSystemStorage * Bs = block->storage;
 	free(Bs->systemStorage);
@@ -144,6 +144,6 @@ static void freeFirstOrderLag2(struct StrictlyProperBlock * block)
 	blockSystem_free(block);
 }
 
-__declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag2 = { getFirstOrderLag2, freeFirstOrderLag2 };
+__declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag2 = { getFirstOrderLag2, FirstOrderLag2_free };
 
 // DEMO 3 =================================================================================
