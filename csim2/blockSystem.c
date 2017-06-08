@@ -20,10 +20,20 @@ static void blockSystem_physics
 	size_t numBlocks = storage->numBlocks;
 	struct StrictlyProperBlock const * const blocks = storage->blocks;
 	double * const * const blockInputs = storage->blockInputs;
-	double const * const * const blockOutputs = storage->blockOutputs;
+	double * const * const blockOutputs = storage->blockOutputs;
 	void * const systemStorage = storage->systemStorage;
+
+	// update all of the block outputs based on the latest state
 	size_t xi = 0;
+	for (size_t i = 0; i < numBlocks; i++)
+	{
+		blocks[i].h(blocks[i].numStates, blocks[i].numOutputs, blockOutputs[i], time, &state[xi], blocks[i].storage);
+		xi += blocks[i].numStates;
+	}
+	// calculate the block inputs from the updated block outputs
 	storage->calcBlockInputs(numBlocks, blocks, blockInputs, time, blockOutputs, numInputs, input, systemStorage);
+	// finally calculate the block dstate from the updated block inputs
+	xi = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
 		blocks[i].f(blocks[i].numStates, blocks[i].numInputs, &dState[xi], time, &state[xi], blockInputs[i], blocks[i].storage);
