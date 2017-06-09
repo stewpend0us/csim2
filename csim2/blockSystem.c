@@ -3,7 +3,7 @@
 #include "blockSystem.h"
 
 // BlockSystem
-static void blockSystem_physics
+static void physics
 (
 	size_t const numStates,
 	size_t const numInputs,
@@ -38,7 +38,7 @@ static void blockSystem_physics
 	}
 }
 
-static void blockSystem_output
+static void output
 (
 	size_t const numStates,
 	size_t const numOutputs,
@@ -80,8 +80,8 @@ struct StrictlyProperBlock blockSystem
 	bstack.numStates = totalBlockStates;
 	bstack.numInputs = numSystemInputs;
 	bstack.numOutputs = numSystemOutputs;
-	bstack.f = blockSystem_physics;
-	bstack.h = blockSystem_output;
+	bstack.f = physics;
+	bstack.h = output;
 	bstack.storage = storage;
 	return bstack;
 }
