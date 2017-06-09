@@ -29,7 +29,7 @@ static void output
 	memcpy(output, state, numStates * sizeof(double));
 }
 
-struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * tau)
+struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau)
 {
 	struct StrictlyProperBlock b;
 	b.numInputs = numBlocks;

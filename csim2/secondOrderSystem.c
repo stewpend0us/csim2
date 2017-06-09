@@ -47,7 +47,7 @@ static void output
 	}
 }
 
-struct StrictlyProperBlock secondOrderSystem(size_t const numBlocks, struct secondOrderSystemStorage * storage)
+struct StrictlyProperBlock secondOrderSystem(size_t const numBlocks, struct secondOrderSystemStorage * const storage)
 {
 	struct StrictlyProperBlock b;
 	b.numInputs = numBlocks;

@@ -1,9 +1,9 @@
 #include <string.h>
 #include "integrator_heap.h"
 
-struct StrictlyProperBlock * integrator_new(size_t const numSignals)
+struct StrictlyProperBlock * integrator_new(size_t const numBlocks)
 {
-	struct StrictlyProperBlock stackb = integrator(numSignals);
+	struct StrictlyProperBlock stackb = integrator(numBlocks);
 	struct StrictlyProperBlock * heapb = malloc(sizeof(struct StrictlyProperBlock));
 	memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
 	return heapb;
