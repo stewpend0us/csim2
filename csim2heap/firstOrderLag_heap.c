@@ -1,3 +1,4 @@
+#include <string.h>
 #include "firstOrderLag_heap.h"
 
 struct StrictlyProperBlock * firstOrderLag_new(size_t const numBlocks, double * const tau)

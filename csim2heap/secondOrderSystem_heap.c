@@ -1,3 +1,4 @@
+#include <string.h>
 #include "secondOrderSystem_heap.h"
 
 struct StrictlyProperBlock * secondOrderSystem_new(size_t const numBlocks, struct secondOrderSystemStorage * const storage)

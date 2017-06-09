@@ -1,6 +1,8 @@
 #include <string.h>
 #include <errno.h>
 #include "../csim2heap/integrator_heap.h"
+#include "../csim2heap/firstOrderLag_heap.h"
+#include "../csim2heap/secondOrderSystem_heap.h"
 #include "../csim2heap/blockSystem_heap.h"
 #include "../csim2heap/blockSystemStorage_heap.h"
 #include "../csim2heap/dllInterface.h"
@@ -24,34 +26,6 @@ __declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getInt, integrator_
 
 // DEMO 2 =================================================================================
 
-// direct implementation of 1/(tau*s + 1)
-static void fol_physics
-(
-	size_t const numStates,
-	size_t const numInputs,
-	double * const dState,
-	double const time,
-	double const * const state,
-	double const * const input,
-	double const * const tau
-)
-{
-	dState[0] = (input[0] - state[0]) / tau[0];
-}
-
-static void fol_output
-(
-	size_t const numStates,
-	size_t const numOutputs,
-	double * const output,
-	double const time,
-	double const * const state,
-	void const * const tau
-)
-{
-	memcpy(output, state, numStates * sizeof(double));
-}
-
 static struct StrictlyProperBlock * getFirstOrderLag1(char const * const options)
 {
 	errno = 0;
@@ -62,25 +36,18 @@ static struct StrictlyProperBlock * getFirstOrderLag1(char const * const options
 		return NULL;
 
 	double * taup = malloc(sizeof(double));
+	if (!taup)
+		return NULL;
+
 	taup[0] = tau;
 
-	struct StrictlyProperBlock bstack;
-	bstack.numStates = 1;
-	bstack.numInputs = 1;
-	bstack.numOutputs = 1;
-	bstack.f = fol_physics;
-	bstack.h = fol_output;
-	bstack.storage = taup;
-
-	struct StrictlyProperBlock * bheap = malloc(sizeof(struct StrictlyProperBlock));
-	memcpy(bheap, &bstack, sizeof(struct StrictlyProperBlock));
-	return bheap;
+	return firstOrderLag_new(1, taup);
 }
 
 static void FirstOrderLag1_free(struct StrictlyProperBlock * block)
 {
 	free(block->storage);
-	free(block);
+	firstOrderLag_free(block);
 }
 
 __declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag1 = { getFirstOrderLag1, FirstOrderLag1_free };
@@ -148,3 +115,45 @@ static void FirstOrderLag2_free(struct StrictlyProperBlock * block)
 __declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag2 = { getFirstOrderLag2, FirstOrderLag2_free };
 
 // DEMO 3 =================================================================================
+
+// DEMO 4 =================================================================================
+
+static struct StrictlyProperBlock * getSecondOrderSystem1(char const * const options)
+{
+	char * loc = strpbrk(options, ",");
+	if (!loc)
+		return NULL;
+
+	errno = 0;
+	double zeta = strtod(options, &loc);
+	if (errno == ERANGE)
+		return NULL;
+	if (zeta <= 0)
+		return NULL;
+
+	errno = 0;
+	double omega_n = strtod(loc, NULL);
+	if (errno == ERANGE)
+		return NULL;
+	if (omega_n <= 0)
+		return NULL;
+
+	struct secondOrderSystemStorage * storagep = malloc(sizeof(struct secondOrderSystemStorage));
+	if (!storagep)
+		return NULL;
+
+	storagep[0].zeta = zeta;
+	storagep[0].omega_n = omega_n;
+
+	return secondOrderSystem_new(1, storagep);
+}
+
+static void SecondOrderSystem1_free(struct StrictlyProperBlock * block)
+{
+	free(block->storage);
+	secondOrderSystem_free(block);
+}
+
+__declspec(dllexport) struct dllStrictlyProperBlock SecondOrderSystem1 = { getSecondOrderSystem1, SecondOrderSystem1_free };
+
+// DEMO 4 =================================================================================
