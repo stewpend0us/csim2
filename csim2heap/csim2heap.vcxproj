@@ -21,13 +21,17 @@
   <ItemGroup>
     <ClCompile Include="blockSystem_heap.c" />
     <ClCompile Include="blockSystemStorage_heap.c" />
+    <ClCompile Include="firstOrderLag_heap.c" />
     <ClCompile Include="integrator_heap.c" />
+    <ClCompile Include="secondOrderSystem_heap.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blockSystem_heap.h" />
     <ClInclude Include="blockSystemStorage_heap.h" />
     <ClInclude Include="dllInterface.h" />
+    <ClInclude Include="firstOrderLag_heap.h" />
     <ClInclude Include="integrator_heap.h" />
+    <ClInclude Include="secondOrderSystem_heap.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csim2\csim2.vcxproj">
