@@ -2,9 +2,6 @@
 #include <string.h>
 #include "blockSystem.h"
 
-
-
-
 // BlockSystem
 static void blockSystem_physics
 (
@@ -87,22 +84,4 @@ struct StrictlyProperBlock blockSystem
 	bstack.h = blockSystem_output;
 	bstack.storage = storage;
 	return bstack;
-}
-
-struct StrictlyProperBlock * blockSystem_new
-(
-	size_t const numSystemInputs,
-	size_t const numSystemOutputs,
-	struct BlockSystemStorage * const storage
-)
-{
-	struct StrictlyProperBlock stackb = blockSystem(numSystemInputs, numSystemOutputs, storage);
-	struct StrictlyProperBlock * heapb = malloc(sizeof(struct StrictlyProperBlock));
-	memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
-	return heapb;
-}
-
-void blockSystem_free(struct StrictlyProperBlock * b)
-{
-	free(b);
 }

@@ -1,6 +1,5 @@
-#include "blockSystemStorage.h"
-#include <assert.h>
 #include <string.h>
+#include "blockSystemStorage_heap.h"
 
 struct BlockSystemStorage * blockSystemStorage_new
 (
@@ -22,9 +21,21 @@ struct BlockSystemStorage * blockSystemStorage_new
 	double * storage = malloc((totalBlockInputs + totalBlockOutputs) * sizeof(double));
 	double ** input_storage = malloc(numBlocks * sizeof(double*));
 	double ** output_storage = malloc(numBlocks * sizeof(double*));
-	assert(storage != NULL);
-	assert(input_storage != NULL);
-	assert(output_storage != NULL);
+	struct BlockSystemStorage * const bheap = malloc(sizeof(struct BlockSystemStorage));
+
+
+	if (storage == NULL || input_storage == NULL || output_storage == NULL || bheap == NULL)
+	{
+#define freeif(ptr) if (ptr) free(ptr)
+		freeif(storage);
+		freeif(input_storage);
+		freeif(output_storage);
+		freeif(bheap);
+#undef freeif
+		return NULL;
+	}
+
+		
 
 	size_t inputi = 0;
 	size_t outputi = totalBlockInputs;
@@ -45,7 +56,7 @@ struct BlockSystemStorage * blockSystemStorage_new
 	bstack.calcSystemOutput = calcSystemOutputs;
 	bstack.systemStorage = systemStorage;
 
-	struct BlockSystemStorage * const bheap = malloc(sizeof(struct BlockSystemStorage));
+	
 	memcpy(bheap, &bstack, sizeof(struct BlockSystemStorage));
 	return bheap;
 }
