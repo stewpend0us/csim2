@@ -41,7 +41,7 @@ double * assertIsVector(char const name[STR1], mxArray const * const pr)
 		)
 	{
 		strcpy_s(msg, STR2, name);
-		strcat_s(msg, STR2, " must be a matrix.");
+		strcat_s(msg, STR2, " must be a vector.");
 		MATLABERROR("notVector", msg);
 	}
 	return mxGetPr(pr);

@@ -132,7 +132,7 @@ static struct StrictlyProperBlock * getSecondOrderSystem1(char const * const opt
 		return NULL;
 
 	errno = 0;
-	double omega_n = strtod(loc, NULL);
+	double omega_n = strtod(loc+1, NULL);
 	if (errno == ERANGE)
 		return NULL;
 	if (omega_n <= 0)
