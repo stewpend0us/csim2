@@ -12,8 +12,8 @@ static void physics
 	struct secondOrderSystemStorage const * const storage
 )
 {
-	double * const state1 = state;
-	double * const state2 = state + numInputs;
+	double const * const state1 = state;
+	double const * const state2 = state + numInputs;
 	double * const dState1 = dState;
 	double * const dState2 = dState + numInputs;
 
@@ -50,7 +50,7 @@ static void output
 	struct secondOrderSystemStorage const * const storage
 )
 {
-	double * const state1 = state;
+	double const * const state1 = state;
 	memcpy(output, state1, numOutputs * sizeof(double));
 
 	//size_t i1;
