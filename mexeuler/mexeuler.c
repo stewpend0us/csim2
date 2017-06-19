@@ -47,16 +47,16 @@ void mexFunction(
 	MATLABASSERT(nrhs == LASTi || nrhs == (LASTi+1), "nrhs", "expected 6 to 7 inputs: " SIGNATURE);
 	MATLABASSERT(nlhs >= 1 && nlhs <= 3, "nlhs", "expected 1 to 3 outputs: " SIGNATURE);
 
-	char * dll;
-	char * obj;
+	char const * dll;
+	char const * obj;
 	double dt; // 1 x 1 time step
 	mwSize numSteps;
-	double * time; // numSteps x 1 time vector
+	double const * time; // numSteps x 1 time vector
 	mwSize numStates;
-	double * Xi; // numStates x 1 initial conditions vector
+	double const * Xi; // numStates x 1 initial conditions vector
 	mwSize numInputs;
-	double * U_t; // numSteps x numInputs inputs
-	char * options;
+	double const * U_t; // numSteps x numInputs inputs
+	char const * options;
 	char Empty = '\0';
 
 	dll = assertIsChar(DLLname, prhs[DLLi]);
@@ -141,8 +141,12 @@ void mexFunction(
 	{
 		plhs[1] = mxCreateDoubleMatrix(block.numStates, numSteps, mxREAL);
 		X = mxGetPr(plhs[1]);
-		memcpy(X, Xi, block.numStates * sizeof(double));
 	}
+	else
+	{
+		X = mxMalloc(block.numStates * sizeof(double));
+	}
+	memcpy(X, Xi, block.numStates * sizeof(double));
 
 	if (outputdState)
 	{
@@ -157,38 +161,46 @@ void mexFunction(
 	// done with setting up the outputs
 	// solve the problem
 
-	double * nextState = Xi;
-	double const * currentState = Xi;
+	double * nextState = X;
+	double const * currentState = X;
 	double * currentdState = dX;
 	double const * currentInput;
-
-	size_t ic = 0; //current time
-	block.h(block.numStates, block.numOutputs, &Y[ic*block.numOutputs], time[ic], currentState, block.storage);
-	for (size_t i = 1; i < numSteps; i++)
+	double * currentOutput;
+	size_t i;
+	for (i = 0; i < (numSteps - 1); i++)
 	{
-		ic = i - 1;
 		if (outputState)
 		{
-			currentState = &X[ic*block.numStates];
-			nextState = &X[i*block.numStates];
+			currentState = &X[i*block.numStates];
+			nextState = &X[(i + 1)*block.numStates];
 		}
 
 		if (outputdState)
-			currentdState = &dX[ic*block.numStates];
+			currentdState = &dX[i*block.numStates];
 
-		currentInput = &U_t[ic*block.numInputs];
+		currentInput = &U_t[i*block.numInputs];
+		currentOutput = &Y[i*block.numOutputs];
 
-		euler_f_step(block.numStates, block.numInputs, dt, time[ic], nextState, currentdState, currentState, currentInput, block.f, block.storage);
-		block.h(block.numStates, block.numOutputs, &Y[i*block.numOutputs], time[i], nextState, block.storage);
+		block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+		euler_f_step(block.numStates, block.numInputs, dt, time[i], nextState, currentdState, currentState, currentInput, block.f, block.storage);
 	}
+
+	//i = numSteps - 1;
+	currentState = nextState;
+	currentOutput = &Y[i*block.numOutputs];
+	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
 
 	if (outputdState)
 	{
-		ic = numSteps - 1;
-		block.f(block.numStates, block.numInputs, &dX[ic*block.numStates], time[ic], nextState, &U_t[ic*block.numInputs], block.storage);
+		currentdState = &dX[i*block.numStates];
+		currentInput = &U_t[i*block.numInputs];
+		block.f(block.numStates, block.numInputs, currentdState, time[i], currentState, currentInput, block.storage);
 	}
 	else
-		mxFree(dX); // but the help says to do it anyway...
+		mxFree(dX);
+
+	if (!outputState)
+		mxFree(X);
 
 	getBlock->destructor(blockp);
 	onExitFreedllHandle();

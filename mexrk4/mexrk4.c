@@ -49,18 +49,18 @@ void mexFunction(
 	MATLABASSERT(nrhs == LASTi || nrhs == (LASTi+1), "nrhs", "expected 7 to 8 inputs: " SIGNATURE);
 	MATLABASSERT(nlhs >= 1 && nlhs <= 3, "nlhs", "expected 1 to 3 outputs: " SIGNATURE);
 
-	char * dll;
-	char * obj;
+	char const * dll;
+	char const * obj;
 	double dt; // 1 x 1 time step
 	mwSize numSteps;
-	double * time; // numSteps x 1 time vector
+	double const * time; // numSteps x 1 time vector
 	mwSize numStates;
-	double * Xi; // numStates x 1 initial conditions vector
+	double const * Xi; // numStates x 1 initial conditions vector
 	mwSize numInputs;
-	double * U_t; // numSteps x numInputs inputs
+	double const * U_t; // numSteps x numInputs inputs
 	mwSize numInputs2;
-	double * U2_t;
-	char * options;
+	double const * U2_t;
+	char const * options;
 	char Empty = '\0';
 
 	dll = assertIsChar(DLLname, prhs[DLLi]);
@@ -141,6 +141,7 @@ void mexFunction(
 	double * Y; // numSteps x numOutputs
 	double * X; // numSteps x numStates OR 1 x numStates
 	double * dX; // numSteps x numStates OR 1 x numStates
+	double * Xistorage; // 1 x numStates
 
 	plhs[0] = mxCreateDoubleMatrix(block.numOutputs, numSteps, mxREAL);
 	Y = mxGetPr(plhs[0]);
@@ -153,6 +154,8 @@ void mexFunction(
 	}
 	else
 	{
+		Xistorage = mxMalloc(block.numStates * sizeof(double));
+		memcpy(Xistorage, Xi, block.numStates * sizeof(double));
 		X = mxMalloc(block.numStates * sizeof(double));
 	}
 
@@ -174,50 +177,56 @@ void mexFunction(
 	// solve the problem
 
 	double * nextState = X;
-	double * currentState = Xi;
+	double * currentState = Xistorage;
 	double * currentdState = dX;
 	double const * currentInput;
 	double const * currentInput2;
 	double const * nextInput;
-
-	size_t ic = 0; //current time
-	block.h(block.numStates, block.numOutputs, &Y[ic*block.numOutputs], time[ic], currentState, block.storage);
-	for (size_t i = 1; i < numSteps; i++)
+	double * currentOutput;
+	size_t i;
+	for (i = 0; i < (numSteps - 1); i++)
 	{
-		ic = i - 1;
 		if (outputState)
 		{
-			currentState = &X[ic*block.numStates];
-			nextState = &X[i*block.numStates];
-		}
-		else
-		{
-			memcpy(currentState, nextState, block.numStates * sizeof(double));
+			currentState = &X[i*block.numStates];
+			nextState = &X[(i + 1)*block.numStates];
 		}
 
 		if (outputdState)
-			currentdState = &dX[ic*block.numStates];
+			currentdState = &dX[i*block.numStates];
 
-		currentInput = &U_t[ic*block.numInputs];
-		currentInput2 = &U2_t[ic*block.numInputs];
-		nextInput = &U_t[i*block.numInputs];
+		currentInput = &U_t[i*block.numInputs];
+		currentInput2 = &U2_t[i*block.numInputs];
+		nextInput = &U_t[(i + 1)*block.numInputs];
+		currentOutput = &Y[i*block.numOutputs];
 
-		rk4_f_step(block.numStates, block.numInputs, dt, time[ic], nextState, currentdState, B, C, D, currentState, currentInput, currentInput2, nextInput, block.f, block.storage);
-		block.h(block.numStates, block.numOutputs, &Y[i*block.numOutputs], time[i], nextState, block.storage);
+		block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+		rk4_f_step(block.numStates, block.numInputs, dt, time[i], nextState, currentdState, B, C, D, currentState, currentInput, currentInput2, nextInput, block.f, block.storage);
+
+		if (!outputState)
+			memcpy(currentState, nextState, block.numStates * sizeof(double));
 	}
 
-	if (!outputState)
-		mxFree(X);
+	//i = numSteps - 1;
+	currentState = nextState;
+	currentOutput = &Y[i*block.numOutputs];
+	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
 
 	if (outputdState)
 	{
-		ic = numSteps - 1;
-		block.f(block.numStates, block.numInputs, &dX[ic*block.numStates], time[ic], nextState, &U_t[ic*block.numInputs], block.storage);
+		currentdState = &dX[i*block.numStates];
+		currentInput = &U_t[i*block.numInputs];
+		block.f(block.numStates, block.numInputs, currentdState, time[i], currentState, currentInput, block.storage);
 	}
 	else
+		mxFree(dX);
+
+	if (!outputState)
 	{
-		mxFree(dX); // but the help says to do it anyway...
+		mxFree(X);
+		mxFree(Xistorage);
 	}
+		
 	mxFree(Xstorage);
 
 	getBlock->destructor(blockp);
