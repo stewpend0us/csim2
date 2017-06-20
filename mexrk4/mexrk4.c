@@ -141,7 +141,6 @@ void mexFunction(
 	double * Y; // numSteps x numOutputs
 	double * X; // numSteps x numStates OR 1 x numStates
 	double * dX; // numSteps x numStates OR 1 x numStates
-	double * Xnext = NULL; // 1 x numStates
 
 	plhs[0] = mxCreateDoubleMatrix(block.numOutputs, numSteps, mxREAL);
 	Y = mxGetPr(plhs[0]);
@@ -154,7 +153,6 @@ void mexFunction(
 	else
 	{
 		X = mxMalloc(block.numStates * 2 * sizeof(double));
-		Xnext = &X[block.numStates];
 	}
 	memcpy(X, Xi, block.numStates * sizeof(double));
 
@@ -175,7 +173,7 @@ void mexFunction(
 	// done with setting up the outputs
 	// solve the problem
 
-	double * nextState = Xnext;
+	double * nextState = &X[block.numStates];
 	double * currentState = X;
 	double * currentdState = dX;
 	double const * currentInput;
