@@ -131,7 +131,7 @@ void mexFunction(
 	bool const outputdState = (nlhs >= 3);
 
 	double * Y; // numSteps x numOutputs
-	double * X = NULL; // numSteps x numStates OR 1 x numStates
+	double * X; // numSteps x numStates OR 1 x numStates
 	double * dX; // numSteps x numStates OR 1 x numStates
 
 	plhs[0] = mxCreateDoubleMatrix(block.numOutputs, numSteps, mxREAL);

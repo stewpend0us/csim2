@@ -5,7 +5,8 @@ struct StrictlyProperBlock * secondOrderSystem_new(size_t const numBlocks, struc
 {
 	struct StrictlyProperBlock stackb = secondOrderSystem(numBlocks, storage);
 	struct StrictlyProperBlock * heapb = malloc(sizeof(struct StrictlyProperBlock));
-	memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
+	if (heapb)
+		memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
 	return heapb;
 }
 

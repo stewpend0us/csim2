@@ -5,7 +5,8 @@ struct StrictlyProperBlock * firstOrderLag_new(size_t const numBlocks, double * 
 {
 	struct StrictlyProperBlock stackb = firstOrderLag(numBlocks, tau);
 	struct StrictlyProperBlock * heapb = malloc(sizeof(struct StrictlyProperBlock));
-	memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
+	if (heapb)
+		memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
 	return heapb;
 }
 

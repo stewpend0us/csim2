@@ -12,7 +12,8 @@ struct StrictlyProperBlock * blockSystem_new
 {
 	struct StrictlyProperBlock stackb = blockSystem(numSystemInputs, numSystemOutputs, storage);
 	struct StrictlyProperBlock * heapb = malloc(sizeof(struct StrictlyProperBlock));
-	memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
+	if (heapb)
+		memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
 	return heapb;
 }
 
