@@ -21,23 +21,6 @@ static void physics
 
 	for (size_t i = 0; i < numInputs; i++)
 		dState2[i] = -2 * storage[i].zeta * storage[i].omega_n * state2[i] - storage[i].omega_n * storage[i].omega_n * ( state1[i] - input[i] );
-	
-	//double zeta;
-	//double wn;
-	//double wn2;
-	//size_t i1;
-	//size_t i2;
-	//for (size_t i = 0; i < numInputs; i++)
-	//{
-	//	i1 = i * 2;
-	//	i2 = i1 + 1;
-	//	zeta = storage[i].zeta;
-	//	wn = storage[i].omega_n;
-	//	wn2 = wn*wn;
-
-	//	dState[i1] = state[i2];
-	//	dState[i2] = -2*zeta*wn*state[i2] - wn2*state[i1] + wn2*input[i];
-	//}
 }
 
 static void output
@@ -52,13 +35,6 @@ static void output
 {
 	double const * const state1 = state;
 	memcpy(output, state1, numOutputs * sizeof(double));
-
-	//size_t i1;
-	//for (size_t i = 0; i < numOutputs; i++)
-	//{
-	//	i1 = i * 2;
-	//	output[i] = state[i1];
-	//}
 }
 
 struct StrictlyProperBlock secondOrderSystem(size_t const numBlocks, struct secondOrderSystemStorage * const storage)
