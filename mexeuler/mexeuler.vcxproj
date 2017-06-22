@@ -14,8 +14,8 @@
     <ClCompile Include="mexeuler.c" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\csim2\csim2.vcxproj">
-      <Project>{1e802af7-e608-42ed-a2d0-bb119f40e884}</Project>
+    <ProjectReference Include="..\csim2heap\csim2heap.vcxproj">
+      <Project>{293d3c48-6e42-4be6-995d-296b57c39c36}</Project>
     </ProjectReference>
     <ProjectReference Include="..\mexshared\mexshared.vcxproj">
       <Project>{f5087c67-79e0-41ec-9491-9efc12a7841e}</Project>
