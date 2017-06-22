@@ -27,7 +27,8 @@ function [dState, storage] = physics(...
 	zeta = [storage.zeta];
 
 	dState1 = state2;
-	dState2 = -2 * zeta .* omega_n .* state2 - omega_n .* omega_n .* ( state1 - input );
+	dState2 = -2 * zeta .* wn .* state2 - wn .* wn .* ( state1 - input );
+    dState = [dState1 dState2];
 end
 
 function [output, storage] = output(...
