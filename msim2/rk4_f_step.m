@@ -1,4 +1,6 @@
-function [nextState, storage] = rk4_f_step(...
+function [nextState, A, storage] = rk4_f_step(...
+    numStates,...
+    numInputs,...
     dt,...
     currentTime,...
     currentState,...
@@ -11,15 +13,15 @@ function [nextState, storage] = rk4_f_step(...
 dt2 = dt / 2;
 currentTime2 = currentTime + dt2;
 nextTime = currentTime + dt;
-[A, storage] = f(currentTime, currentState, currentInput, storage);
+[A, storage] = f(numStates, numInputs, currentTime, currentState, currentInput, storage);
 nextState = currentState + A * dt2;
 
-[B, storage] = f(currentTime2, nextState, currentInput2, storage);
+[B, storage] = f(numStates, numInputs, currentTime2, nextState, currentInput2, storage);
 nextState = currentState + B * dt2;
 
-[C, storage] = f(currentTime2, nextState, currentInput2, storage);
+[C, storage] = f(numStates, numInputs, currentTime2, nextState, currentInput2, storage);
 nextState = currentState + C * dt;
 
-[D, storage] = f(nextTime, nextState, nextInput, storage);
+[D, storage] = f(numStates, numInputs, nextTime, nextState, nextInput, storage);
 nextState = currentState + dt * (A + 2 * B + 2 * C + D) / 6;
 end
