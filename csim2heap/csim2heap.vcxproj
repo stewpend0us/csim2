@@ -24,6 +24,7 @@
     <ClCompile Include="firstOrderLag_heap.c" />
     <ClCompile Include="integrator_heap.c" />
     <ClCompile Include="secondOrderSystem_heap.c" />
+    <ClCompile Include="transferFunction_heap.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blockSystem_heap.h" />
@@ -32,6 +33,7 @@
     <ClInclude Include="firstOrderLag_heap.h" />
     <ClInclude Include="integrator_heap.h" />
     <ClInclude Include="secondOrderSystem_heap.h" />
+    <ClInclude Include="transferFunction_heap.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csim2\csim2.vcxproj">
