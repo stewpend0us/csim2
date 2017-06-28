@@ -1,4 +1,5 @@
 #include <string.h>
+#include <assert.h>
 #include "firstOrderLag.h"
 
 static void physics
@@ -31,6 +32,10 @@ static void output
 
 struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau)
 {
+	assert(numBlocks > 0);
+	for (size_t i = 0; i < 0; i++)
+		assert(tau[i] > 0);
+
 	struct StrictlyProperBlock b;
 	b.numInputs = numBlocks;
 	b.numOutputs = numBlocks;

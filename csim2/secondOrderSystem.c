@@ -1,4 +1,5 @@
 #include <string.h>
+#include <assert.h>
 #include "secondOrderSystem.h"
 
 static void physics
@@ -39,6 +40,13 @@ static void output
 
 struct StrictlyProperBlock secondOrderSystem(size_t const numBlocks, struct secondOrderSystemStorage * const storage)
 {
+	assert(numBlocks > 0);
+	for (size_t i = 0; i < numBlocks; i++)
+	{
+		assert(storage[i].omega_n > 0);
+		assert(storage[i].zeta > 0);
+	}
+
 	struct StrictlyProperBlock b;
 	b.numInputs = numBlocks;
 	b.numOutputs = numBlocks;
