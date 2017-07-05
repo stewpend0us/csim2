@@ -1,5 +1,5 @@
-#include <assert.h>
 #include <string.h>
+#include <assert.h>
 #include "integrator.h"
 
 static void physics
@@ -31,6 +31,7 @@ static void output
 
 struct StrictlyProperBlock integrator(size_t const numBlocks)
 {
+	assert(numBlocks > 0);
 	struct StrictlyProperBlock b;
 	b.numStates = numBlocks;
 	b.numInputs = numBlocks;
