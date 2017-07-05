@@ -1,25 +1,28 @@
-function [output, state, dstate] = rk4(...
+function [output, state, dstate, input] = rk4f(...
     block,...
     dt,...
     time,...
     Xi,...
-    input,...
-    input2...
+    inputf,...
+    finput...
     )
 numSteps = numel(time);
 
 output = zeros(numSteps,block.numOutputs);
 state = zeros(numSteps,block.numStates);
 dstate = zeros(numSteps,block.numStates);
+input = zeros(numSteps,block.numInputs);
 
 state(1,:) = Xi;
 for i = 1:(numSteps-1)
     [output(i,:), block.storage] = block.h(block.numStates, block.numOutputs, time(i), state(i,:), block.storage);
-    [state(i+1,:), dstate(i,:), block.storage] = rk4_f_step(block.numStates, block.numInputs, dt, time(i), state(i,:), input(i,:), input2(i,:), input(i+1,:), block.f, block.storage);
+    input(i,:) = inputf(time(i), output(i,:), finput(i,:));
+    [state(i+1,:), dstate(i,:), block.storage] = rk4_f_step(block.numStates, block.numInputs, dt, time(i), state(i,:), input(i,:), input(i,:), input(i,:), block.f, block.storage);
 end
 i = numSteps;
 [output(i,:), block.storage] = block.h(block.numStates, block.numOutputs, time(i), state(i,:), block.storage);
 [dstate(i,:), block.storage] = block.f(block.numStates, block.numInputs, time(i), state(i,:), input(i,:), block.storage);
+input(i,:) = inputf(time(i), output(i,:), finput(i,:));
 end
 
 function [nextState, A, storage] = rk4_f_step(...
@@ -47,5 +50,5 @@ nextState = currentState + B * dt2;
 nextState = currentState + C * dt;
 
 [D, storage] = f(numStates, numInputs, nextTime, nextState, nextInput, storage);
-nextState = currentState + dt * (A + 2 * B + 2 * C + D) / 6;
+nextState = currentState + dt .* (A + 2 * B + 2 * C + D) / 6;
 end

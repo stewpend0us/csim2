@@ -1,4 +1,4 @@
-
+function test
 debug = false;
 c = 0;
 
@@ -67,4 +67,5 @@ for i = 1:numel(run)
         continue;
     end
     fprintf(': euler -> %8.2f rk4 -> %8.2f\n', e_time, rk_time);
+end
 end
