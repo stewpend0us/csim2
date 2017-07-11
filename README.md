@@ -48,13 +48,13 @@ the section on composing blocks). The interface is defined in
 
 ## solvers
 Solvers only ever deal with an individual block even if that block is composed of several other
-blocks (see blockSystem). Their most important job is to integrate the state derivative.
+blocks. Their most important job is to integrate the state derivative.
 You can think of the solver as dealing with the top half of the block for us. Like this:
 
             _______
            |       |
            |   1   |
-    .<-----|  ---  |<-----.
+    .------|  ---  |<-----.
     |      |   s   |      |
     |      |_______|      |
     |     ___________     |
@@ -65,18 +65,9 @@ You can think of the solver as dealing with the top half of the block for us. Li
 Here the laplace domain integrator `1/s` is used to represent the solver. Solvers are
 (partially) implemented in `csim2/solvers.c`.
 
+## implementing blocks
 
-## Organization:
-- csim2/
-  - contains the most important bits
-- mex*/
-  - various matlab mex file functions enable using matlab as the front end
-- demo/
-  - .dll file intended to beused with matlab and the mex functions
-- msim2/
-  - a matlab implementation of csim2/ mainly for testing/prototyping
-  
-Currently implemented blocks:
+### Currently implemented blocks:
 - csim2/integrator.c
   - 1/s
 - csim2/firstOrderLag.c
@@ -87,3 +78,16 @@ Currently implemented blocks:
   - strictly proper transfer function general case
 - csim2/blockSystem.c
   - this is used to compose a collection of other blocks together
+  
+## composing blocks
+
+## file structure:
+- csim2/
+  - contains the most important bits
+- mex*/
+  - various matlab mex file functions enable using matlab as the front end
+- demo/
+  - a .dll intended to beused with matlab and the mex functions
+- msim2/
+  - a matlab implementation of csim2/ mainly for testing/prototyping
+  
