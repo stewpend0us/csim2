@@ -19,10 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="blockSystemStorage_heap.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="blockSystemStorage_heap.h" />
     <ClInclude Include="dllInterface.h" />
   </ItemGroup>
   <ItemGroup>
