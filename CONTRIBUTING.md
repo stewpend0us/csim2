@@ -1,6 +1,7 @@
 # How to contribute
 
-Honestly I'm not expecting much interest in this...but it'd be awesome if there were! So here's me being optimistic:
+Honestly I'm not expecting much interest in this...but it'd be awesome if there were!
+So here's me being optimistic:
 
 ## Project organization
 
