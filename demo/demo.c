@@ -1,9 +1,6 @@
 #include <string.h>
 #include <errno.h>
-#include "../csim2heap/integrator_heap.h"
-#include "../csim2heap/firstOrderLag_heap.h"
-#include "../csim2heap/secondOrderSystem_heap.h"
-#include "../csim2heap/blockSystem_heap.h"
+#include "../csim2/constructors.h"
 #include "../csim2heap/blockSystemStorage_heap.h"
 #include "../csim2heap/dllInterface.h"
 

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="blockSystem.c" />
+    <ClCompile Include="constructors.c" />
     <ClCompile Include="firstOrderLag.c" />
     <ClCompile Include="integrator.c" />
     <ClCompile Include="secondOrderSystem.c" />
@@ -29,6 +30,7 @@
   <ItemGroup>
     <ClInclude Include="blockSystem.h" />
     <ClInclude Include="blockSystemStorage.h" />
+    <ClInclude Include="constructors.h" />
     <ClInclude Include="firstOrderLag.h" />
     <ClInclude Include="integrator.h" />
     <ClInclude Include="secondOrderSystem.h" />
