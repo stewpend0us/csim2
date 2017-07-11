@@ -5,11 +5,21 @@ blocks can be written and then be composed together to create more complex
 systems. One of the objectives is to create a repository of truly general and
 re-usable blocks for composing dynamic simulations.
 
+## blocks
+blocks are the part of block diagrams that contain all of the dynamics. Connections
+between blocks define where the inputs to a block come from and where the outputs go.
+Here is a simple block diagram:
+`
+            ______       ______
+           |      |     |      |
+input ---->|u B1 y|---->|u B2 y|----> output
+           |______|     |______|
+`
+
+
 Organization:
 - csim2/
-  - contains the most important bits. No dependencies (yet) and no heap allocation
-- csim2heap/
-  - contains helper functions/constructors for blocks
+  - contains the most important bits
 - mex*/
   - various matlab mex file functions enable using matlab as the front end
 - demo/
