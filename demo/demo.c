@@ -5,7 +5,7 @@
 #include "../csim2/firstOrderLag.h"
 #include "../csim2/secondOrderSystem.h"
 #include "../csim2/blockSystem.h"
-#include "../csim2heap/dllInterface.h"
+#include "../csim2/dllInterface.h"
 
 // DEMO 1 =================================================================================
 

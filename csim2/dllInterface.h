@@ -10,3 +10,6 @@ struct dllStrictlyProperBlock
 	ConstructorFunction constructor;
 	DestructorFunction destructor;
 };
+
+// use it like:
+// __declspec(dllexport) struct dllStrictlyProperBlock Int1 = { <constructor_function>, <free_function> };

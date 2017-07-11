@@ -14,9 +14,6 @@
     <ClCompile Include="mexrk4.c" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\csim2heap\csim2heap.vcxproj">
-      <Project>{293d3c48-6e42-4be6-995d-296b57c39c36}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\mexshared\mexshared.vcxproj">
       <Project>{f5087c67-79e0-41ec-9491-9efc12a7841e}</Project>
     </ProjectReference>

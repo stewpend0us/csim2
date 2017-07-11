@@ -31,6 +31,7 @@
     <ClInclude Include="blockSystem.h" />
     <ClInclude Include="blockSystemStorage.h" />
     <ClInclude Include="constructors.h" />
+    <ClInclude Include="dllInterface.h" />
     <ClInclude Include="firstOrderLag.h" />
     <ClInclude Include="integrator.h" />
     <ClInclude Include="secondOrderSystem.h" />
