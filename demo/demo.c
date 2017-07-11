@@ -1,6 +1,10 @@
 #include <string.h>
 #include <errno.h>
 #include "../csim2/constructors.h"
+#include "../csim2/integrator.h"
+#include "../csim2/firstOrderLag.h"
+#include "../csim2/secondOrderSystem.h"
+#include "../csim2/blockSystem.h"
 #include "../csim2heap/blockSystemStorage_heap.h"
 #include "../csim2heap/dllInterface.h"
 
@@ -14,10 +18,10 @@ static struct StrictlyProperBlock * getInt(char const * const options)
 		return NULL;
 	if (numStates <= 0)
 		return NULL;
-	return integrator_new(numStates);
+	return block_new(integrator(numStates));
 }
 
-__declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getInt, integrator_free };
+__declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getInt, block_free };
 
 // DEMO 1 =================================================================================
 
@@ -38,13 +42,13 @@ static struct StrictlyProperBlock * getFirstOrderLag1(char const * const options
 
 	taup[0] = tau;
 
-	return firstOrderLag_new(1, taup);
+	return block_new(firstOrderLag(1, taup));
 }
 
 static void FirstOrderLag1_free(struct StrictlyProperBlock * block)
 {
 	free(block->storage);
-	firstOrderLag_free(block);
+	block_free(block);
 }
 
 __declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag1 = { getFirstOrderLag1, FirstOrderLag1_free };
@@ -93,9 +97,9 @@ static struct StrictlyProperBlock * getFirstOrderLag2(char const * const options
 	double * taup = malloc(sizeof(double));
 	taup[0] = tau;
 
-	struct StrictlyProperBlock * I = integrator_new(1);
+	struct StrictlyProperBlock * I = block_new(integrator(1));
 	struct BlockSystemStorage * Bs = blockSystemStorage_new(1, I, fol_blockInputs, fol_blockOutputs, taup);
-	struct StrictlyProperBlock * B = blockSystem_new(1, 1, Bs);
+	struct StrictlyProperBlock * B = block_new(blockSystem(1, 1, Bs));
 
 	return B;
 }
@@ -104,9 +108,9 @@ static void FirstOrderLag2_free(struct StrictlyProperBlock * block)
 {
 	struct BlockSystemStorage * Bs = block->storage;
 	free(Bs->systemStorage);
-	integrator_free(Bs->blocks);
+	block_free(Bs->blocks);
 	blockSystemStorage_free(Bs);
-	blockSystem_free(block);
+	block_free(block);
 }
 
 __declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag2 = { getFirstOrderLag2, FirstOrderLag2_free };
@@ -142,13 +146,13 @@ static struct StrictlyProperBlock * getSecondOrderSystem1(char const * const opt
 	storagep[0].zeta = zeta;
 	storagep[0].omega_n = omega_n;
 
-	return secondOrderSystem_new(1, storagep);
+	return block_new(secondOrderSystem(1, storagep));
 }
 
 static void SecondOrderSystem1_free(struct StrictlyProperBlock * block)
 {
 	free(block->storage);
-	secondOrderSystem_free(block);
+	block_free(block);
 }
 
 __declspec(dllexport) struct dllStrictlyProperBlock SecondOrderSystem1 = { getSecondOrderSystem1, SecondOrderSystem1_free };
