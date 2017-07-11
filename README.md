@@ -10,10 +10,10 @@ blocks are the part of block diagrams that contain all of the dynamics. Connecti
 between blocks define where the inputs to a block come from and where the outputs go.
 Here is a simple block diagram:
 `
-            ______       ______
-           |      |     |      |
-input ---->|u B1 y|---->|u B2 y|----> output
-           |______|     |______|
+            ______       ______  
+           |      |     |      |  
+input ---->|u B1 y|---->|u B2 y|----> output  
+           |______|     |______|  
 `
 
 
