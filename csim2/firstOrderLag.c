@@ -33,8 +33,10 @@ static void output
 struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau)
 {
 	assert(numBlocks > 0);
-	for (size_t i = 0; i < 0; i++)
+	for (size_t i = 0; i < numBlocks; i++)
+	{
 		assert(tau[i] > 0);
+	}
 
 	struct StrictlyProperBlock b;
 	b.numInputs = numBlocks;
