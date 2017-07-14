@@ -34,7 +34,7 @@ block __input__, and __y__ is the block __output__. In the general case:
     dx = f(t,x,u)
     y  = h(t,x,u)
 
-## strictly proper blocks
+## strictly proper blocks `csim2/StrictlyProperBlock.h`
 csim2 is designed to only work with strictly proper blocks. Strictly proper blocks look
 the same as general blocks but the relatonship between inputs and outputs is different.
 
@@ -43,27 +43,55 @@ the same as general blocks but the relatonship between inputs and outputs is dif
 
 There is no direct connection between the outputs and inputs. This compromise is made to
 drastically simplify composing blocks together (I'll talk about why this works more in 
-the section on composing blocks). The interface is defined in
-`csim2/StrictlyProperBlock.h`.
+the section on composing blocks).
 
-## solvers
-Solvers only ever deal with an individual block even if that block is composed of several other
-blocks. Their most important job is to integrate the state derivative.
-You can think of the solver as dealing with the top half of the block for us. Like this:
+## solvers `csim2/solvers.c`
+Solvers only ever deal with an individual block (although the block may be composed of
+several other blocks). Their most important job is to integrate the state derivative.
+This is what the block and solver look like:
 
-            _______
-           |       |
-           |   1   |
-    .------|  ---  |<-----.
-    |      |   s   |      |
-    |      |_______|      |
-    |     ___________     |
-    |    |           |    |
-    '--->|x        dx|----'
-        ~ ~ ~ ~ ~ ~ ~ ~
+                 _______
+                |       |
+                |   1   |
+         .------|  ---  |<-----.
+         |      |   s   |      |
+         |      |_______|      |
+         |     ___________     |
+         |    |           |    |
+         '--->|x        dx|----'
+              |           |
+    input---->|u         y|---->output
+              |___________|
 
-Here the laplace domain integrator `1/s` is used to represent the solver. Solvers are
-(partially) implemented in `csim2/solvers.c`.
+Here the laplace domain integrator `1/s` is used to represent the solver. The standard
+solver functions take the block to be solved, time vector, initial conditions, and input
+vector as input. They return the block output, and optionally the block state and dstate
+as a function of time.
+
+## controller solvers
+Controller solvers do the same thing as standard solvers but instead of specifying the
+block input directly they are specified via a controller function and command. The block diagram 
+looks like this:
+
+                   _______
+                  |       |
+                  |   1   |
+           .------|  ---  |<-----.
+           |      |   s   |      |
+           |      |_______|      |
+           |     ___________     |
+           |    |           |    |
+           '--->|x        dx|----'
+                |           |
+           .--->|u         y|----.
+           |    |___________|    |
+          \      ___________      \
+           |    |           |    |
+           '----|o         f|<---'
+                |  control  |
+    command---->|c          |
+                |___________|
+              
 
 ## implementing blocks
 
