@@ -185,7 +185,7 @@ block inputs and contained blocks outputs to the contained blocks inputs. Here's
 
 The inputs to the calcSystemOutput function are:
 - `numSystemOutputs` number of blockSystem outputs (size of they systemOutputs array)
-- `systemOutputs` current output array *output*
+- `systemOutputs` current output array *(output)*
 - `time` current time value
 - `blockOutputs` same as above
 - `systemStorage` same as above
@@ -193,7 +193,7 @@ The inputs to the calcSystemOutput function are:
 The calcSystemOutput makes the connection from the contained blocks output to the blockSystem
 output. 
 
-All of this sounds complex but it's not really. Here's a diagram of the two functions:
+All of this sounds complex but it's not really. Here's a diagram of the two functions and the contained blocks:
 
                  ________________________________________
                 |      ___________                       |
