@@ -1,5 +1,5 @@
 # csim2
-csim2 is a very simple time domain simulation tool. It is architected to enable
+csim2 is a very simple time domain simulation tool. It is designed to enable
 implementing dynamic systems as block diagrams (similar to simulink). Individual
 blocks can be written and then be composed together to create more complex
 systems. One of the objectives is to create a repository of truly general and
@@ -47,8 +47,8 @@ the section on composing blocks).
 
 ## solvers `csim2/solvers.c`
 Solvers only ever deal with an individual block (although the block may be composed of
-several other blocks). Their job is to integrate the state derivative. This is what the
-block and solver look like:
+several other blocks). Their job is to integrate the state derivative and produce the next state.
+This is what the block and solver look like:
 
                  _______
                 |       |
@@ -99,7 +99,15 @@ diagram looks like this:
     command---->|c          |
                 |___________|
               
-In this case the solver functions also return the output of the controller. 
+In this case the solver functions also return the output of the controller.
+
+The kink in the connections from y to f and o to u represent switches. That means
+the signals are sampled rather than "continuous". This is convenient because the
+controller is typically implemented on a digital computer. Right now the controller
+function is called once per time step. So the time step used for the simulation
+should be less than or equal to the rate that the controller code is expected to run.
+If the time step is less you will have to manually check whether the controller
+function should be run or not and then call it accordingly.
 
 ## implementing blocks 
 Blocks are implemented by writing a function that returns a `StrictlyProperBlock`
@@ -181,7 +189,7 @@ The inputs to the calcBlockInputs function are:
 - `systemStorage` same as above
 
 You can think of the calcBlockInputs function as making the connections from the the containing
-block inputs and contained blocks outputs to the contained blocks inputs. Here's a diagram:
+block inputs and contained blocks outputs to the contained blocks inputs.
 
 The inputs to the calcSystemOutput function are:
 - `numSystemOutputs` number of blockSystem outputs (size of they systemOutputs array)
@@ -193,13 +201,14 @@ The inputs to the calcSystemOutput function are:
 The calcSystemOutput makes the connection from the contained blocks output to the blockSystem
 output. 
 
-All of this sounds complex but it's not really. Here's a diagram of the two functions and the contained blocks:
+Here's a diagram to hopefully clear this up:
 
                  ________________________________________
+                |           containing block             |
                 |      ___________                       |
                 |     | Contained |      ____________    |
                 |     |  Blocks   |     | calcSystem |   |      system
-                |  .->|u         y|--.--|  Ooutput   |-->|----> output
+                |  .->|u         y|--.--|   Output   |-->|----> output
                 |  |  |___________|  |  |____________|   |
                 |  |   ___________   |                   |
                 |  |  | calcBlock |  |                   |
@@ -207,6 +216,14 @@ All of this sounds complex but it's not really. Here's a diagram of the two func
      input ---->|---->|___________|                      |
                 |________________________________________|
 
+This is where the distinction between general blocks and strictly proper blocks comes in.
+If we were using general blocks and the output were a function of state and input `y = h(t,x,u)`
+then there would be an algebraic loop between the contained blocks and the calcBlockInputs function.
+Say we need to calculate the output of the block. First we will need the state which we have and the input
+which we don't have. So we'd need to follow the signal back to the calcBlockInputs function which requires
+the block output as input. Of cource the block output is what we were after in the first place so that's
+not going to work without getting fancy. Thankfully we're using strictly proper blocks `y = h(t,x)` so 
+the output of the block is guaranteed to be available and this problem goes away.
 
 ## file structure:
 - csim2/
