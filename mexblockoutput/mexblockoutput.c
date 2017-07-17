@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <Windows.h>
 #include "mex.h"
-#include "../csim2heap/dllInterface.h"
+#include "../csim2/dllInterface.h"
 #define TOOLBOX "csim2"
 #define FUNCTION "mexblockoutput"
 #include "../mexshared/mexshared.h"

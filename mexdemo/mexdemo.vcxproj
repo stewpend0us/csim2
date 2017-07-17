@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{578692D5-C3CE-4F9D-8878-90B2E1CF5F9F}</ProjectGuid>
-    <RootNamespace>demo</RootNamespace>
+    <RootNamespace>mexdemo</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -122,7 +122,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="demo.c" />
+    <ClCompile Include="mexdemo.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csim2\csim2.vcxproj">
