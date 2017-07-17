@@ -1,6 +1,52 @@
 #include <math.h>
+#include <string.h>
 #include <assert.h>
 #include "solvers.h"
+
+void euler
+(
+	struct StrictlyProperBlock block,
+	double const dt, //time step
+	size_t numSteps,
+	double const * const time, // numSteps x 1 time vector
+	size_t numStates,
+	double const * const Xi, // numStates x 1 initial conditions vector (will be over-written)
+	size_t numInputs,
+	double const * const U_t, // numSteps x numInputs input values over time
+	size_t numOutputs,
+	double * const Y // numSteps x numOutputs output buffer
+)
+{
+	double * const currentState = malloc(block.numStates * sizeof(double));
+	double * const nextState = currentState; //in this case it's ok that these are the same block of memory
+	double * const currentdState = malloc(block.numStates * sizeof(double));
+	if (currentState == NULL || currentdState == NULL)
+	{
+		if (currentState) free(currentState);
+		if (currentdState) free(currentdState);
+		return;
+	}
+	double const * currentInput;
+	double * currentOutput;
+
+	memcpy(currentState, Xi, block.numStates * sizeof(double));
+	size_t i;
+	for (i = 0; i < (numSteps - 1); i++)
+	{
+		currentInput = &U_t[i*block.numInputs];
+		currentOutput = &Y[i*block.numOutputs];
+
+		block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+		euler_f_step(block.numStates, block.numInputs, dt, time[i], nextState, currentdState, currentState, currentInput, block.f, block.storage);
+	}
+
+	//currentState = nextState;
+	currentOutput = &Y[i*block.numOutputs];
+	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+
+	free(currentState);
+	free(currentdState);
+}
 
 void euler_f_step
 (
@@ -70,12 +116,23 @@ void rk4_f_step
 		nextState[i] = currentState[i] + dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
 }
 
-//size_t numSteps
-//(
-//	double const ti,
-//	double const dt,
-//	double const tf
-//)
-//{
-//	return (size_t)floor((tf - ti) / dt + 1);
-//}
+size_t numTimeSteps
+(
+	double const dt,
+	double const duration
+)
+{
+	return (size_t)floor(duration / dt + 1);
+}
+
+void initializeTime
+(
+	size_t const numSteps,
+	double * const time,
+	double const dt,
+	double const ti
+)
+{
+	for (size_t i = 0; i < numSteps; i++)
+		time[i] = i*dt + ti;
+}
