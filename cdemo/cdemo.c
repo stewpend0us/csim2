@@ -3,6 +3,7 @@
 #include "../csim2/StrictlyProperBlock.h"
 #include "../csim2/integrator.h"
 #include "../csim2/solvers.h"
+#include "test.h"
 
 int main(int argc, char * argv[])
 {
@@ -65,8 +66,9 @@ int main(int argc, char * argv[])
 	{
 		printf("%10.4f", (startTime + duration - stepTime)*stepValue + Xi[i]);
 	}
-	printf("\n\n");
+	printf("\n\n\n");
 
+	run_all_tests();
 	printf("press enter\n");
 	getchar();
 }

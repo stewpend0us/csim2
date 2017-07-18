@@ -119,11 +119,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cdemo.c" />
+    <ClCompile Include="test.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csim2\csim2.vcxproj">
       <Project>{1e802af7-e608-42ed-a2d0-bb119f40e884}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
