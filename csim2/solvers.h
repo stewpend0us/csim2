@@ -2,6 +2,20 @@
 #include "StrictlyProperBlock.h"
 
 // euler solver
+void euler
+(
+	struct StrictlyProperBlock b,
+	double const dt, //time step
+	size_t numSteps, //size of time vector
+	double const * const time, //time vector
+	size_t numStates,
+	double const * const Xi, // numStates x 1 initial conditions vector
+	size_t numInputs,
+	double const * const U_t, // numSteps x numInputs inputs
+	size_t numOutputs,
+	double * const Y_t
+);
+
 void euler_f_step
 (
 	size_t const numStates,
@@ -17,6 +31,9 @@ void euler_f_step
 );
 
 // rk4 solver
+void rk4
+();
+
 void rk4_f_step
 (
 	size_t const numStates,
@@ -38,9 +55,16 @@ void rk4_f_step
 
 // other:
 
-//size_t numSteps
-//(
-//	double const ti,
-//	double const dt,
-//	double const tf
-//);
+size_t numTimeSteps
+(
+	double const dt,
+	double const duration
+);
+
+void initializeTime
+(
+	size_t const numSteps,
+	double * const time,
+	double const dt,
+	double const ti	
+);

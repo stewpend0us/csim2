@@ -39,6 +39,9 @@
     <ClInclude Include="StrictlyProperBlock.h" />
     <ClInclude Include="transferFunction.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1E802AF7-E608-42ED-A2D0-BB119F40E884}</ProjectGuid>
     <RootNamespace>csim2</RootNamespace>

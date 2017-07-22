@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include "mex.h"
 #include "../csim2/solvers.h"
-#include "../csim2heap/dllInterface.h"
+#include "../csim2/dllInterface.h"
 #define TOOLBOX "csim2"
 #define FUNCTION "mexrk4"
 #include "../mexshared/mexshared.h"

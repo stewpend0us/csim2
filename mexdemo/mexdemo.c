@@ -20,7 +20,7 @@ static struct StrictlyProperBlock * getInt(char const * const options)
 	return block_new(integrator(numStates));
 }
 
-__declspec(dllexport) struct dllStrictlyProperBlock Int1 = { getInt, block_free };
+EXPORT struct dllStrictlyProperBlock Int1 = { getInt, block_free };
 
 // DEMO 1 =================================================================================
 
@@ -50,7 +50,7 @@ static void FirstOrderLag1_free(struct StrictlyProperBlock * block)
 	block_free(block);
 }
 
-__declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag1 = { getFirstOrderLag1, FirstOrderLag1_free };
+EXPORT struct dllStrictlyProperBlock FirstOrderLag1 = { getFirstOrderLag1, FirstOrderLag1_free };
 
 // DEMO 2 =================================================================================
 
@@ -112,7 +112,7 @@ static void FirstOrderLag2_free(struct StrictlyProperBlock * block)
 	block_free(block);
 }
 
-__declspec(dllexport) struct dllStrictlyProperBlock FirstOrderLag2 = { getFirstOrderLag2, FirstOrderLag2_free };
+EXPORT struct dllStrictlyProperBlock FirstOrderLag2 = { getFirstOrderLag2, FirstOrderLag2_free };
 
 // DEMO 3 =================================================================================
 
@@ -154,6 +154,6 @@ static void SecondOrderSystem1_free(struct StrictlyProperBlock * block)
 	block_free(block);
 }
 
-__declspec(dllexport) struct dllStrictlyProperBlock SecondOrderSystem1 = { getSecondOrderSystem1, SecondOrderSystem1_free };
+EXPORT struct dllStrictlyProperBlock SecondOrderSystem1 = { getSecondOrderSystem1, SecondOrderSystem1_free };
 
 // DEMO 4 =================================================================================

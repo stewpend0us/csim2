@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "csim2", "csim2\csim2.vcxproj", "{1E802AF7-E608-42ED-A2D0-BB119F40E884}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "demo", "demo\demo.vcxproj", "{578692D5-C3CE-4F9D-8878-90B2E1CF5F9F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mexdemo", "mexdemo\mexdemo.vcxproj", "{578692D5-C3CE-4F9D-8878-90B2E1CF5F9F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mexrk4", "mexrk4\mexrk4.vcxproj", "{99D9F467-B8D5-409D-B91C-3362A9C2E071}"
 EndProject
@@ -19,10 +19,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mexblockdstate", "mexblockd
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5DAC2FFA-C104-47B2-80CA-D3F773BDA624}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		common_footer.mak = common_footer.mak
+		common_header.mak = common_header.mak
+		config.mak = config.mak
 		CONTRIBUTING.md = CONTRIBUTING.md
+		executable.mak = executable.mak
 		LICENSE = LICENSE
+		Makefile = Makefile
 		README.md = README.md
+		shared_lib.mak = shared_lib.mak
+		static_lib.mak = static_lib.mak
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cdemo", "cdemo\cdemo.vcxproj", "{BAB2CC5C-206F-4D6B-8845-99271FA744B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +88,14 @@ Global
 		{1F9131FA-332F-4887-B4E6-2BE3F77FEFF0}.Release|x64.ActiveCfg = Release|x64
 		{1F9131FA-332F-4887-B4E6-2BE3F77FEFF0}.Release|x64.Build.0 = Release|x64
 		{1F9131FA-332F-4887-B4E6-2BE3F77FEFF0}.Release|x86.ActiveCfg = Release|x64
+		{BAB2CC5C-206F-4D6B-8845-99271FA744B5}.Debug|x64.ActiveCfg = Debug|x64
+		{BAB2CC5C-206F-4D6B-8845-99271FA744B5}.Debug|x64.Build.0 = Debug|x64
+		{BAB2CC5C-206F-4D6B-8845-99271FA744B5}.Debug|x86.ActiveCfg = Debug|Win32
+		{BAB2CC5C-206F-4D6B-8845-99271FA744B5}.Debug|x86.Build.0 = Debug|Win32
+		{BAB2CC5C-206F-4D6B-8845-99271FA744B5}.Release|x64.ActiveCfg = Release|x64
+		{BAB2CC5C-206F-4D6B-8845-99271FA744B5}.Release|x64.Build.0 = Release|x64
+		{BAB2CC5C-206F-4D6B-8845-99271FA744B5}.Release|x86.ActiveCfg = Release|Win32
+		{BAB2CC5C-206F-4D6B-8845-99271FA744B5}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
