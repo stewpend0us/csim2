@@ -31,11 +31,11 @@ static bool is_increasing(size_t const numSteps, double const * const values)
 	return true;
 }
 
-static bool all_less_than(size_t const numSteps, double const * const values, double lessThan)
+static bool all_less_than(size_t const numSteps, double const * const values, double value)
 {
 	for (size_t i = 0; i < numSteps; i++)
 	{
-		if (values[i] > lessThan)
+		if (values[i] > value)
 		{
 			return false;
 		}
@@ -45,16 +45,16 @@ static bool all_less_than(size_t const numSteps, double const * const values, do
 
 static bool difference_decreasing(size_t numSteps, double const * const values)
 {
-	if (numSteps < 2)
-		return true;
-
-	double prevDiff = values[1] - values[0];
-	for (size_t i = 2; i < numSteps; i++)
+	if (numSteps > 2)
 	{
-		double diff = values[i] - values[i - 1];
-		if (diff > prevDiff)
-			return false;
-		prevDiff = diff;
+		double prevDiff = values[1] - values[0];
+		for (size_t i = 2; i < numSteps; i++)
+		{
+			double diff = values[i] - values[i - 1];
+			if (diff > prevDiff)
+				return false;
+			prevDiff = diff;
+		}
 	}
 	return true;
 }
