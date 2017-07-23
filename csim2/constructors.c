@@ -5,7 +5,7 @@ struct StrictlyProperBlock * block_new(struct StrictlyProperBlock const stackb)
 {
 	struct StrictlyProperBlock * heapb = malloc(sizeof(struct StrictlyProperBlock));
 	if (heapb)
-		memcpy(heapb, &stackb, sizeof(struct StrictlyProperBlock));
+		*heapb = stackb;
 	return heapb;
 }
 
@@ -38,12 +38,10 @@ struct BlockSystemStorage * blockSystemStorage_new
 
 	if (storage == NULL || input_storage == NULL || output_storage == NULL || bheap == NULL)
 	{
-#define freeif(ptr) if (ptr) free(ptr)
-		freeif(storage);
-		freeif(input_storage);
-		freeif(output_storage);
-		freeif(bheap);
-#undef freeif
+		free(storage);
+		free(input_storage);
+		free(output_storage);
+		free(bheap);
 		return NULL;
 	}
 
@@ -66,7 +64,7 @@ struct BlockSystemStorage * blockSystemStorage_new
 	bstack.calcSystemOutput = calcSystemOutputs;
 	bstack.systemStorage = systemStorage;
 
-	memcpy(bheap, &bstack, sizeof(struct BlockSystemStorage));
+	*bheap = bstack;
 	return bheap;
 }
 
