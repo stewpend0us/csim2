@@ -6,21 +6,68 @@ systems. One of the objectives is to create a repository of truly general and
 re-usable blocks and solvers for composing and running dynamic simulations.
 
 ## prerequisites
-Before this tool will be useful you'll need to know something about ordinary differential
+Before this tool will make sense you'll need to know something about differential
 equations. I'll attempt to put it in a nutshell here but you may want to look around
-as well. An ordinary differential equation is an eqation that is a function of a variable
-and its derivatives. The classic (mechanical) example is the mass spring damper. The system
+as well. A differential equation is an eqation that is a function of a variable
+and its derivatives. The classic (mechanical) example is a mass spring damper. The system
 looks like this:
 
+               |----> +x
                 _______
     >|----K----|       |
-    >|         |   M   |
+    >|         |   M   |---->F
     >|----C----|_______|
            
-      
-to be continued...
-       
+*This is supposed to look like a wall on the left connected to a weight on the right with a spring
+and a damper.*
+Where:
+- M is the mass (force due to acceleration = mass * acceleration)
+- K is the spring constant (spring force = spring constant * position)
+- C is the damping coefficient (damping force = damping coefficient * velocity)
+- F is an externally applied force
+- +x indicates the positive x direction
 
+Summing the forces results in the following differential equation:
+
+    M*xdotdot + C*xdot + K*x = F
+
+I've used `dot` to indcate a time derivative of `x` so `xdot` is the first derivative of
+position (velocity) and `xdotdot` is the seccond derivative of position (acceleration).
+
+In csim2 the differential equation is defined by the *physics* function for a block.
+The physics function calculates the state derivative as a function of state, input, and time.
+What are the state derivative and state? The unsatisfying answer is: the state
+derivative is the derivative of the state. Now we just need to figure out what the state is.
+
+Back to the example. Let's solve our equation for the highest order derivative that shows up:
+
+    xdotdot = (F - C*xdot - K*x)/M
+
+I'm tempted to say that "x and all of its derivatives that show up on the right hand side are the state"
+which is true in this case but they don't actually have to show up to be a part of the state. If C were
+zero you could cross C\*xdot out of the equation but xdot would still need to be a part of the state. Another way
+to say it might be "x and all of its derivatives less than the highest order derivative are the state".
+This one is better and it would always work but it's not always nececary to keep x *and* all of its derivatives.
+If K were zero and you weren't interested in knowing the position of the mass you don't have to keep x as part of the state.
+
+In our example x and xdot show up so our system has two states (and two state derivatives). This could be
+implemented in a physics function something like this:
+
+    // deconstruct the state vector into each state
+    double x = state[0];
+    double xdot = state[1];
+    // calculate the derivative of each state
+    dstate[0] = xdot; // dx = xdot
+    dstate[1] = (F - C*xdot - K*x)/M; // dxdot = xdotdot = (F - C*xdot - K*x)/M
+
+I this example the first state derivative is trivial. x and xdot are provided in the state vector.
+That means our state derivative will be dx (derivative of x) and dxdot (derivative of xdot). The 
+derivative of x is just xdot and the derivative of xdot is the acceleration we solved for above.
+
+One thing that helps me distinguish between the state derivative and the state is I always put the
+word `dot` after the variable when I'm talking about the state and I always put the letter `d` before
+the variable when I'm talking about the state derivative. It can be tempting to name both the state
+and the state derivative `xdot` for example but this gets confusing quickly.
 
 ## blocks
 Blocks are the part of block diagrams that contain all of the dynamics. Connections
@@ -223,8 +270,8 @@ Here's a diagram to hopefully clear this up:
                  ________________________________________
                 |           containing block             |
                 |      ___________                       |
-                |     | Contained |      ____________    |
-                |     |  Blocks   |     | calcSystem |   |      system
+                |     | contained |      ____________    |
+                |     |  blocks   |     | calcSystem |   |      system
                 |  .->|u         y|--.--|   Output   |-->|----> output
                 |  |  |___________|  |  |____________|   |
                 |  |   ___________   |                   |
@@ -245,9 +292,11 @@ the output of the block is guaranteed to be available and this problem goes away
 ## file structure:
 - csim2/
   - contains the most important bits
+- cdemo/
+  - contains example code and tests
 - mex*/
   - various matlab mex file functions enable using matlab as the front end
-- demo/
+- mexdemo/
   - a .dll intended to be used with matlab and the mex functions
 - msim2/
   - a matlab implementation of csim2/ mainly for testing/prototyping
