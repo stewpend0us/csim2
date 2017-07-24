@@ -5,6 +5,23 @@ blocks can be written and then be composed together to create more complex
 systems. One of the objectives is to create a repository of truly general and
 re-usable blocks and solvers for composing and running dynamic simulations.
 
+## prerequisites
+Before this tool will be useful you'll need to know something about ordinary differential
+equations. I'll attempt to put it in a nutshell here but you may want to look around
+as well. An ordinary differential equation is an eqation that is a function of a variable
+and its derivatives. The classic (mechanical) example is the mass spring damper. The system
+looks like this:
+
+                _______
+    >|----K----|       |
+    >|         |   M   |
+    >|----C----|_______|
+           
+      
+to be continued...
+       
+
+
 ## blocks
 Blocks are the part of block diagrams that contain all of the dynamics. Connections
 between blocks define where the inputs to a block come from and where the outputs go.
