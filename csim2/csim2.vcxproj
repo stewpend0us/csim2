@@ -36,6 +36,7 @@
     <ClInclude Include="integrator.h" />
     <ClInclude Include="secondOrderSystem.h" />
     <ClInclude Include="solvers.h" />
+    <ClInclude Include="solvers_controller.h" />
     <ClInclude Include="StrictlyProperBlock.h" />
     <ClInclude Include="transferFunction.h" />
   </ItemGroup>
