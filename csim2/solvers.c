@@ -3,51 +3,6 @@
 #include <assert.h>
 #include "solvers.h"
 
-void euler
-(
-	struct StrictlyProperBlock block,
-	double const dt, //time step
-	size_t numSteps,
-	double const * const time, // numSteps x 1 time vector
-	size_t numStates,
-	double const * const Xi, // numStates x 1 initial conditions vector (will be over-written)
-	size_t numInputs,
-	double const * const U_t, // numSteps x numInputs input values over time
-	size_t numOutputs,
-	double * const Y // numSteps x numOutputs output buffer
-)
-{
-	double * const currentState = malloc(block.numStates * sizeof(double));
-	double * const nextState = currentState; //in this case it's ok that these are the same block of memory
-	double * const currentdState = malloc(block.numStates * sizeof(double));
-	if (currentState == NULL || currentdState == NULL)
-	{
-		if (currentState) free(currentState);
-		if (currentdState) free(currentdState);
-		return;
-	}
-	double const * currentInput;
-	double * currentOutput;
-
-	memcpy(currentState, Xi, block.numStates * sizeof(double));
-	size_t i;
-	for (i = 0; i < (numSteps - 1); i++)
-	{
-		currentInput = &U_t[i*block.numInputs];
-		currentOutput = &Y[i*block.numOutputs];
-
-		block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
-		euler_f_step(block.numStates, block.numInputs, dt, time[i], nextState, currentdState, currentState, currentInput, block.f, block.storage);
-	}
-
-	//currentState = nextState;
-	currentOutput = &Y[i*block.numOutputs];
-	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
-
-	free(currentState);
-	free(currentdState);
-}
-
 void euler_f_step
 (
 	size_t const numStates,
@@ -115,6 +70,102 @@ void rk4_f_step
 	for (i = 0; i < numStates; i++)
 		nextState[i] = currentState[i] + dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
 }
+
+void euler
+(
+	struct StrictlyProperBlock block,
+	double const dt, //time step
+	size_t numSteps,
+	double const * const time, // numSteps x 1 time vector
+	size_t numStates,
+	double const * const Xi, // numStates x 1 initial conditions vector (will be over-written)
+	size_t numInputs,
+	double const * const U, // numSteps x numInputs input values over time
+	size_t numOutputs,
+	double * const Y // numSteps x numOutputs output buffer
+)
+{
+	double * const temp_memory = malloc(block.numStates * 2 * sizeof(double));
+	if (!temp_memory)
+		return;
+	
+	double * const currentState = &temp_memory[0 * block.numStates];
+	double * const nextState = currentState; //in this case it's ok that these are the same block of memory
+	double * const currentdState = &temp_memory[1 * block.numStates];
+
+	
+	double const * currentInput;
+	double * currentOutput;
+
+	memcpy(currentState, Xi, block.numStates * sizeof(double));
+	size_t i;
+	for (i = 0; i < (numSteps - 1); i++)
+	{
+		currentInput = &U[i*block.numInputs];
+		currentOutput = &Y[i*block.numOutputs];
+
+		block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+		euler_f_step(block.numStates, block.numInputs, dt, time[i], nextState, currentdState, currentState, currentInput, block.f, block.storage);
+	}
+
+	//currentState = nextState;
+	currentOutput = &Y[i*block.numOutputs];
+	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+
+	free(temp_memory);
+}
+
+void rk4(
+	struct StrictlyProperBlock block,
+	double const dt, //time step
+	size_t numSteps, //size of time vector
+	double const * const time, //time vector
+	size_t numStates,
+	double const * const Xi, // numStates x 1 initial conditions vector
+	size_t numInputs,
+	double const * const U1, // numSteps x numInputs inputs
+	double const * const U2, // numSteps x numInputs inputs
+	size_t numOutputs,
+	double * const Y
+)
+{
+	double * const temp_memory = malloc(block.numStates * 6 * sizeof(double));
+	if (!temp_memory)
+		return;
+
+	double * const currentState = &temp_memory[0 * block.numStates];
+	double * const nextState = &temp_memory[1 * block.numStates];
+	double * const currentdState = &temp_memory[2 * block.numStates];
+	double * const B = &temp_memory[3 * block.numStates];
+	double * const C = &temp_memory[4 * block.numStates];
+	double * const D = &temp_memory[5 * block.numStates];
+
+	double const * currentInput;
+	double const * currentInput2;
+	double const * nextInput;
+	double * currentOutput;
+
+	memcpy(currentState, Xi, block.numStates * sizeof(double));
+	size_t i;
+	for (i = 0; i < (numSteps - 1); i++)
+	{
+		currentInput = &U1[i*block.numInputs];
+		currentInput2 = &U2[i*block.numInputs];
+		nextInput = &U1[(i + 1)*block.numInputs];
+		currentOutput = &Y[i*block.numOutputs];
+
+		block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+		rk4_f_step(block.numStates, block.numInputs, dt, time[i], nextState, currentdState, B, C, D, currentState, currentInput, currentInput2, nextInput, block.f, block.storage);
+		memcpy(currentState, nextState, block.numStates * sizeof(double));
+	}
+
+	currentOutput = &Y[i*block.numOutputs];
+	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+
+	free(temp_memory);
+}
+
+
 
 size_t numTimeSteps
 (

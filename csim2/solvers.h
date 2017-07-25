@@ -1,21 +1,6 @@
 #pragma once
 #include "StrictlyProperBlock.h"
 
-// euler solver
-void euler
-(
-	struct StrictlyProperBlock b,
-	double const dt, //time step
-	size_t numSteps, //size of time vector
-	double const * const time, //time vector
-	size_t numStates,
-	double const * const Xi, // numStates x 1 initial conditions vector
-	size_t numInputs,
-	double const * const U_t, // numSteps x numInputs inputs
-	size_t numOutputs,
-	double * const Y_t
-);
-
 void euler_f_step
 (
 	size_t const numStates,
@@ -29,10 +14,6 @@ void euler_f_step
 	PhysicsFunction const f,
 	void * const storage
 );
-
-// rk4 solver
-void rk4
-();
 
 void rk4_f_step
 (
@@ -53,8 +34,37 @@ void rk4_f_step
 	void * const storage
 );
 
-// other:
+// euler solver
+void euler
+(
+	struct StrictlyProperBlock block,
+	double const dt, //time step
+	size_t numSteps, //size of time vector
+	double const * const time, //time vector
+	size_t numStates,
+	double const * const Xi, // numStates x 1 initial conditions vector
+	size_t numInputs,
+	double const * const U, // numSteps x numInputs inputs
+	size_t numOutputs,
+	double * const Y
+);
 
+// rk4 solver
+void rk4(
+	struct StrictlyProperBlock block,
+	double const dt, //time step
+	size_t numSteps, //size of time vector
+	double const * const time, //time vector
+	size_t numStates,
+	double const * const Xi, // numStates x 1 initial conditions vector
+	size_t numInputs,
+	double const * const U1, // numSteps x numInputs inputs
+	double const * const U2, // numSteps x numInputs inputs
+	size_t numOutputs,
+	double * const Y
+);
+
+// other:
 size_t numTimeSteps
 (
 	double const dt,
