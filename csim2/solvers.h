@@ -50,7 +50,8 @@ void euler
 );
 
 // rk4 solver
-void rk4(
+void rk4
+(
 	struct StrictlyProperBlock block,
 	double const dt, //time step
 	size_t numSteps, //size of time vector

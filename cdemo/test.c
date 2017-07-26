@@ -35,7 +35,19 @@ static bool all_less_than(size_t const numSteps, double const * const values, do
 {
 	for (size_t i = 0; i < numSteps; i++)
 	{
-		if (values[i] > value)
+		if (!(values[i] < value))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+static bool each_less_than_or_equal_to(size_t const numSteps, double const * const small, double const * const large)
+{
+	for (size_t i = 0; i < numSteps; i++)
+	{
+		if (!(small[i] <= large[i]))
 		{
 			return false;
 		}
@@ -57,6 +69,34 @@ static bool difference_decreasing(size_t numSteps, double const * const values)
 		}
 	}
 	return true;
+}
+
+struct first_order_lag_step_solver_results
+{
+	bool increasing;
+	bool right_size;
+	bool right_trend;
+	bool initial_value;
+	bool final_value;
+};
+
+static struct first_order_lag_step_solver_results check_first_order_lag_step
+(
+	size_t const numSteps,
+	double const initialValue,
+	double const finalValue,
+	double const * const Y
+)
+{
+	struct first_order_lag_step_solver_results result;
+
+	result.increasing = is_increasing(numSteps, Y);
+	result.right_size = all_less_than(numSteps, Y, finalValue);
+	result.right_trend = difference_decreasing(numSteps, Y);
+	result.initial_value = (Y[0] == initialValue);
+	result.final_value = (finalValue - Y[numSteps - 1]) < tol;
+
+	return result;
 }
 
 static char * first_order_lag_step_test()
@@ -83,23 +123,32 @@ static char * first_order_lag_step_test()
 	double Xi[1] = { 0 };
 
 	euler(block, dt, numSteps, time, block.numStates, Xi, block.numInputs, U_t, block.numOutputs, eulerY);
+	rk4(block, dt, numSteps, time, block.numStates, Xi, block.numInputs, U_t, U_t, block.numOutputs, rk4Y);
 
-	bool increasing = is_increasing(numSteps, eulerY);
-	bool right_size = all_less_than(numSteps, eulerY, stepValue);
-	bool right_trend = difference_decreasing(numSteps, eulerY);
-	bool initial_value = (eulerY[0] == Xi[0]);
-	bool final_value = (stepValue - eulerY[numSteps - 1]) < tol;
+	struct first_order_lag_step_solver_results euler_results = check_first_order_lag_step(numSteps, Xi[0], stepValue, eulerY);
+	struct first_order_lag_step_solver_results rk4_results = check_first_order_lag_step(numSteps, Xi[0], stepValue, rk4Y);
+
+	bool rk4_smaller_than_euler = each_less_than_or_equal_to(numSteps, rk4Y, eulerY);
 
 	free(time);
 	free(U_t);
 	free(eulerY);
 	free(rk4Y);
 
-	assert_is_true(increasing, "every output should be greater than the previous output");
-	assert_is_true(right_size, "every output should be smaller than the input");
-	assert_is_true(initial_value, "the initial output should be equal to the initial condition");
-	assert_is_true(final_value, "the final value should be within 'tol' of the input value");
-	assert_is_true(right_trend, "the difference between outputs should be getting smaller");
+	assert_is_true(euler_results.increasing,	"euler: every output should be greater than the previous output");
+	assert_is_true(euler_results.right_size,	"euler: every output should be smaller than the input");
+	assert_is_true(euler_results.initial_value, "euler: the initial output should be equal to the initial condition");
+	assert_is_true(euler_results.final_value,	"euler: the final value should be within 'tol' of the input value");
+	assert_is_true(euler_results.right_trend,	"euler: the difference between outputs should be getting smaller");
+
+	assert_is_true(rk4_results.increasing,		"rk4: every output should be greater than the previous output");
+	assert_is_true(rk4_results.right_size,		"rk4: every output should be smaller than the input");
+	assert_is_true(rk4_results.initial_value,	"rk4: the initial output should be equal to the initial condition");
+	assert_is_true(rk4_results.final_value,		"rk4: the final value should be within 'tol' of the input value");
+	assert_is_true(rk4_results.right_trend,		"rk4: the difference between outputs should be getting smaller");
+
+	assert_is_true(rk4_smaller_than_euler, 		"rk4 is expected to have a smaller value than euler");
+
 	return NULL;
 }
 
