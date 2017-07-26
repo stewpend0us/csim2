@@ -3,8 +3,9 @@
 #include "inverted_pendulum_example.h"
 
 // First we'll need to declare the physics function and output function for our inverted_pendulum block
-// Look in StrictlyProperBlock.h for the function signature we must use.
-// Decalre them as static since no-one needs access to these functions outside this file. You'll be able to get at them via the StrictlyProperBlock interface.
+// (look in StrictlyProperBlock.h for the correct function signature to use).
+// Decalre them as static since no-one needs access to these functions outside this file.
+// You'll be able to get at them via the StrictlyProperBlock interface.
 
 static void physics(
 	size_t const numStates,
@@ -49,20 +50,21 @@ static void physics(
 	struct inverted_pendulum_data * const storage //note the function signature uses void * here but we know what we're being passed so use that instead
 )
 {
-	// Using the equations from wikipedia:
+	// Using the equations from:
 	//https://en.wikipedia.org/wiki/Inverted_pendulum#Equations_of_motion
-	//		(M + m)*ddx - m*l*ddtheta*cos(theta) + m*l*dtheta^2*sin(theta) = F
-	// and
-	//		l*ddtheta - g*sin(theta) = ddx*cos(theta)
+	//		[1] (M + m)*ddx - m*l*ddtheta*cos(theta) + m*l*dtheta^2*sin(theta) = F
+	//		[2] l*ddtheta - g*sin(theta) = ddx*cos(theta)
 	//
-	// these aren't in a directly implementable form so let's do some algebra
+	// these aren't in a directly implementable form so let's do some algebra.
+	// solve [2] for ddx:
 	//		ddx = (l*ddtheta - g*sin(theta))/cos(theta)
-	// plug this in to the first equation and rearrange
+	// substitute ddx in to [1]:
 	//		(M + m)*(l*ddtheta - g*sin(theta))/cos(theta) - m*l*ddtheta*cos(theta) + m*l*dtheta^2*sin(theta) = F
+	// rearrange and solve for ddtheta:
 	//		(M + m)*l*ddtheta - (M + m)*g*sin(theta) - m*l*ddtheta*cos(theta)^2 + m*l*dtheta^2*sin(theta)*cos(theta) = F*cos(theta)
 	//		((M + m)*l - m*l*cos(theta)^2)*ddtheta = F*cos(theta) + (M + m)*g*sin(theta) - m*l*dtheta^2*sin(theta)*cos(theta)
 	//		ddtheta = (F*cos(theta) + (M + m)*g*sin(theta) - m*l*dtheta^2*sin(theta)*cos(theta))/((M + m)*l - m*l*cos(theta)^2)
-	// now for the easy ones
+	// now for the easy ones:
 	//		dtheta = thetadot;
 	//		dx = xdot
 
