@@ -305,12 +305,9 @@ the output of the block is guaranteed to be available and this problem goes away
 ## file structure:
 - csim2/
   - contains the most important bits
-- cdemo/
-  - contains example code and tests
-- mex*/
-  - various matlab mex file functions enable using matlab as the front end
-- mexdemo/
-  - a .dll intended to be used with matlab and the mex functions
-- msim2/
-  - a matlab implementation of csim2/ mainly for testing/prototyping
-  
+- test/
+  - test code. All but test 1 should pass
+- example1/
+  - 1D mass spring damper example
+- example2/
+  - inverted pendulum example
