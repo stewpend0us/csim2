@@ -25,6 +25,7 @@
     <ClCompile Include="integrator.c" />
     <ClCompile Include="secondOrderSystem.c" />
     <ClCompile Include="solvers.c" />
+    <ClCompile Include="solvers_controller.c" />
     <ClCompile Include="transferFunction.c" />
   </ItemGroup>
   <ItemGroup>
