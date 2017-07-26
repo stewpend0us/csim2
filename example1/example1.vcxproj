@@ -118,9 +118,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cdemo.c" />
+    <ClCompile Include="example1.c" />
     <ClCompile Include="inverted_pendulum_example.c" />
-    <ClCompile Include="test.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csim2\csim2.vcxproj">
@@ -129,7 +128,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inverted_pendulum_example.h" />
-    <ClInclude Include="test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

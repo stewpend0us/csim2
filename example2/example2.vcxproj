@@ -118,7 +118,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cdemo.c" />
+    <ClCompile Include="example2.c" />
     <ClCompile Include="inverted_pendulum_example.c" />
   </ItemGroup>
   <ItemGroup>
