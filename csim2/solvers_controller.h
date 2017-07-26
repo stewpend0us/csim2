@@ -25,7 +25,7 @@ void euler_c
 	size_t numCommands,
 	double const * const C, // numSteps x numCommand inputs
 	size_t numInputs,
-	double const * const U, // numSteps x numInputs input values over time
+	double * const U, // numSteps x numInputs input values over time
 	size_t numOutputs,
 	double * const Y
 );
@@ -43,7 +43,7 @@ void rk4_c
 	size_t numCommands,
 	double const * const C, // numSteps x numCommands inputs
 	size_t numInputs,
-	double const * const U, // numSteps x numInputs input values over time
+	double * const U, // numSteps x numInputs input values over time
 	size_t numOutputs,
 	double * const Y
 );
