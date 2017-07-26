@@ -8,9 +8,12 @@ re-usable blocks and solvers for composing and running dynamic simulations.
 ## prerequisites
 Before this tool will make sense you'll need to know something about differential
 equations. I'll attempt to put it in a nutshell here but you may want to look around
-as well. A differential equation is an eqation that is a function of a variable
-and its derivatives. The classic (mechanical) example is a mass spring damper. The system
-looks like this:
+as well. If you are comfortable with differential equations and/or state space you
+can probably skip this section.
+
+A differential equation is an eqation that is a
+function of a variable and its derivatives. The classic (mechanical) example is a
+mass spring damper. The system looks like this:
 
                |----> +x
                 _______
@@ -20,6 +23,7 @@ looks like this:
            
 *This is supposed to look like a wall on the left connected to a weight on the right with a spring
 and a damper.*
+
 Where:
 - M is the mass (force due to acceleration = mass * acceleration)
 - K is the spring constant (spring force = spring constant * position)
@@ -31,43 +35,52 @@ Summing the forces results in the following differential equation:
 
     M*xdotdot + C*xdot + K*x = F
 
-I've used `dot` to indcate a time derivative of `x` so `xdot` is the first derivative of
+I've used `dot` to indcate a time derivative so `xdot` is the first derivative of
 position (velocity) and `xdotdot` is the seccond derivative of position (acceleration).
 
 In csim2 the differential equation is defined by the *physics* function for a block.
 The physics function calculates the state derivative as a function of state, input, and time.
-What are the state derivative and state? The unsatisfying answer is: the state
-derivative is the derivative of the state. Now we just need to figure out what the state is.
 
-Back to the example. Let's solve our equation for the highest order derivative that shows up:
+What are the state derivative and state? Start by identifying the highest and lowest
+order derivatives of x that appear in the differential equation. In our case the highest
+is `xdotdot` and the lowest is `x`. That means that `xdotdot` is definitely a state derivative
+and `x` is definitely a state. Everything in-between `xdotdot` and `x` are both state derivatives
+*and* states. 
+
+     state
+    derivative        state
+    [ xdotdot ]  ->  [ xdot ]
+	[ xdot    ]  ->  [ x    ]
+
+If it was confusing before hopefully now it's obvious why the state derivative is called the
+state derivative. It's simply the derivative of the state!
+
+Notice how `xdot` appears in both the state and state derivative. This isn't a problem but calling
+them the same thing can get messy. I fix this by prefixing the state derivative with a `d` instead
+of a suffix of `dot`. They have the same meaning but it allows me to easily identify the state derivative
+versus the state.
+
+     state
+    derivative        state
+    [ dxdot   ]  ->  [ xdot ]
+	[ dx      ]  ->  [ x    ]
+
+Now back to the example. In the physics function we need to calculate the state derivative. So let solve
+our differential equation for the highest order derivative of x:
 
     xdotdot = (F - C*xdot - K*x)/M
 
-I'm tempted to say that "x and all of its derivatives that show up on the right hand side are the state"
-which is true in this case but they don't actually have to show up to be a part of the state. If C were
-zero you could cross C\*xdot out of the equation but xdot would still need to be a part of the state. Another way
-to say it might be "x and all of its derivatives less than the highest order derivative are the state".
-This one is better and it would always work but it's not always nececary to keep x *and* all of its derivatives.
-If K were zero and you weren't interested in knowing the position of the mass you don't have to keep x as part of the state.
-
-In our example x and xdot show up so our system has two states (and two state derivatives). This could be
-implemented in a physics function something like this:
+All that's left is to implement the physics function. It will look something like this:
 
     // deconstruct the state vector into each state
-    double x = state[0];
-    double xdot = state[1];
-    // calculate the derivative of each state
-    dstate[0] = xdot; // dx = xdot
-    dstate[1] = (F - C*xdot - K*x)/M; // dxdot = xdotdot = (F - C*xdot - K*x)/M
-
-I this example the first state derivative is trivial. x and xdot are provided in the state vector.
-That means our state derivative will be dx (derivative of x) and dxdot (derivative of xdot). The 
-derivative of x is just xdot and the derivative of xdot is the acceleration we solved for above.
-
-One thing that helps me distinguish between the state derivative and the state is I always put the
-word `dot` after the variable when I'm talking about the state and I always put the letter `d` before
-the variable when I'm talking about the state derivative. It can be tempting to name both the state
-and the state derivative `xdot` for example but this gets confusing quickly.
+    double xdot = state[0];
+	double x =	  state[1];
+	// deconstruct the state derivative vector into each state derivative
+	double * dxdot = &dstate[0];
+	double * dx =	 &dstate[1];
+    // calculate each state derivative
+    *dx = xdot; // this is why I use the naming convention otherwise both variables would have the same name
+    *dxdot = (F - C*xdot - K*x) / M;
 
 ## blocks
 Blocks are the part of block diagrams that contain all of the dynamics. Connections
@@ -98,7 +111,7 @@ block __input__, and __y__ is the block __output__. In the general case:
     dx = f(t,x,u)
     y  = h(t,x,u)
 
-## strictly proper blocks
+## strictly proper blocks `csim2/StrictlyProperBlock.h`
 csim2 is __designed to only work with strictly proper blocks__. Strictly proper blocks look
 the same as general blocks but the relatonship between inputs and outputs is different.
 
@@ -139,7 +152,7 @@ The return values are:
 - block state *(optional)*
 - block dstate *(optional)*
 
-## controller solvers
+## solvers with controller `csim2/solvers_controller.c`
 Controller solvers do the same thing as standard solvers but instead of specifying the
 block input directly they are specified via a controller function and command. The block
 diagram looks like this:
