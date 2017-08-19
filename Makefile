@@ -1,7 +1,8 @@
 include config.mak
 
 DIRS = csim2 \
-	demo
+	example1 \
+	example2
 
 all: $(DIRS)
 .PHONY: $(DIRS)
