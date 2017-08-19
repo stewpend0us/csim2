@@ -21,8 +21,8 @@ mass spring damper. The system looks like this:
     >|         |   M   |---->F
     >|----C----|_______|
            
-*This is supposed to look like a wall on the left connected to a weight on the right with a spring
-and a damper.*
+*This is supposed to look like a wall on the left connected to a weight on the right with
+a spring and a damper.*
 
 Where:
 - M is the mass (force due to acceleration = mass * acceleration)
@@ -44,29 +44,29 @@ The physics function calculates the state derivative as a function of state, inp
 What are the state derivative and state? Start by identifying the highest and lowest
 order derivatives of x that appear in the differential equation. In our case the highest
 is `xdotdot` and the lowest is `x`. That means that `xdotdot` is definitely a state derivative
-and `x` is definitely a state. Everything in-between `xdotdot` and `x` are both state derivatives
-*and* states. 
+and `x` is definitely a state. Everything in-between `xdotdot` and `x` are both state
+derivatives *and* states. 
 
      state
     derivative        state
     [ xdotdot ]  ->  [ xdot ]
-	[ xdot    ]  ->  [ x    ]
+    [ xdot    ]  ->  [ x    ]
 
 If it was confusing before hopefully now it's obvious why the state derivative is called the
 state derivative. It's simply the derivative of the state!
 
-Notice how `xdot` appears in both the state and state derivative. This isn't a problem but calling
-them the same thing can get messy. I fix this by prefixing the state derivative with a `d` instead
-of a suffix of `dot`. They have the same meaning but it allows me to easily identify the state derivative
-versus the state.
+Notice how `xdot` appears in both the state and state derivative. This isn't a problem but
+calling them the same thing can get messy. I fix this by prefixing the state derivative with
+a `d` instead of a suffix of `dot`. They have the same meaning but it allows me to easily
+identify the state derivative versus the state.
 
      state
     derivative        state
     [ dxdot   ]  ->  [ xdot ]
-	[ dx      ]  ->  [ x    ]
+    [ dx      ]  ->  [ x    ]
 
-Now back to the example. In the physics function we need to calculate the state derivative. So let solve
-our differential equation for the highest order derivative of x:
+Now back to the example. In the physics function we need to calculate the state derivative.
+So let solve our differential equation for the highest order derivative of x:
 
     xdotdot = (F - C*xdot - K*x)/M
 
