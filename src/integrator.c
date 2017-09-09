@@ -13,6 +13,10 @@ static void physics
 	void const * const storage
 )
 {
+	(void)numInputs;
+	(void)time;
+	(void)state;
+	(void)storage;
 	memcpy(dState, input, numStates * sizeof(double));
 }
 
@@ -26,6 +30,9 @@ static void output
 	void const * const storage
 )
 {
+	(void)numOutputs;
+	(void)time;
+	(void)storage;
 	memcpy(output, state, numStates * sizeof(double));
 }
 
@@ -36,8 +43,8 @@ struct StrictlyProperBlock integrator(size_t const numBlocks)
 	b.numStates = numBlocks;
 	b.numInputs = numBlocks;
 	b.numOutputs = numBlocks;
-	b.f = physics;
-	b.h = output;
+	b.f = (PhysicsFunction)physics;
+	b.h = (OutputFunction)output;
 	b.storage = NULL;
 	return b;
 }
