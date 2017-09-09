@@ -1,24 +1,53 @@
-include config.mak
+CFLAGS=-g -O2 -Wall -Wextra -Isrc -DNDEBUG $(OPTFLAGS)
+LIBS=-ldl $(OPTLIBS)
+PREFIX?=/usr/local
 
-DIRS = csim2 \
-	example1 \
-	example2
+SOURCES=$(wildcard src/**/*.c src/*.c)
+OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 
-all: $(DIRS)
-.PHONY: $(DIRS)
+TEST_SRC=$(wildcard tests/*_tests.c)
+TESTS=$(patsubst %.c,%,$(TEST_SRT))
 
-demo: csim2
+TARGET=build/libcsim2.a
+SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 
-release:
-	$(MAKE) CONFIG=Release
+# The Target Build
+all: $(TARGET) $(SO_TARGET) tests
 
-$(DIRS):
-	$(MAKE) -C $@
+dev: CFLAGS=-g -Wall -Wextra -Isrc $(OPTFLAGS)
+dev: all
 
+$(TARGET): GFLAGS += -fPIC
+$(TARGET): build $(OBJECTS)
+	ar rcs $@ $(OBJECTS)
+	ranlib $@
+
+$(SO_TARGET): $(TARGET) $(OBJECTS)
+	$(CC) -shared -o $@ $(OBJECTS)
+
+build:
+	@mkdir -p build
+	@mkdir -p bin
+
+# The Unit Tests
+.PHONY: tests
+tests: CFLAGS += $(TARGET)
+tests: $(TESTS)
+	sh ./tests/runtests.sh
+
+# The Cleaner
 clean:
-	$(foreach DIR,$(DIRS),$(MAKE) -C $(DIR) $@;)
+	rm -rf build $(OBJECTS) $(TESTS)
+	rm -f tests/tests.log
+	find . -name "*.gc" -exec rm {} \;
+	rm -rf `find . -name "*.dSYM" -print`
 
-dist-clean:
-	if [ -d "$(BUILD_DIR)" ]; then \
-		rm -r "$(BUILD_DIR)"; \
-	fi
+# The Install
+install: all
+	install -d $(DESTDIR)/$(PREFIX)/lib/
+	install $(TARGET) $(DESTDIR)/$(PREFIX)/lib/
+
+# The Checker
+check:
+	@echo Files with potentially dangerous functions.
+	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(SOURCES) || true
