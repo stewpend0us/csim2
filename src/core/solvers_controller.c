@@ -1,3 +1,4 @@
+#include <string.h>
 #include "solvers_controller.h"
 
 void euler_c
