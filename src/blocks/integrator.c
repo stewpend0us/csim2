@@ -10,7 +10,7 @@ static void physics
 	double const time,
 	double const * const state,
 	double const * const input,
-	void const * const storage
+	void * const storage
 )
 {
 	(void)numInputs;
@@ -27,7 +27,7 @@ static void output
 	double * const output,
 	double const time,
 	double const * const state,
-	void const * const storage
+	void * const storage
 )
 {
 	(void)numOutputs;
@@ -43,8 +43,8 @@ struct StrictlyProperBlock integrator(size_t const numBlocks)
 	b.numStates = numBlocks;
 	b.numInputs = numBlocks;
 	b.numOutputs = numBlocks;
-	b.f = (PhysicsFunction)physics;
-	b.h = (OutputFunction)output;
+	b.f = physics;
+	b.h = output;
 	b.storage = NULL;
 	return b;
 }

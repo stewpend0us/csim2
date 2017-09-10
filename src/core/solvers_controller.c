@@ -19,6 +19,10 @@ void euler_c
 	double * const Y
 )
 {
+	(void)numStates;
+	(void)numInputs;
+	(void)numOutputs;
+
 	double * const temp_memory = malloc(block.numStates * 2 * sizeof(double));
 	if (!temp_memory)
 		return;
@@ -73,6 +77,10 @@ void rk4_c
 	double * const Y
 )
 {
+	(void)numStates;
+	(void)numInputs;
+	(void)numOutputs;
+	
 	double * const temp_memory = malloc(block.numStates * 6 * sizeof(double));
 	if (!temp_memory)
 		return;

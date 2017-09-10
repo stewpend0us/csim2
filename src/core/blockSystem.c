@@ -14,6 +14,8 @@ static void physics
 	struct BlockSystemStorage * const storage
 )
 {
+	(void)numStates;
+
 	size_t numBlocks = storage->numBlocks;
 	struct StrictlyProperBlock const * const blocks = storage->blocks;
 	double * const * const blockInputs = storage->blockInputs;
@@ -48,6 +50,8 @@ static void output
 	struct BlockSystemStorage * const storage
 )
 {
+	(void) numStates;
+
 	size_t const numBlocks = storage->numBlocks;
 	struct StrictlyProperBlock const * const blocks = storage->blocks;
 	double * const * const blockOutputs = storage->blockOutputs;
@@ -80,8 +84,8 @@ struct StrictlyProperBlock blockSystem
 	bstack.numStates = totalBlockStates;
 	bstack.numInputs = numSystemInputs;
 	bstack.numOutputs = numSystemOutputs;
-	bstack.f = physics;
-	bstack.h = output;
+	bstack.f = (PhysicsFunction)physics;
+	bstack.h = (OutputFunction)output;
 	bstack.storage = storage;
 	return bstack;
 }

@@ -85,6 +85,10 @@ void euler
 	double * const Y // numSteps x numOutputs output buffer
 )
 {
+	(void)numStates;
+	(void)numInputs;
+	(void)numOutputs;
+
 	double * const temp_memory = malloc(block.numStates * 2 * sizeof(double));
 	if (!temp_memory)
 		return;
@@ -130,6 +134,10 @@ void rk4
 	double * const Y
 )
 {
+	(void)numStates;
+	(void)numInputs;
+	(void)numOutputs;
+	
 	double * const temp_memory = malloc(block.numStates * 6 * sizeof(double));
 	if (!temp_memory)
 		return;

@@ -10,9 +10,13 @@ static void physics
 	double const time,
 	double const * const state,
 	double const * const input,
-	double const * const tau
+	void * const storage
 )
 {
+	(void)numInputs;
+	(void)time;
+	double const * const tau = storage;
+
 	for (size_t i = 0; i<numStates; i++)
 		dState[i] = (input[i] - state[i]) / tau[i];
 }
@@ -24,9 +28,13 @@ static void output
 	double * const output,
 	double const time,
 	double const * const state,
-	double const * const tau
+	void * const storage
 )
 {
+	(void)numOutputs;
+	(void)time;
+	(void)storage;
+	
 	memcpy(output, state, numStates * sizeof(double));
 }
 
