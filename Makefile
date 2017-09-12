@@ -1,4 +1,5 @@
-CFLAGS=-g -O2 -Wall -Wextra -Isrc -DNDEBUG -fPIC $(OPTFLAGS)
+INCLUDES=-Isrc -Isrc/core
+CFLAGS=-g -O2 -Wall -Wextra -DNDEBUG -fPIC $(INCLUDES) $(OPTFLAGS)
 LIBS=-ldl $(OPTLIBS)
 PREFIX?=/usr/local
 
@@ -14,7 +15,7 @@ SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 # The Target Build
 all: $(TARGET) $(SO_TARGET) tests
 
-dev: CFLAGS=-g -Wall -Wextra -Isrc $(OPTFLAGS)
+dev: CFLAGS=-g -Wall -Wextra $(INCLUDES) $(OPTFLAGS)
 dev: all
 
 $(TARGET): GFLAGS += -fPIC
