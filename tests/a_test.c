@@ -2,15 +2,13 @@
 #include <stdio.h>
 #include <time.h>
 #include <assert.h>
-#include "test.h"
-#include "../csim2/StrictlyProperBlock.h"
-#include "../csim2/integrator.h"
-#include "../csim2/firstOrderLag.h"
-#include "../csim2/solvers.h"
+#include "a_test.h"
+#include "StrictlyProperBlock.h"
+#include "integrator.h"
+#include "firstOrderLag.h"
+#include "solvers.h"
 
-#include "test.h"
-
-int main(int argc, char * argv[])
+int main(void)
 {
 	size_t const numBlocks = 2;
 

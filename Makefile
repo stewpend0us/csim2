@@ -1,13 +1,13 @@
 INCLUDES=-Isrc -Isrc/core
-CFLAGS=-g -O2 -Wall -Wextra -DNDEBUG -fPIC $(INCLUDES) $(OPTFLAGS)
-LIBS=-ldl $(OPTLIBS)
+LIBS=-ldl $(OTPLIBS)
+CFLAGS=-g -O2 -Wall -Wextra -DNDEBUG $(INCLUDES) $(LIBS) $(OPTFLAGS)
 PREFIX?=/usr/local
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 
 TEST_SRC=$(wildcard tests/*_tests.c)
-TESTS=$(patsubst %.c,%,$(TEST_SRT))
+TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
 TARGET=build/libcsim2.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
@@ -15,10 +15,10 @@ SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 # The Target Build
 all: $(TARGET) $(SO_TARGET) tests
 
-dev: CFLAGS=-g -Wall -Wextra $(INCLUDES) $(OPTFLAGS)
+dev: CFLAGS=-g -Wall -Wextra $(INCLUDES) $(LIBS) $(OPTFLAGS)
 dev: all
 
-$(TARGET): GFLAGS += -fPIC
+$(TARGET): CFLAGS += -fPIC
 $(TARGET): build $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
 	ranlib $@
@@ -39,7 +39,7 @@ tests: $(TESTS)
 # The Cleaner
 clean:
 	rm -rf build $(OBJECTS) $(TESTS)
-	rm -f tests/tests.log
+	rm -f tests/test.log
 	find . -name "*.gc" -exec rm {} \;
 	rm -rf `find . -name "*.dSYM" -print`
 
