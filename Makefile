@@ -1,6 +1,5 @@
-INCLUDES=-Isrc -Isrc/core -Isrc/blocks -Isrc/solvers
 LIBS=-ldl $(OTPLIBS)
-CFLAGS=-g -O2 -Wall -Wextra -DNDEBUG $(INCLUDES) $(LIBS) $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Wextra -DNDEBUG -Isrc $(OPTFLAGS)
 PREFIX?=/usr/local
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
@@ -15,7 +14,7 @@ SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 # The Target Build
 all: $(TARGET) $(SO_TARGET) tests
 
-dev: CFLAGS=-g -Wall -Wextra $(INCLUDES) $(LIBS) $(OPTFLAGS)
+dev: CFLAGS=-g -Wall -Wextra -Isrc $(OPTFLAGS)
 dev: all
 
 $(TARGET): CFLAGS += -fPIC
@@ -32,7 +31,7 @@ build:
 
 # The Unit Tests
 .PHONY: tests
-tests: CFLAGS += $(TARGET)
+tests: CFLAGS += -Isrc/blocks -Isrc/solvers $(LIBS) $(TARGET)
 tests: $(TESTS)
 	sh ./tests/runtests.sh
 
