@@ -1,4 +1,4 @@
-INCLUDES=-Isrc -Isrc/core
+INCLUDES=-Isrc -Isrc/core -Isrc/blocks -Isrc/solvers
 LIBS=-ldl $(OTPLIBS)
 CFLAGS=-g -O2 -Wall -Wextra -DNDEBUG $(INCLUDES) $(LIBS) $(OPTFLAGS)
 PREFIX?=/usr/local
@@ -6,7 +6,7 @@ PREFIX?=/usr/local
 SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 
-TEST_SRC=$(wildcard tests/*_tests.c)
+TEST_SRC=$(wildcard tests/*_test.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
 TARGET=build/libcsim2.a

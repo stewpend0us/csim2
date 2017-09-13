@@ -1,6 +1,6 @@
 #pragma once
 #include "StrictlyProperBlock.h"
-#include "blockSystemStorage.h"
+#include "blockSystem.h"
 
 struct StrictlyProperBlock * block_new(struct StrictlyProperBlock const stackb);
 void block_free(struct StrictlyProperBlock * heapb);
