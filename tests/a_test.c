@@ -231,11 +231,7 @@ void run_all_tests()
 		test_fail,
 		first_order_lag_step_test,
 	};
-	run_tests(sizeof(tests) / sizeof(test_function), tests);
-}
-
-void run_tests(size_t count, test_function * tests)
-{
+	size_t count = sizeof(tests) / sizeof(test_function);
 	printf("TESTS:\n");
 	for (size_t i = 0; i < count; i++)
 	{

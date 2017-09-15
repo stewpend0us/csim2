@@ -12,9 +12,10 @@ char * test_fail()
 	mu_assert(0,"this should fail");
 	return NULL;
 }
+
 char *all_tests()
 {
-	mu_suite_start();
+	mu_start();
 
 	mu_run_test(test_demo);
 	mu_run_test(test_fail);

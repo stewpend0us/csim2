@@ -25,6 +25,8 @@
 #define log_info(M, ...) fprintf(stderr, "[INFO] (%s:%d) " M "\n",\
         __FILE__, __LINE__, ##__VA_ARGS__)
 
+// following functions require "goto error:" defined in the function
+// just like assert except it doesn't get compiled away and jumps to error:
 #define check(A, M, ...) if(!(A)) {\
     log_err(M, ##__VA_ARGS__); errno=0; goto error; }
 
