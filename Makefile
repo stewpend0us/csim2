@@ -1,8 +1,9 @@
-LIBS=-ldl $(OTPLIBS)
-CFLAGS=-g -O2 -Wall -Wextra -DNDEBUG -Isrc $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Wextra -Isrc -DNDEBUG $(OPTFLAGS)
+LDFLAGS=-lm $(OTPLIBS)
 PREFIX?=/usr/local
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
+HEADERS=$(wildcard src/**/*.h src/*.h)
 OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 
 TEST_SRC=$(wildcard tests/*_test.c)
@@ -16,6 +17,8 @@ all: $(TARGET) $(SO_TARGET) tests
 
 dev: CFLAGS=-g -Wall -Wextra -Isrc $(OPTFLAGS)
 dev: all
+
+$(TESTS): $(TARGET) $(SO_TARGET)
 
 $(TARGET): CFLAGS += -fPIC
 $(TARGET): build $(OBJECTS)
@@ -40,7 +43,6 @@ clean:
 	rm -rf build $(OBJECTS) $(TESTS)
 	rm -f tests/test.log
 	find . -name "*.gc" -exec rm {} \;
-	rm -rf `find . -name "*.dSYM" -print`
 
 # The Install
 install: all
@@ -48,6 +50,7 @@ install: all
 	install $(TARGET) $(DESTDIR)/$(PREFIX)/lib/
 
 # The Checker
+BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)'
 check:
 	@echo Files with potentially dangerous functions.
-	@egrep '[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)' $(SOURCES) || true
+	@egrep $(BADFUNCS) $(SOURCES) || true
