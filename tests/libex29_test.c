@@ -2,7 +2,6 @@
 
 char *test_demo()
 {
-	printf("demo test\n");
 	mu_assert(1,"this is true");
 	return NULL;
 }
@@ -13,13 +12,8 @@ char * test_fail()
 	return NULL;
 }
 
-char *all_tests()
-{
-	mu_start();
 
-	mu_run_test(test_demo);
-	mu_run_test(test_fail);
-	return NULL;
-}
-
-RUN_TESTS(all_tests);
+RUN_TESTS(
+	test_demo,
+	test_fail,
+);
