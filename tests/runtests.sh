@@ -1,3 +1,4 @@
+echo ""
 echo "Running unit tests:"
 rm -f tests/test.log
 

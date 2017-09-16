@@ -1,14 +1,10 @@
 #include <stdbool.h>
-#include <stdio.h>
-#include <time.h>
-#include <assert.h>
-#include "a_test.h"
-#include "StrictlyProperBlock.h"
+#include "minunit.h"
 #include "integrator.h"
 #include "firstOrderLag.h"
 #include "solvers.h"
 
-int main(void)
+char * integrator_test()
 {
 	size_t const numBlocks = 2;
 
@@ -18,7 +14,7 @@ int main(void)
 	double const startTime = 5;
 	double const duration = 30;
 	double const stepTime = 10;
-	assert(stepTime >= startTime && stepTime < (startTime + duration - dt));
+	mu_assert(stepTime >= startTime && stepTime < (startTime + duration - dt), "bad arguments");
 	double const stepValue = 5;
 
 	size_t const numSteps = numTimeSteps(dt, duration);
@@ -47,48 +43,18 @@ int main(void)
 	}
 
 	euler(block, dt, numSteps, time, block.numStates, Xi, numBlocks, input, numBlocks, output);
-
-	printf("%10s%10s", "time", "input");
-	for (size_t i = 0; i < block.numOutputs; i++)
-		printf("%9s%zu", "output", i);
-	printf("\n");
-
-	for (size_t i = 0; i < numSteps; i++)
-	{
-		printf("%10.2f%10.2f", time[i], input[i*block.numInputs]);
-		for (size_t j = 0; j < block.numOutputs; j++)
-		{
-			printf("%10.4f", output[i*block.numOutputs + j]);
-		}
-		printf("\n");
-	}
-
-	printf("\nFinal row should be:\n");
-	printf("%10.2f%10.2f", (numSteps - 1)*dt + startTime, stepValue);
+	size_t const last_step = numSteps - 1;
+	mu_assert(last_step*dt + startTime == time[last_step], "Final time");
+	mu_assert(stepValue == input[last_step*block.numInputs],"Final step value");
 	for (size_t i = 0; i < block.numOutputs; i++)
 	{
-		printf("%10.4f", (startTime + duration - stepTime)*stepValue + Xi[i]);
+		mu_assert(((startTime + duration - stepTime)*stepValue + Xi[i]) == output[last_step*block.numOutputs + i],"Final output");
 	}
-	printf("\n\n\n");
-
-	run_all_tests();
-	printf("press enter\n");
-	getchar();
+	
+	return NULL;
 }
 
 #define tol 1e-10
-
-static char * test_pass()
-{
-	assert_is_true(true, "should pass");
-	return NULL;
-}
-
-static char * test_fail()
-{
-	assert_is_true(false, "should fail");
-	return NULL;
-}
 
 static bool is_increasing(size_t const numSteps, double const * const values)
 {
@@ -206,43 +172,24 @@ static char * first_order_lag_step_test()
 	free(eulerY);
 	free(rk4Y);
 
-	assert_is_true(euler_results.increasing,	"euler: every output should be greater than the previous output");
-	assert_is_true(euler_results.right_size,	"euler: every output should be smaller than the input");
-	assert_is_true(euler_results.initial_value, "euler: the initial output should be equal to the initial condition");
-	assert_is_true(euler_results.final_value,	"euler: the final value should be within 'tol' of the input value");
-	assert_is_true(euler_results.right_trend,	"euler: the difference between outputs should be getting smaller");
+	mu_assert(euler_results.increasing,		"euler: every output should be greater than the previous output");
+	mu_assert(euler_results.right_size,		"euler: every output should be smaller than the input");
+	mu_assert(euler_results.initial_value, 	"euler: the initial output should be equal to the initial condition");
+	mu_assert(euler_results.final_value,	"euler: the final value should be within 'tol' of the input value");
+	mu_assert(euler_results.right_trend,	"euler: the difference between outputs should be getting smaller");
 
-	assert_is_true(rk4_results.increasing,		"rk4: every output should be greater than the previous output");
-	assert_is_true(rk4_results.right_size,		"rk4: every output should be smaller than the input");
-	assert_is_true(rk4_results.initial_value,	"rk4: the initial output should be equal to the initial condition");
-	assert_is_true(rk4_results.final_value,		"rk4: the final value should be within 'tol' of the input value");
-	assert_is_true(rk4_results.right_trend,		"rk4: the difference between outputs should be getting smaller");
+	mu_assert(rk4_results.increasing,		"rk4: every output should be greater than the previous output");
+	mu_assert(rk4_results.right_size,		"rk4: every output should be smaller than the input");
+	mu_assert(rk4_results.initial_value,	"rk4: the initial output should be equal to the initial condition");
+	mu_assert(rk4_results.final_value,		"rk4: the final value should be within 'tol' of the input value");
+	mu_assert(rk4_results.right_trend,		"rk4: the difference between outputs should be getting smaller");
 
-	assert_is_true(rk4_smaller_than_euler, 		"rk4 is expected to have a smaller value than euler");
+	mu_assert(rk4_smaller_than_euler, 		"rk4 is expected to have a smaller value than euler");
 
 	return NULL;
 }
 
-void run_all_tests()
-{
-	test_function tests[] = 
-	{
-		test_pass,
-		test_fail,
-		first_order_lag_step_test,
-	};
-	size_t count = sizeof(tests) / sizeof(test_function);
-	printf("TESTS:\n");
-	for (size_t i = 0; i < count; i++)
-	{
-		clock_t start = clock();
-		char * result = tests[i]();
-		clock_t stop = clock();
-		double time_spent = (double)(stop - start) / CLOCKS_PER_SEC * 1000;
-		printf("%4zu of %zu took %5.2f ms: ", i+1, count, time_spent);
-		if (result)
-			printf("FAILED %s\n", result);
-		else
-			printf("passed\n");
-	}
-}
+RUN_TESTS(
+	integrator_test,
+	first_order_lag_step_test,
+);
