@@ -14,3 +14,13 @@ So here's me being optimistic:
 2. Program
 3. **Rebase on `develop` branch and resolve any conflicts _before submitting a pull request!_**
 4. Submit a pull request to the `develop` branch.
+
+## TODO
+
+* write more tests (especially for blockSystem)
+* install dbg.h macros in the solvers (and blocks?) to make them more user friendly
+* write some "real" examples
+* get visual studio projects setup (consider using visual studio code instead)
+* pass "output" as an input to physics function
+* add a few more comments?
+* make a simple array type and convert everything to use them

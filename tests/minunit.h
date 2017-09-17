@@ -27,14 +27,17 @@ typedef char*(*test_function)(); //return 0 if the test passed otherwise return 
 		char * result = tests[i]();\
 		clock_t end_time = clock();\
         double time_spent = (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000;\
-        char * pass_fail = "PASS";\
+        char * pass_fail;\
         if (result)\
         {\
             pass_fail = "FAIL";\
             fail_count++;\
         }\
         else\
+        {\
+            pass_fail = "PASS";\
             result = "";\
+        }\
         printf("%4zu/%zu [%s] %7.2fms (%.*s) %s\n",\
             i+1, count, pass_fail, time_spent, (int)(end-start), start, result);\
         start = end+1;\
