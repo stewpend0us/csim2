@@ -1,4 +1,5 @@
 #include <string.h>
+#include "dbg.h"
 #include "solvers_controller.h"
 
 void euler_c
@@ -24,8 +25,7 @@ void euler_c
 	(void)numOutputs;
 
 	double * const temp_memory = malloc(block.numStates * 2 * sizeof(double));
-	if (!temp_memory)
-		return;
+	check_mem(temp_memory);
 
 	double * const currentState = &temp_memory[0 * block.numStates];
 	double * const nextState = currentState; //in this case it's ok that these are the same block of memory
@@ -56,6 +56,7 @@ void euler_c
 	control(block.numInputs, block.numOutputs, numCommands, time[i], currentInput, currentOutput, currentCommand, controlStorage);
 	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
 
+error:
 	free(temp_memory);
 }
 
@@ -82,8 +83,7 @@ void rk4_c
 	(void)numOutputs;
 	
 	double * const temp_memory = malloc(block.numStates * 6 * sizeof(double));
-	if (!temp_memory)
-		return;
+	check_mem(temp_memory);
 
 	double * const currentState = &temp_memory[0 * block.numStates];
 	double * const nextState = &temp_memory[1 * block.numStates];
@@ -116,5 +116,6 @@ void rk4_c
 	control(block.numInputs, block.numOutputs, numCommands, time[i], currentInput, currentOutput, currentCommand, controlStorage);
 	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
 
+error:
 	free(temp_memory);
 }

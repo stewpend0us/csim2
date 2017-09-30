@@ -1,6 +1,6 @@
-#include <math.h>
+
 #include <string.h>
-#include <assert.h>
+#include "dbg.h"
 #include "solvers.h"
 
 void euler_f_step
@@ -48,11 +48,11 @@ void rk4_f_step
 	double const nextTime = currentTime + dt;
 	double * const A = currentdState;
 
-	assert(currentState != nextState);
-	assert(A != B && A != C && A != D && A != nextState && A != currentState);
-	assert(B != C && B != D && B != nextState && B != currentState);
-	assert(C != D && C != nextState && C != currentState);
-	assert(D != nextState && D != currentState);
+	check_debug(currentState != nextState, "current state cannot be the same location in memory");
+	check_debug(A != B && A != C && A != D && A != nextState && A != currentState, "B, C, D, nextState, and currentState cannot be the same location as A in memory");
+	check_debug(B != C && B != D && B != nextState && B != currentState, "C, D, nextState, and currentState cannot be the same location as B in memory");
+	check_debug(C != D && C != nextState && C != currentState, "D, C, nextState, and currentState cannot be the same location as C in memory");
+	check_debug(D != nextState && D != currentState, "nextState, and currentState cannot be the same location as D in memory");
 
 	f(numStates, numInputs, A, currentTime, currentState, currentInput, storage);
 	for (i = 0; i < numStates; i++)
@@ -69,6 +69,9 @@ void rk4_f_step
 	f(numStates, numInputs, D, nextTime, nextState, nextInput, storage);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = currentState[i] + dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
+	
+error:
+	return;
 }
 
 void euler
@@ -90,13 +93,11 @@ void euler
 	(void)numOutputs;
 
 	double * const temp_memory = malloc(block.numStates * 2 * sizeof(double));
-	if (!temp_memory)
-		return;
+	check_mem(temp_memory);
 	
 	double * const currentState = &temp_memory[0 * block.numStates];
 	double * const nextState = currentState; //in this case it's ok that these are the same block of memory
 	double * const currentdState = &temp_memory[1 * block.numStates];
-
 	
 	double const * currentInput;
 	double * currentOutput;
@@ -116,6 +117,7 @@ void euler
 	currentOutput = &Y[i*block.numOutputs];
 	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
 
+error:
 	free(temp_memory);
 }
 
@@ -139,8 +141,7 @@ void rk4
 	(void)numOutputs;
 	
 	double * const temp_memory = malloc(block.numStates * 6 * sizeof(double));
-	if (!temp_memory)
-		return;
+	check_mem(temp_memory);
 
 	double * const currentState = &temp_memory[0 * block.numStates];
 	double * const nextState = &temp_memory[1 * block.numStates];
@@ -170,11 +171,13 @@ void rk4
 
 	currentOutput = &Y[i*block.numOutputs];
 	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
-
+error:
 	free(temp_memory);
 }
 
 
+
+#include <math.h>
 
 size_t numTimeSteps
 (
