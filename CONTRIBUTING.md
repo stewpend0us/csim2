@@ -22,5 +22,5 @@ So here's me being optimistic:
 * write some "real" examples
 * get visual studio projects setup (consider using visual studio code instead)
 * pass "output" as an input to physics function
-* add a few more comments?
-* make a simple array type and convert everything to use them
+* add a few more comments
+* (maybe) make a simple array type and convert everything to use them

@@ -38,7 +38,7 @@ typedef char*(*test_function)(); //return 0 if the test passed otherwise return 
             pass_fail = "PASS";\
             result = "";\
         }\
-        printf("%4zu/%zu [%s] %7.2fms (%.*s) %s\n",\
+        printf("%4zu/%zu [%s] %8.6fms (%.*s) %s\n",\
             i+1, count, pass_fail, time_spent, (int)(end-start), start, result);\
         start = end+1;\
         end = strchr(start,',');\
