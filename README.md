@@ -111,7 +111,7 @@ block __input__, and __y__ is the block __output__. In the general case:
     dx = f(t,x,u)
     y  = h(t,x,u)
 
-## strictly proper blocks `csim2/StrictlyProperBlock.h`
+## strictly proper blocks `StrictlyProperBlock.h`
 csim2 is __designed to only work with strictly proper blocks__. Strictly proper blocks look
 the same as general blocks but the relatonship between inputs and outputs is different.
 
@@ -122,7 +122,7 @@ There is no direct connection between the outputs and inputs. This compromise is
 drastically simplify composing blocks together (I'll talk about why this works more in 
 the section on composing blocks).
 
-## solvers `csim2/solvers.c`
+## solvers `solvers.c`
 Solvers only ever deal with an individual block (although the block may be composed of
 several other blocks). Their job is to integrate the state derivative and produce the next state.
 This is what the block and solver look like:
@@ -152,7 +152,7 @@ The return values are:
 - block state *(optional)*
 - block dstate *(optional)*
 
-## solvers with controller `csim2/solvers_controller.c`
+## solvers with controller `solvers_controller.c`
 Controller solvers do the same thing as standard solvers but instead of specifying the
 block input directly they are specified via a controller function and command. The block
 diagram looks like this:
@@ -188,7 +188,7 @@ function should be run or not and then call it accordingly.
 
 ## implementing blocks 
 Blocks are implemented by writing a function that returns a `StrictlyProperBlock`
-struct (`csim2/StrictlyProperBlock.h`).
+struct (`StrictlyProperBlock.h`).
 
 The struct contains the properties:
 - `numStates` number of States (size of the state and dstate array)
@@ -236,12 +236,38 @@ Blocks can be composed together to form one larger block. Here's a simple exampl
                 |_________________________|
 
 Here we've taken the trivial example from above and enclosed it in it's
-own block so that it can be solved (remember the solvers only operate on one block).
+own block so that it can be solved (remember the solvers only operate on a single block).
+To achieve this using csim2 you would construct a `blockSystem`
 
-## blockSystem `csim2/blockSystem.c`
+## blockSystem `blockSystem.c`
 The `blockSystem` block enables the composition of other blocks. Unlike implementing a new
 block the `blockSystem` block is already implemented. Instead you have to construct a
-`blockSystemStorage` struct and use that to construct a `blockSystem` block.
+`blockSystemStorage` struct which contains functions for calculating the input to all of the
+contained block and for calculating the output of the entire block system.
+
+Here's a more complete diagram:
+
+                 ________________________________________
+                |           containing block             |
+                |      ___________                       |
+                |     | contained |      ____________    |
+                |     |  blocks   |     | calcSystem |   |      system
+                |  .->|u         y|--.--|   Output   |-->|----> output
+                |  |  |___________|  |  |____________|   |
+                |  |   ___________   |                   |
+                |  |  | calcBlock |  |                   |
+     system     |  '--|  Inputs   |<-'                   |
+     input ---->|---->|___________|                      |
+                |________________________________________|
+
+This is where the distinction between general blocks and strictly proper blocks comes in.
+If we were using general blocks and the output were a function of state and input `y = h(t,x,u)`
+then there would be an algebraic loop between the contained blocks and the calcBlockInputs function.
+Say we need to calculate the output of the block. First we will need the state which we have and the input
+which we don't have. So we'd need to follow the signal back to the calcBlockInputs function which requires
+the block output as input. Of cource the block output is what we were after in the first place so that's
+not going to work without getting fancy. Thankfully we're using strictly proper blocks `y = h(t,x)` so 
+the output of the block is guaranteed to be available and this problem goes away.
 
 The blockSystemStorage struct contains:
 - `numBlocks` number of blocks the blockSystem contains
@@ -276,38 +302,4 @@ The inputs to the calcSystemOutput function are:
 - `systemStorage` same as above
 
 The calcSystemOutput makes the connection from the contained blocks output to the blockSystem
-output. 
-
-Here's a diagram to hopefully clear this up:
-
-                 ________________________________________
-                |           containing block             |
-                |      ___________                       |
-                |     | contained |      ____________    |
-                |     |  blocks   |     | calcSystem |   |      system
-                |  .->|u         y|--.--|   Output   |-->|----> output
-                |  |  |___________|  |  |____________|   |
-                |  |   ___________   |                   |
-                |  |  | calcBlock |  |                   |
-    system      |  '--|  Inputs   |<-'                   |
-     input ---->|---->|___________|                      |
-                |________________________________________|
-
-This is where the distinction between general blocks and strictly proper blocks comes in.
-If we were using general blocks and the output were a function of state and input `y = h(t,x,u)`
-then there would be an algebraic loop between the contained blocks and the calcBlockInputs function.
-Say we need to calculate the output of the block. First we will need the state which we have and the input
-which we don't have. So we'd need to follow the signal back to the calcBlockInputs function which requires
-the block output as input. Of cource the block output is what we were after in the first place so that's
-not going to work without getting fancy. Thankfully we're using strictly proper blocks `y = h(t,x)` so 
-the output of the block is guaranteed to be available and this problem goes away.
-
-## file structure:
-- csim2/
-  - contains the most important bits
-- test/
-  - test code. All but test 1 should pass
-- example1/
-  - 1D mass spring damper example
-- example2/
-  - inverted pendulum example
+output.
