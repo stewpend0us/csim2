@@ -15,10 +15,14 @@ SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 # The Target Build
 all: $(TARGET) $(SO_TARGET) tests
 
+dbg: 
+	@echo $(CC) $(CFLAGS) $(OBJECTS) -o $@
+
 dev: CFLAGS=-g -Wall -Wextra -Isrc $(OPTFLAGS)
 dev: all
 
 $(TESTS): $(TARGET) $(SO_TARGET)
+	$(CC) $(CFLAGS) $(TEST_SRC) -o $@ $(LDFLAGS)
 
 $(TARGET): CFLAGS += -fPIC
 $(TARGET): build $(OBJECTS)
