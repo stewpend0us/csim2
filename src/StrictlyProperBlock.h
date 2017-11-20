@@ -1,21 +1,26 @@
 #pragma once
 #include <stdlib.h>
 
+struct BlockInfo
+{
+	size_t numStates;
+	size_t numInputs;
+	size_t numOutputs;
+	void * storage;
+}
+
 // update dState as a function of time, state, input, and storage
 typedef void(*PhysicsFunction)(
-	size_t const numStates,
-	size_t const numInputs,
+	struct BlockInfo const * const info,
 	double * const dState,
 	double const time,
 	double const * const state,
-	double const * const input,
-	void * const storage
+	double const * const input
 	);
 
 // update output as a function of time, state, and storage
 typedef void(*OutputFunction)(
-	size_t const numStates,
-	size_t const numOutputs,
+	struct BlockInfo const * const info,
 	double * const output,
 	double const time,
 	double const * const state,
@@ -25,10 +30,7 @@ typedef void(*OutputFunction)(
 // StrictlyProperBlock data
 struct StrictlyProperBlock
 {
-	size_t numStates;
-	size_t numInputs;
-	size_t numOutputs;
+	struct BlockInfo const info;
 	PhysicsFunction f;
 	OutputFunction h;
-	void * storage;
 };
