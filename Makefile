@@ -1,13 +1,12 @@
 CFLAGS=-g -O2 -Wall -Wextra -Isrc -DNDEBUG $(OPTFLAGS)
-LDFLAGS=-lm $(OTPLIBS)
+LDFLAGS=$(OTPLIBS)
 PREFIX?=/usr/local
 
-SOURCES=$(wildcard src/**/*.c src/*.c)
-HEADERS=$(wildcard src/**/*.h src/*.h)
-OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
+SRC_C=$(wildcard src/**/*.c src/*.c)
+SRC_O=$(patsubst %.c,%.o,$(SRC_C))
 
-TEST_SRC=$(wildcard tests/*_test.c)
-TESTS=$(patsubst %.c,%,$(TEST_SRC))
+TEST_C=$(wildcard tests/**/*_test.c tests/*_test.c)
+TEST=$(patsubst %.c,%,$(TEST_C))
 
 TARGET=build/libcsim2.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
@@ -15,22 +14,20 @@ SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 # The Target Build
 all: $(TARGET) $(SO_TARGET) tests
 
-dbg: 
-	@echo $(CC) $(CFLAGS) $(OBJECTS) -o $@
-
 dev: CFLAGS=-g -Wall -Wextra -Isrc $(OPTFLAGS)
 dev: all
 
-$(TESTS): $(TARGET) $(SO_TARGET)
-	$(CC) $(CFLAGS) $(TEST_SRC) -o $@ $(LDFLAGS)
+$(TEST): LDFLAGS += -lm
+$(TEST): $(TARGET) $(SO_TARGET)
+	$(CC) $(CFLAGS) -o $@ $@.c $(SRC_O) $(LDFLAGS)
 
 $(TARGET): CFLAGS += -fPIC
-$(TARGET): build $(OBJECTS)
-	ar rcs $@ $(OBJECTS)
+$(TARGET): build $(SRC_O)
+	ar rcs $@ $(SRC_O)
 	ranlib $@
 
-$(SO_TARGET): $(TARGET) $(OBJECTS)
-	$(CC) -shared -o $@ $(OBJECTS)
+$(SO_TARGET): $(TARGET) $(SRC_O)
+	$(CC) -shared -o $@ $(SRC_O)
 
 build:
 	@mkdir -p build
@@ -38,13 +35,13 @@ build:
 
 # The Unit Tests
 .PHONY: tests
-tests: CFLAGS += -Isrc/blocks -Isrc/solvers $(LIBS) $(TARGET)
-tests: $(TESTS)
+tests: CFLAGS += -Isrc/blocks -Isrc/solvers $(TARGET)
+tests: $(TEST)
 	sh ./tests/runtests.sh
 
 # The Cleaner
 clean:
-	rm -rf build $(OBJECTS) $(TESTS)
+	rm -rf build $(SRC_O) $(TEST)
 	rm -f tests/test.log
 	find . -name "*.gc" -exec rm {} \;
 
@@ -57,4 +54,4 @@ install: all
 BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)'
 check:
 	@echo Files with potentially dangerous functions.
-	@egrep $(BADFUNCS) $(SOURCES) || true
+	@egrep $(BADFUNCS) $(SRC_C) || true
