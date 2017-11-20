@@ -17,10 +17,13 @@ So here's me being optimistic:
 
 ## TODO
 
-* write more tests (especially for blockSystem)
+* write "is valid block" test and run it on all block types
+* write solver specific tests to verify that they...work? aka have some basic standard behaviors
+* each solver type (euler, rk4) should have a "single step" function to simplify (or hopefully generalize) the creation of "custom" solver types (real-time, controller, known input)
+* put all of the data in struct StrictlyProperBlock on it's own struct that can be passed into the functions rather than having the huge parameter lists
+* add a "void util(time, input, output, state??)" function to all blocks
 * install dbg.h macros in the solvers (and blocks?) to make them more user friendly
 * write some "real" examples
 * get visual studio projects setup (consider using visual studio code instead)
-* pass "output" as an input to physics function
+
 * add a few more comments
-* (maybe) make a simple array type and convert everything to use them
