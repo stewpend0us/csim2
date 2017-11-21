@@ -171,9 +171,9 @@ diagram looks like this:
            |    |___________|    |
           \      ___________      \
            |    |           |    |
-           '----|o         f|<---'
+           '----|c         f|<---'
                 |  control  |
-    command---->|c          |
+    command---->|i          |
                 |___________|
               
 In this case the solver functions also return the output of the controller.
