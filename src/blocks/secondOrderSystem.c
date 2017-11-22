@@ -1,5 +1,4 @@
-#include <string.h>
-#include <assert.h>
+#include <dbg.h>
 #include "secondOrderSystem.h"
 
 static void physics
@@ -11,9 +10,10 @@ static void physics
 	double const * const input
 )
 {
-	(void)numStates;
 	(void)time;
-	struct secondOrderSystemStorage const * const so_storage = storage;
+	size_t const numInputs = info->numInputs;
+
+	struct secondOrderSystemStorage const * const so_storage = info->storage;
 
 	double const * const state1 = state;
 	double const * const state2 = state + numInputs;
@@ -34,29 +34,31 @@ static void output
 	double const * const state
 )
 {
-	(void)numStates;
 	(void)time;
-	(void)storage;
-
-	double const * const state1 = state;
+	size_t const numOutputs = info->numOutputs;
+	double const * const state1 = state; // just a reminder that there are 2 groups of state (2nd order)
 	memcpy(output, state1, numOutputs * sizeof(double));
 }
 
 struct StrictlyProperBlock secondOrderSystem(size_t const numBlocks, struct secondOrderSystemStorage * const so_storage)
 {
-	assert(numBlocks > 0);
+	check(numBlocks > 0,"numBlocks must be greater than zero");
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		assert(so_storage[i].omega_n > 0);
-		assert(so_storage[i].zeta > 0);
+		check(so_storage[i].omega_n > 0,"so_storage[%zu].omega_n must be greater than zero",i);
+		check(so_storage[i].zeta > 0,"so_storage[%zu].zeta must be greater than zero",i);
 	}
-
-	struct StrictlyProperBlock b;
-	b.numInputs = numBlocks;
-	b.numOutputs = numBlocks;
-	b.numStates = 2 * numBlocks;
-	b.storage = so_storage;
-	b.f = physics;
-	b.h = output;
-	return b;
+	return (struct StrictlyProperBlock)
+	{
+		{
+			2*numBlocks,
+			numBlocks,
+			numBlocks,
+			so_storage,
+		},
+		physics,
+		output,
+	};
+error:
+	return NULL_StritclyProperBlock;
 }
