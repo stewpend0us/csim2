@@ -41,7 +41,8 @@ So here's me being optimistic:
 ### blocks
 
 * implement `reducedSystem` block (so you can quickly zero out states and debug blocks)
-* implement a "state space" block
+* implement a `stateSpace` block
+* implement a parallel `blockSystem`
 
 ### examples
 
