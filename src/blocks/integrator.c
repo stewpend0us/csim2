@@ -1,50 +1,46 @@
-#include <string.h>
-#include <assert.h>
+#include <dbg.h>
 #include "integrator.h"
 
 static void physics
 (
-	size_t const numStates,
-	size_t const numInputs,
+	struct StrictlyProperBlockInfo const * const info,
 	double * const dState,
 	double const time,
 	double const * const state,
-	double const * const input,
-	void * const storage
+	double const * const input
 )
 {
-	(void)numInputs;
 	(void)time;
 	(void)state;
-	(void)storage;
-	memcpy(dState, input, numStates * sizeof(double));
+	memcpy(dState, input, info->numStates * sizeof(double));
 }
 
 static void output
 (
-	size_t const numStates,
-	size_t const numOutputs,
+	struct StrictlyProperBlockInfo const * const info,
 	double * const output,
 	double const time,
-	double const * const state,
-	void * const storage
+	double const * const state
 )
 {
-	(void)numOutputs;
 	(void)time;
-	(void)storage;
-	memcpy(output, state, numStates * sizeof(double));
+	memcpy(output, state, info->numStates * sizeof(double));
 }
 
 struct StrictlyProperBlock integrator(size_t const numBlocks)
 {
-	assert(numBlocks > 0);
-	struct StrictlyProperBlock b;
-	b.numStates = numBlocks;
-	b.numInputs = numBlocks;
-	b.numOutputs = numBlocks;
-	b.f = physics;
-	b.h = output;
-	b.storage = NULL;
-	return b;
+	
+	check(numBlocks > 0, "numBlocks must be greater than 0");
+	return (struct StrictlyProperBlock) {
+		{
+			numBlocks,
+			numBlocks,
+			numBlocks,
+			NULL,
+		},
+		physics,
+		output,
+	};
+error:
+	return NULL_StritclyProperBlock;
 }

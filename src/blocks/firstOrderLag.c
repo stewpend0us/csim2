@@ -4,13 +4,11 @@
 
 static void physics
 (
-	size_t const numStates,
-	size_t const numInputs,
+	struct StrictlyProperBlockInfo const * const info,
 	double * const dState,
 	double const time,
 	double const * const state,
-	double const * const input,
-	void * const storage
+	double const * const input
 )
 {
 	(void)numInputs;
@@ -23,12 +21,10 @@ static void physics
 
 static void output
 (
-	size_t const numStates,
-	size_t const numOutputs,
+	struct StrictlyProperBlockInfo const * const info,
 	double * const output,
 	double const time,
-	double const * const state,
-	void * const storage
+	double const * const state
 )
 {
 	(void)numOutputs;

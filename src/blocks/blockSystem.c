@@ -5,13 +5,11 @@
 // BlockSystem
 static void physics
 (
-	size_t const numStates,
-	size_t const numInputs,
+	struct StrictlyProperBlockInfo const * const info,
 	double * const dState,
 	double const time,
 	double const * const state,
-	double const * const input,
-	struct BlockSystemStorage * const storage
+	double const * const input
 )
 {
 	(void)numStates;
@@ -42,12 +40,10 @@ static void physics
 
 static void output
 (
-	size_t const numStates,
-	size_t const numOutputs,
+	struct StrictlyProperBlockInfo const * const info,
 	double * const output,
 	double const time,
-	double const * const state,
-	struct BlockSystemStorage * const storage
+	double const * const state
 )
 {
 	(void) numStates;

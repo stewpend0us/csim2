@@ -29,7 +29,9 @@ typedef void(*OutputFunction)(
 // StrictlyProperBlock data
 struct StrictlyProperBlock
 {
-	struct StrictlyProperBlockInfo const info;
-	PhysicsFunction const f;
-	OutputFunction const h;
+	struct StrictlyProperBlockInfo info;
+	PhysicsFunction f;
+	OutputFunction h;
 };
+
+#define NULL_StritclyProperBlock ((struct StrictlyProperBlock){{0,0,0,NULL},NULL,NULL})

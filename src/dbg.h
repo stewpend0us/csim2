@@ -36,7 +36,7 @@
 // use this after calling malloc
 #define check_mem(A) check((A), "Out of memory.")
 
-// this seems like a bad idea? use log_err or debug instead
+// this does nothing when NDEBUG is defined
 #define check_debug(A, M, ...) if(!(A)) {\
          debug(M, ##__VA_ARGS__); errno=0; goto error; }
 
