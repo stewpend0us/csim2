@@ -31,7 +31,8 @@ struct StrictlyProperBlock integrator(size_t const numBlocks)
 {
 	
 	check(numBlocks > 0, "numBlocks must be greater than 0");
-	return (struct StrictlyProperBlock) {
+	return (struct StrictlyProperBlock)
+	{
 		{
 			numBlocks,
 			numBlocks,
