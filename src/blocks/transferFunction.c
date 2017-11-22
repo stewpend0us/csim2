@@ -1,4 +1,3 @@
-#include <string.h>
 #include <dbg.h>
 #include "transferFunction.h"
 

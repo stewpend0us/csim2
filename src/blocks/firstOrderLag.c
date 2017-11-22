@@ -1,5 +1,4 @@
-#include <string.h>
-#include <assert.h>
+#include <dbg.h>
 #include "firstOrderLag.h"
 
 static void physics
@@ -11,9 +10,9 @@ static void physics
 	double const * const input
 )
 {
-	(void)numInputs;
 	(void)time;
-	double const * const tau = storage;
+	size_t const numStates = info->numStates;
+	double const * const tau = info->storage;
 
 	for (size_t i = 0; i<numStates; i++)
 		dState[i] = (input[i] - state[i]) / tau[i];
@@ -27,27 +26,29 @@ static void output
 	double const * const state
 )
 {
-	(void)numOutputs;
 	(void)time;
-	(void)storage;
-	
+	size_t const numStates = info->numStates;	
 	memcpy(output, state, numStates * sizeof(double));
 }
 
 struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau)
 {
-	assert(numBlocks > 0);
+	check(numBlocks > 0,"numBlocks must be greater than zero");
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		assert(tau[i] > 0);
+		check(tau[i] > 0, "tau[%zu] must be greater than zero",i);
 	}
-
-	struct StrictlyProperBlock b;
-	b.numInputs = numBlocks;
-	b.numOutputs = numBlocks;
-	b.numStates = numBlocks;
-	b.storage = tau;
-	b.f = physics;
-	b.h = output;
-	return b;
+	return (struct StrictlyProperBlock)
+	{
+		{
+			numBlocks,
+			numBlocks,
+			numBlocks,
+			tau,
+		},
+		physics,
+		output,
+	};
+error:
+	return NULL_StritclyProperBlock;
 }
