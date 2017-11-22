@@ -34,26 +34,26 @@ void rk4_f_step
 // euler solver
 void euler
 (
-	struct StrictlyProperBlock const block,
+	struct StrictlyProperBlock const * const block,
+	double * const Y, // numSteps x numOutputs output buffer
 	double const dt, //time step
-	size_t numSteps, //size of time vector
-	double const * const time, //time vector
-	double const * const Xi, // numStates x 1 initial conditions vector
-	double const * const U, // numSteps x numInputs inputs
-	double * const Y
+	size_t const numSteps,
+	double const * const time, // numSteps x 1 time vector
+	double const * const Xi, // numStates x 1 initial conditions vector (will be over-written)
+	double const * const U // numSteps x numInputs input values over time
 );
 
 // rk4 solver
 void rk4
 (
-	struct StrictlyProperBlock const block,
+	struct StrictlyProperBlock const * const block,
+	double * const Y,
 	double const dt, //time step
 	size_t numSteps, //size of time vector
 	double const * const time, //time vector
 	double const * const Xi, // numStates x 1 initial conditions vector
 	double const * const U1, // numSteps x numInputs inputs
-	double const * const U2, // numSteps x numInputs inputs
-	double * const Y
+	double const * const U2 // numSteps x numInputs inputs
 );
 
 // other:

@@ -5,7 +5,7 @@
 
 void euler_f_step
 (
-	struct BlockInfo const * const info,
+	struct StrictlyProperBlockInfo const * const info,
 	PhysicsFunction const f,
 	double * const nextState, // (1 x numStates)
 	double * const currentdState, // (1 x numStates)
@@ -16,20 +16,20 @@ void euler_f_step
 )
 {
 	size_t i;
-	f(numStates, numInputs, currentdState, currentTime, currentState, currentInput, storage);
-	for (i = 0; i < numStates; i++)
+	f(info, currentdState, currentTime, currentState, currentInput);
+	for (i = 0; i < info->numStates; i++)
 		nextState[i] = currentState[i] + currentdState[i] * dt;
 }
 
 void rk4_f_step
 (
-	struct BlockInfo const * const info,
+	struct StrictlyProperBlockInfo const * const info,
 	PhysicsFunction const f,
 	double * const nextState, // (1 x numStates)
 	double * const currentdState, // (1 x numStates)
-	double * const B, // (1 x numStates) solver storage/temp
-	double * const C, // (1 x numStates) solver storage/temp
-	double * const D, // (1 x numStates) solver storage/temp
+	double * const B, // (1 x numStates) solve/temp
+	double * const C, // (1 x numStates) solve/temp
+	double * const D, // (1 x numStates) solve/temp
 	double const dt, // time step
 	double const currentTime, // current time
 	double const * const currentState, // (1 x numStates) also initial conditions
@@ -50,19 +50,21 @@ void rk4_f_step
 	check_debug(C != D && C != nextState && C != currentState, "D, C, nextState, and currentState cannot be the same location as C in memory");
 	check_debug(D != nextState && D != currentState, "nextState, and currentState cannot be the same location as D in memory");
 
-	f(numStates, numInputs, A, currentTime, currentState, currentInput, storage);
+	size_t const numStates = info->numStates;
+
+	f(info, A, currentTime, currentState, currentInput);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = currentState[i] + A[i] * dt2;
 
-	f(numStates, numInputs, B, currentTime2, nextState, currentInput2, storage);
+	f(info, B, currentTime2, nextState, currentInput2);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = currentState[i] + B[i] * dt2;
 
-	f(numStates, numInputs, C, currentTime2, nextState, currentInput2, storage);
+	f(info, C, currentTime2, nextState, currentInput2);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = currentState[i] + C[i] * dt;
 
-	f(numStates, numInputs, D, nextTime, nextState, nextInput, storage);
+	f(info, D, nextTime, nextState, nextInput);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = currentState[i] + dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
 	
@@ -72,40 +74,46 @@ error:
 
 void euler
 (
-	struct StrictlyProperBlock block,
+	struct StrictlyProperBlock const * const block,
+	double * const Y, // numSteps x numOutputs output buffer
 	double const dt, //time step
-	size_t numSteps,
+	size_t const numSteps,
 	double const * const time, // numSteps x 1 time vector
 	double const * const Xi, // numStates x 1 initial conditions vector (will be over-written)
-	double const * const U, // numSteps x numInputs input values over time
-	double * const Y // numSteps x numOutputs output buffer
+	double const * const U // numSteps x numInputs input values over time
 )
 {
+	struct StrictlyProperBlockInfo const bi = block->info;
+	size_t const numStates = bi.numStates;
+	size_t const numInputs = bi.numInputs;
+	size_t const numOutputs = bi.numOutputs;
+	OutputFunction const h = block->h;
+	PhysicsFunction const f = block->f;
 
-	double * const temp_memory = malloc(block.numStates * 2 * sizeof(double));
+	double * const temp_memory = malloc(numStates * 2 * sizeof(double));
 	check_mem(temp_memory);
 	
-	double * const currentState = &temp_memory[0 * block.numStates];
+	double * const currentState = &temp_memory[0 * numStates];
 	double * const nextState = currentState; //in this case it's ok that these are the same block of memory
-	double * const currentdState = &temp_memory[1 * block.numStates];
+	double * const currentdState = &temp_memory[1 * numStates];
 	
 	double const * currentInput;
 	double * currentOutput;
 
-	memcpy(currentState, Xi, block.numStates * sizeof(double));
+	memcpy(currentState, Xi, numStates * sizeof(double));
 	size_t i;
 	for (i = 0; i < (numSteps - 1); i++)
 	{
-		currentInput = &U[i*block.numInputs];
-		currentOutput = &Y[i*block.numOutputs];
+		currentInput = &U[i*numInputs];
+		currentOutput = &Y[i*numOutputs];
 
-		block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
-		euler_f_step(block.numStates, block.numInputs, dt, time[i], nextState, currentdState, currentState, currentInput, block.f, block.storage);
+		h(&bi, currentOutput, time[i], currentState);
+		euler_f_step(&bi, f, nextState, currentdState, dt, time[i], currentState, currentInput);
 	}
 
 	//currentState = nextState;
-	currentOutput = &Y[i*block.numOutputs];
-	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+	currentOutput = &Y[i*numOutputs];
+	h(&bi, currentOutput, time[i], currentState);
 
 error:
 	free(temp_memory);
@@ -113,48 +121,54 @@ error:
 
 void rk4
 (
-	struct StrictlyProperBlock block,
+	struct StrictlyProperBlock const * const block,
+	double * const Y,
 	double const dt, //time step
 	size_t numSteps, //size of time vector
 	double const * const time, //time vector
 	double const * const Xi, // numStates x 1 initial conditions vector
 	double const * const U1, // numSteps x numInputs inputs
-	double const * const U2, // numSteps x numInputs inputs
-	double * const Y
+	double const * const U2 // numSteps x numInputs inputs
 )
 {
-	
-	double * const temp_memory = malloc(block.numStates * 6 * sizeof(double));
+	struct StrictlyProperBlockInfo const bi = block->info;
+	size_t const numStates = bi.numStates;
+	size_t const numInputs = bi.numInputs;
+	size_t const numOutputs = bi.numOutputs;
+	OutputFunction const h = block->h;
+	PhysicsFunction const f = block->f;
+
+	double * const temp_memory = malloc(numStates * 6 * sizeof(double));
 	check_mem(temp_memory);
 
-	double * const currentState = &temp_memory[0 * block.numStates];
-	double * const nextState = &temp_memory[1 * block.numStates];
-	double * const currentdState = &temp_memory[2 * block.numStates];
-	double * const B = &temp_memory[3 * block.numStates];
-	double * const C = &temp_memory[4 * block.numStates];
-	double * const D = &temp_memory[5 * block.numStates];
+	double * const currentState = &temp_memory[0 * numStates];
+	double * const nextState = &temp_memory[1 * numStates];
+	double * const currentdState = &temp_memory[2 * numStates];
+	double * const B = &temp_memory[3 * numStates];
+	double * const C = &temp_memory[4 * numStates];
+	double * const D = &temp_memory[5 * numStates];
 
 	double const * currentInput;
 	double const * currentInput2;
 	double const * nextInput;
 	double * currentOutput;
 
-	memcpy(currentState, Xi, block.numStates * sizeof(double));
+	memcpy(currentState, Xi, numStates * sizeof(double));
 	size_t i;
 	for (i = 0; i < (numSteps - 1); i++)
 	{
-		currentInput = &U1[i*block.numInputs];
-		currentInput2 = &U2[i*block.numInputs];
-		nextInput = &U1[(i + 1)*block.numInputs];
-		currentOutput = &Y[i*block.numOutputs];
+		currentInput = &U1[i*numInputs];
+		currentInput2 = &U2[i*numInputs];
+		nextInput = &U1[(i + 1)*numInputs];
+		currentOutput = &Y[i*numOutputs];
 
-		block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
-		rk4_f_step(block.numStates, block.numInputs, dt, time[i], nextState, currentdState, B, C, D, currentState, currentInput, currentInput2, nextInput, block.f, block.storage);
-		memcpy(currentState, nextState, block.numStates * sizeof(double));
+		h(&bi, currentOutput, time[i], currentState);
+		rk4_f_step(&bi, f, nextState, currentdState, B, C, D, dt, time[i], currentState, currentInput, currentInput2, nextInput);
+		memcpy(currentState, nextState, numStates * sizeof(double));
 	}
 
-	currentOutput = &Y[i*block.numOutputs];
-	block.h(block.numStates, block.numOutputs, currentOutput, time[i], currentState, block.storage);
+	currentOutput = &Y[i*numOutputs];
+	h(&bi, currentOutput, time[i], currentState);
 error:
 	free(temp_memory);
 }
