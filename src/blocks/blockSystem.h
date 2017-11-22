@@ -25,9 +25,9 @@ typedef void(*CalcSystemOutputFunction)(
 struct BlockSystemStorage
 {
 	size_t numBlocks;
-	struct StrictlyProperBlock * blocks;
-	double ** blockInputs;
-	double ** blockOutputs;
+	struct StrictlyProperBlock const * blocks;
+	double * const * blockInputs;
+	double * const * blockOutputs;
 	CalcBlockInputsFunction calcBlockInputs;
 	CalcSystemOutputFunction calcSystemOutput;
 	void * systemStorage;

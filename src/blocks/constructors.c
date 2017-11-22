@@ -1,4 +1,4 @@
-#include <string.h>
+#include "dbg.h"
 #include "constructors.h"
 
 struct StrictlyProperBlock * block_new(struct StrictlyProperBlock const stackb)
@@ -17,7 +17,7 @@ void block_free(struct StrictlyProperBlock * heapb)
 struct BlockSystemStorage * blockSystemStorage_new
 (
 	size_t const numBlocks,
-	struct StrictlyProperBlock * const blocks,
+	struct StrictlyProperBlock const * const blocks,
 	CalcBlockInputsFunction const calcBlockInputs,
 	CalcSystemOutputFunction const calcSystemOutputs,
 	void * const systemStorage
@@ -27,23 +27,23 @@ struct BlockSystemStorage * blockSystemStorage_new
 	size_t totalBlockOutputs = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		totalBlockInputs += blocks[i].numInputs;
-		totalBlockOutputs += blocks[i].numOutputs;
+		totalBlockInputs += blocks[i].info.numInputs;
+		totalBlockOutputs += blocks[i].info.numOutputs;
 	}
 
-	double * storage = malloc((totalBlockInputs + totalBlockOutputs) * sizeof(double));
-	double ** input_storage = malloc(numBlocks * sizeof(double*));
-	double ** output_storage = malloc(numBlocks * sizeof(double*));
-	struct BlockSystemStorage * const bheap = malloc(sizeof(struct BlockSystemStorage));
+	double * storage = NULL;
+	double ** input_storage = NULL;
+	double ** output_storage = NULL;
+	struct BlockSystemStorage * bheap = NULL;
 
-	if (storage == NULL || input_storage == NULL || output_storage == NULL || bheap == NULL)
-	{
-		free(storage);
-		free(input_storage);
-		free(output_storage);
-		free(bheap);
-		return NULL;
-	}
+	storage = malloc((totalBlockInputs + totalBlockOutputs) * sizeof(double));
+	check_mem(storage);
+	input_storage = malloc(numBlocks * sizeof(double*));
+	check_mem(input_storage);
+	output_storage = malloc(numBlocks * sizeof(double*));
+	check_mem(output_storage);
+	bheap = malloc(sizeof(struct BlockSystemStorage));
+	check_mem(bheap);
 
 	size_t inputi = 0;
 	size_t outputi = totalBlockInputs;
@@ -51,8 +51,8 @@ struct BlockSystemStorage * blockSystemStorage_new
 	{
 		input_storage[i] = &storage[inputi];
 		output_storage[i] = &storage[outputi];
-		inputi += blocks[i].numInputs;
-		outputi += blocks[i].numOutputs;
+		inputi += blocks[i].info.numInputs;
+		outputi += blocks[i].info.numOutputs;
 	}
 
 	struct BlockSystemStorage bstack;
@@ -66,6 +66,12 @@ struct BlockSystemStorage * blockSystemStorage_new
 
 	*bheap = bstack;
 	return bheap;
+error:
+	free(storage);
+	free(input_storage);
+	free(output_storage);
+	free(bheap);
+	return NULL;
 }
 
 void blockSystemStorage_free(struct BlockSystemStorage * storage)

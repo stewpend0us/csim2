@@ -8,7 +8,7 @@ void block_free(struct StrictlyProperBlock * heapb);
 struct BlockSystemStorage * blockSystemStorage_new
 (
 	size_t const numBlocks,
-	struct StrictlyProperBlock * const blocks,
+	struct StrictlyProperBlock const * const blocks,
 	CalcBlockInputsFunction const calcBlockInputs,
 	CalcSystemOutputFunction const calcSystemOutputs,
 	void * const systemStorage
