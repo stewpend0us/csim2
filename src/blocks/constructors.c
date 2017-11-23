@@ -77,7 +77,7 @@ error:
 void blockSystemStorage_free(struct BlockSystemStorage * storage)
 {
 	free(storage->blockInputs[0]);
-	free(storage->blockInputs);
-	free(storage->blockOutputs);
+	free((void*)storage->blockInputs); //cast avoids a warning
+	free((void*)storage->blockOutputs); //cast avoids a warning
 	free(storage);
 }

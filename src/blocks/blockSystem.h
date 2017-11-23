@@ -37,5 +37,5 @@ struct StrictlyProperBlock blockSystem
 (
 	size_t const numSystemInputs,
 	size_t const numSystemOutputs,
-	struct BlockSystemStorage const * const storage
+	struct BlockSystemStorage * const storage
 );
