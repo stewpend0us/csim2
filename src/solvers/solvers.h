@@ -16,21 +16,23 @@ void euler_step
 	double const * const currentInput // (1 x numInputs)
 );
 
-void rk4_f_step
+void rk4_step
 (
 	struct StrictlyProperBlockInfo const * const info,
+	OutputFunction const h,
 	PhysicsFunction const f,
 	double * const nextState, // (1 x numStates)
-	double * const currentdState, // (1 x numStates)
-	double * const B, // (1 x numStates) solver storage/temp
-	double * const C, // (1 x numStates) solver storage/temp
-	double * const D, // (1 x numStates) solver storage/temp
-	double const dt, // time step
-	double const currentTime, // current time
-	double const * const currentState, // (1 x numStates) also initial conditions
-	double const * const currentInput, // (1 x numInputs)
-	double const * const currentInput2, // (1 x numInputs) input at time ti + dt/2
-	double const * const nextInput // (1 x numInputs) input at time ti + dt
+	double * const dState, // (1 x numStates)
+	double * const dB, // (1 x numStates) temp
+	double * const dC, // (1 x numStates) temp
+	double * const dD, // (1 x numStates) temp
+	double * const output, // (1 x numOutputs)
+	double const dt,
+	double const time,
+	double const * const state, // (1 x numStates)
+	double const * const input, // (1 x numInputs)
+	double const * const halfStepInput, // (1 x numInputs)
+	double const * const nextInput // (1 x numInputs)
 );
 
 // euler solver

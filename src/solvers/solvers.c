@@ -2,78 +2,78 @@
 #include <string.h>
 #include "dbg.h"
 #include "solvers.h"
-
+	
 void euler_step
 (
-	struct StrictlyProperBlockInfo const * const bi,
+	struct StrictlyProperBlockInfo const * const info,
 	OutputFunction const h,
 	PhysicsFunction const f,
 	double * const nextState, // (1 x numStates)
-	double * const currentdState, // (1 x numStates)
-	double * const currentOutput, // (1 x numOutputs)
+	double * const dState, // (1 x numStates)
+	double * const output, // (1 x numOutputs)
 	double const dt,
-	double const currentTime,
-	double const * const currentState, // (1 x numStates)
-	double const * const currentInput // (1 x numInputs)
+	double const time,
+	double const * const state, // (1 x numStates)
+	double const * const input // (1 x numInputs)
 )
 {
-	size_t const numStates = bi->numStates;
-
-	h(bi, currentOutput, currentTime, currentState); // update output
-	f(bi, currentdState, currentTime, currentState, currentInput); // update dState
+	size_t const numStates = info->numStates;
+	h(info, output, time, state);
+	f(info, dState, time, state, input);
 	for (size_t i = 0; i < numStates; i++)
-		nextState[i] = currentState[i] + currentdState[i] * dt; // calculate next state
+		nextState[i] = state[i] + dState[i] * dt;
 }
 
-void rk4_f_step
+/* not sure where this should live
+	check_debug(currentState != nextState, "current state cannot be the same location in memory");
+	check_debug(dA != B && dA != C && dA != D && dA != nextState && dA != currentState, "B, C, D, nextState, and currentState cannot be the same location as dA in memory");
+	check_debug(B != C && B != D && B != nextState && B != currentState, "C, D, nextState, and currentState cannot be the same location as B in memory");
+	check_debug(C != D && C != nextState && C != currentState, "D, C, nextState, and currentState cannot be the same location as C in memory");
+	check_debug(D != nextState && D != currentState, "nextState, and currentState cannot be the same location as D in memory");
+*/
+
+void rk4_step
 (
 	struct StrictlyProperBlockInfo const * const info,
+	OutputFunction const h,
 	PhysicsFunction const f,
 	double * const nextState, // (1 x numStates)
-	double * const currentdState, // (1 x numStates)
-	double * const B, // (1 x numStates) solve/temp
-	double * const C, // (1 x numStates) solve/temp
-	double * const D, // (1 x numStates) solve/temp
-	double const dt, // time step
-	double const currentTime, // current time
-	double const * const currentState, // (1 x numStates) also initial conditions
-	double const * const currentInput, // (1 x numInputs)
-	double const * const currentInput2, // (1 x numInputs) input at time ti + dt/2
-	double const * const nextInput // (1 x numInputs) input at time ti + dt
+	double * const dState, // (1 x numStates)
+	double * const dB, // (1 x numStates) temp
+	double * const dC, // (1 x numStates) temp
+	double * const dD, // (1 x numStates) temp
+	double * const output, // (1 x numOutputs)
+	double const dt,
+	double const time,
+	double const * const state, // (1 x numStates)
+	double const * const input, // (1 x numInputs)
+	double const * const halfStepInput, // (1 x numInputs)
+	double const * const nextInput // (1 x numInputs)
 )
 {
 	size_t i;
-	double const dt2 = dt / 2;
-	double const currentTime2 = currentTime + dt2;
-	double const nextTime = currentTime + dt;
-	double * const A = currentdState;
-
-	check(currentState != nextState, "current state cannot be the same location in memory");
-	check(A != B && A != C && A != D && A != nextState && A != currentState, "B, C, D, nextState, and currentState cannot be the same location as A in memory");
-	check(B != C && B != D && B != nextState && B != currentState, "C, D, nextState, and currentState cannot be the same location as B in memory");
-	check(C != D && C != nextState && C != currentState, "D, C, nextState, and currentState cannot be the same location as C in memory");
-	check(D != nextState && D != currentState, "nextState, and currentState cannot be the same location as D in memory");
-
+	double * const dA = dState; //for consistency
 	size_t const numStates = info->numStates;
+	double const halfdt = dt / 2;
+	double const halfStepTime = time + halfdt;
+	double const nextTime = time + dt;
 
-	f(info, A, currentTime, currentState, currentInput);
+	h(info, output, time, state);
+	f(info, dA, time, state, input);
 	for (i = 0; i < numStates; i++)
-		nextState[i] = currentState[i] + A[i] * dt2;
+		nextState[i] = state[i] + dA[i] * dt;
 
-	f(info, B, currentTime2, nextState, currentInput2);
+	f(info, dB, halfStepTime, nextState, halfStepInput);
 	for (i = 0; i < numStates; i++)
-		nextState[i] = currentState[i] + B[i] * dt2;
+		nextState[i] = state[i] + dB[i] * halfdt;
 
-	f(info, C, currentTime2, nextState, currentInput2);
+	f(info, dC, halfStepTime, nextState, halfStepInput);
 	for (i = 0; i < numStates; i++)
-		nextState[i] = currentState[i] + C[i] * dt;
+		nextState[i] = state[i] + dC[i] * halfdt;
 
-	f(info, D, nextTime, nextState, nextInput);
+	f(info, dD, nextTime, nextState, nextInput);
 	for (i = 0; i < numStates; i++)
-		nextState[i] = currentState[i] + dt * (A[i] + 2 * B[i] + 2 * C[i] + D[i]) / 6;
-	
-error:
-	return;
+		nextState[i] = state[i] + dt * (dA[i] + 2*dB[i] + 2*dC[i] + dD[i]) / 6;
 }
 
 void euler
@@ -166,8 +166,7 @@ void rk4
 		nextInput = &U1[(i + 1)*numInputs];
 		currentOutput = &Y[i*numOutputs];
 
-		h(&bi, currentOutput, time[i], currentState);
-		rk4_f_step(&bi, f, nextState, currentdState, B, C, D, dt, time[i], currentState, currentInput, currentInput2, nextInput);
+		rk4_step(&bi, h, f, nextState, currentdState, B, C, D, currentOutput, dt, time[i], currentState, currentInput, currentInput2, nextInput);
 		memcpy(currentState, nextState, numStates * sizeof(double));
 	}
 

@@ -101,8 +101,7 @@ void rk4_c
 		ctrlCommand = &uC[i*ci.numCommands];
 		
 		c(&ci, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
-		h(&bi, ctrlFeedback, time[i], currentState);
-		rk4_f_step(&bi,f,nextState,currentdState,B,C,D,dt,time[i],currentState,ctrlCommand,ctrlCommand,ctrlCommand);
+		rk4_step(&bi,h,f,nextState,currentdState,B,C,D,ctrlFeedback,dt,time[i],currentState,ctrlCommand,ctrlCommand,ctrlCommand);
 		memcpy(currentState, nextState, bi.numStates * sizeof(double));
 	}
 	ctrlFeedback = &Y[i*ci.numFeedback];
