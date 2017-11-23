@@ -19,7 +19,7 @@ static void physics
 	struct StrictlyProperBlock const * const blocks = bss->blocks;
 	double * const * const blockInputs = bss->blockInputs;
 	double * const * const blockOutputs = bss->blockOutputs;
-	void * const storage = bss->storage;
+	void * const storage = bss->systemStorage;
 
 	// update all of the block outputs based on the latest state
 	size_t xi = 0;
@@ -50,19 +50,20 @@ static void output
 	double const * const state
 )
 {
-	(void) numStates;
-
-	size_t const numBlocks = storage->numBlocks;
-	struct StrictlyProperBlock const * const blocks = storage->blocks;
-	double * const * const blockOutputs = storage->blockOutputs;
-	void * const storage = storage->storage;
+	struct BlockSystemStorage const * const bss = info->storage;
+	size_t const numOutputs = info->numOutputs;
+	size_t const numBlocks = bss->numBlocks;
+	struct StrictlyProperBlock const * const blocks = bss->blocks;
+	double * const * const blockOutputs = bss->blockOutputs;
+	void * const storage = bss->systemStorage;
 	size_t xi = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		blocks[i].h(blocks[i].numStates, blocks[i].numOutputs, blockOutputs[i], time, &state[xi], blocks[i].storage);
-		xi += blocks[i].numStates;
+		struct StrictlyProperBlockInfo bi = blocks[i].info;
+		blocks[i].h(&bi, blockOutputs[i], time, &state[xi]);
+		xi += bi.numStates;
 	}
-	storage->calcSystemOutput(numOutputs, output, time, blockOutputs, storage);
+	bss->calcSystemOutput(numOutputs, output, time, blockOutputs, storage);
 }
 
 
@@ -70,22 +71,29 @@ struct StrictlyProperBlock blockSystem
 (
 	size_t const numSystemInputs,
 	size_t const numSystemOutputs,
-	struct BlockSystemStorage * const storage
+	struct BlockSystemStorage const * const storage
 )
 {
+	check(storage, "storage must not be NULL");
 	size_t const numBlocks = storage->numBlocks;
 	struct StrictlyProperBlock const * const blocks = storage->blocks;
 
 	size_t totalBlockStates = 0;
 	for (size_t i = 0; i < numBlocks; i++)
-		totalBlockStates += blocks[i].numStates;
-
-	struct StrictlyProperBlock bsstack;
-	bsstack.numStates = totalBlockStates;
-	bsstack.numInputs = numSystemInputs;
-	bsstack.numOutputs = numSystemOutputs;
-	bsstack.f = (PhysicsFunction)physics;
-	bsstack.h = (OutputFunction)output;
-	bsstack.storage = storage;
-	return bsstack;
+	{
+		totalBlockStates += blocks[i].info.numStates;
+	}
+	return (struct StrictlyProperBlock)
+	{
+		{
+			totalBlockStates,
+			numSystemInputs,
+			numSystemOutputs,
+			storage,
+		},
+		physics,
+		output,
+	};
+error:
+	return NULL_StritclyProperBlock;
 }
