@@ -7,6 +7,7 @@ void euler_step
 	struct StrictlyProperBlockInfo const * const info,
 	OutputFunction const h,
 	PhysicsFunction const f,
+	UtilityFunction const u,
 	double * const nextState, // (1 x numStates)
 	double * const dState, // (1 x numStates)
 	double * const output, // (1 x numOutputs)
@@ -19,6 +20,8 @@ void euler_step
 	size_t const numStates = info->numStates;
 	h(info, output, time, state);
 	f(info, dState, time, state, input);
+	if (u)
+		u(info, time, dState, state, input, output);
 	for (size_t i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dState[i] * dt;
 }
@@ -36,6 +39,7 @@ void rk4_step
 	struct StrictlyProperBlockInfo const * const info,
 	OutputFunction const h,
 	PhysicsFunction const f,
+	UtilityFunction const u,
 	double * const nextState, // (1 x numStates)
 	double * const dState, // (1 x numStates)
 	double * const dB, // (1 x numStates) temp
@@ -51,16 +55,17 @@ void rk4_step
 )
 {
 	size_t i;
-	double * const dA = dState; //for consistency
 	size_t const numStates = info->numStates;
 	double const halfdt = dt / 2;
 	double const halfStepTime = time + halfdt;
 	double const nextTime = time + dt;
 
 	h(info, output, time, state);
-	f(info, dA, time, state, input);
+	f(info, dState, time, state, input);
+	if (u)
+		u(info, time, dState, state, input, output);
 	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + dA[i] * dt;
+		nextState[i] = state[i] + dState[i] * dt;
 
 	f(info, dB, halfStepTime, nextState, halfStepInput);
 	for (i = 0; i < numStates; i++)
@@ -72,5 +77,5 @@ void rk4_step
 
 	f(info, dD, nextTime, nextState, nextInput);
 	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + dt * (dA[i] + 2*dB[i] + 2*dC[i] + dD[i]) / 6;
+		nextState[i] = state[i] + dt * (dState[i] + 2*dB[i] + 2*dC[i] + dD[i]) / 6;
 }

@@ -18,6 +18,7 @@ void euler_c
 	struct StrictlyProperBlockInfo const bi = block->info;
 	PhysicsFunction const f = block->f;
 	OutputFunction const h = block->h;
+	UtilityFunction const u = block->u;
 
 	struct ControllerBlockInfo const ci = controller->info;
 	ControllerFunction const c = controller->c;
@@ -43,7 +44,7 @@ void euler_c
 
 		c(&ci, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
 		//h(&bi, ctrlFeedback, time[i], currentState);
-		euler_step(&bi, h, f, nextState, currentdState, ctrlFeedback, dt, time[i], currentState, ctrlCommand);
+		euler_step(&bi, h, f, u, nextState, currentdState, ctrlFeedback, dt, time[i], currentState, ctrlCommand);
 	}
 
 	//currentState = nextState;
@@ -74,6 +75,7 @@ void rk4_c
 	struct StrictlyProperBlockInfo const bi = block->info;
 	PhysicsFunction const f = block->f;
 	OutputFunction const h = block->h;
+	UtilityFunction const u = block->u;
 
 	struct ControllerBlockInfo const ci = controller->info;
 	ControllerFunction const c = controller->c;
@@ -101,7 +103,7 @@ void rk4_c
 		ctrlCommand = &uC[i*ci.numCommands];
 		
 		c(&ci, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
-		rk4_step(&bi,h,f,nextState,currentdState,B,C,D,ctrlFeedback,dt,time[i],currentState,ctrlCommand,ctrlCommand,ctrlCommand);
+		rk4_step(&bi,h,f,u,nextState,currentdState,B,C,D,ctrlFeedback,dt,time[i],currentState,ctrlCommand,ctrlCommand,ctrlCommand);
 		memcpy(currentState, nextState, bi.numStates * sizeof(double));
 	}
 	ctrlFeedback = &Y[i*ci.numFeedback];
