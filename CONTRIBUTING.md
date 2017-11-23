@@ -32,7 +32,7 @@ So here's me being optimistic:
 
 ### solvers
 
-* think about the solver architecture...is there a better way to organize things so there is less duplication and so it's easier to implement new types of solvers? (solver, solver_controller, solver_realtime etc.)
+* ~~think about the solver architecture...is there a better way to organize things so there is less duplication and so it's easier to implement new types of solvers? (solver, solver_controller, solver_realtime etc.)~~
 * ~~each solver type (euler, rk4) should have a "take single step" function to simplify (or hopefully generalize) the creation of "custom" solver types (real-time, controller, known input)~~
 * implement a "real time" solver
 * implement a "linearize" function

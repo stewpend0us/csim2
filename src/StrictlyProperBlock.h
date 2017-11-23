@@ -27,13 +27,23 @@ typedef void(*OutputFunction)(
 	double const * const state
 	);
 
+typedef void(*UtilityFunction)(
+	struct StrictlyProperBlock const * const info,
+	double const time,
+	double const * const dState,
+	double const * const state,
+	double const * const input,
+	double const * const output
+);
+
 // StrictlyProperBlock data
 struct StrictlyProperBlock
 {
 	struct StrictlyProperBlockInfo info;
-	PhysicsFunction f;
 	OutputFunction h;
+	PhysicsFunction f;
+	UtilityFunction u;
 };
 
-#define NULL_StritclyProperBlock ((struct StrictlyProperBlock){{0,0,0,NULL},NULL,NULL})
-#define good_block(block) (block.f && block.h)
+#define NULL_StritclyProperBlock ((struct StrictlyProperBlock){{0,0,0,NULL},NULL,NULL,NULL})
+#define good_block(block) (block.h && block.f)
