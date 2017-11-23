@@ -34,7 +34,7 @@ static void output
 struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau)
 {
 	check(numBlocks > 0,"numBlocks must be greater than zero");
-	check(!tau, "tau must not be NULL");
+	check(tau, "tau must not be NULL");
 	for (size_t i = 0; i < numBlocks; i++)
 	{
 		check(tau[i] > 0, "tau[%zu] must be greater than zero",i);

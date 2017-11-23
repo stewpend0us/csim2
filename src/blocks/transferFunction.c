@@ -53,7 +53,7 @@ static void output
 struct StrictlyProperBlock transferFunction(size_t const numBlocks, struct transferFunctionStorage * const tf_storage)
 {
 	check(numBlocks > 0, "numBlocks must be greater than zero");
-	check(!tf_storage, "tf_storage must not be NULL");
+	check(tf_storage, "tf_storage must not be NULL");
 
 	size_t totalStates = 0;
 	for (size_t i = 0; i < numBlocks; i++)

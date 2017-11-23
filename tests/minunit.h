@@ -11,22 +11,22 @@ typedef char*(*test_function)(); //return 0 if the test passed otherwise return 
 
 #define mu_assert(test, message) if (!(test)) { log_err(message); return message; }
 
-#define RUN_TESTS(...) int main(int argc, char * argv[])\
+#define RUN_TESTS(...) int main(int argc, char const * const argv[])\
 {\
     (void)argc;\
-    test_function tests[] = { __VA_ARGS__ };\
-    char names[] = #__VA_ARGS__ ",";\
-    char * start = names;\
-    char * end = strchr(start,',');\
+    test_function const tests[] = { __VA_ARGS__ };\
+    char const names[] = #__VA_ARGS__ ",";\
+    char const * start = names;\
+    char const * end = strchr(start,',');\
     printf("%s\n", argv[0]);\
-    size_t count = sizeof(tests) / sizeof(test_function);\
+    size_t const count = sizeof(tests) / sizeof(test_function);\
     size_t fail_count = 0;\
     for (size_t i = 0; i<count; i++)\
     {\
         clock_t start_time = clock();\
 		char * result = tests[i]();\
 		clock_t end_time = clock();\
-        double time_spent = (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000;\
+        double const time_spent = (double)(end_time - start_time) / CLOCKS_PER_SEC * 1000;\
         char * pass_fail;\
         if (result)\
         {\
@@ -46,7 +46,7 @@ typedef char*(*test_function)(); //return 0 if the test passed otherwise return 
             start++;\
     }\
     if (fail_count)\
-        printf("%s %zu FAILED\n", argv[0], fail_count);\
+        printf("%s, %zu FAILED\n", argv[0], fail_count);\
     else\
         printf("%s\n", argv[0]);\
 }

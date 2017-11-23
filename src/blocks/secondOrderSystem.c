@@ -43,7 +43,7 @@ static void output
 struct StrictlyProperBlock secondOrderSystem(size_t const numBlocks, struct secondOrderSystemStorage * const so_storage)
 {
 	check(numBlocks > 0,"numBlocks must be greater than zero");
-	check(!so_storage, "so_storage must not be NULL");
+	check(so_storage, "so_storage must not be NULL");
 	for (size_t i = 0; i < numBlocks; i++)
 	{
 		check(so_storage[i].omega_n > 0,"so_storage[%zu].omega_n must be greater than zero",i);

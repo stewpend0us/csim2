@@ -87,8 +87,14 @@ static struct first_order_lag_step_solver_results check_first_order_lag_step
 
 static char * first_order_lag_step_test()
 {
+	double * time = NULL;
+	double * U_t = NULL;
+	double * eulerY = NULL;
+	double * rk4Y = NULL;
+
 	double tau[1] = { 3 };
 	struct StrictlyProperBlock const block = firstOrderLag(1, tau);
+	mu_assert(good_block(block),"failed to construct");
 
 	double const dt = .01;
 	double const startTime = 0;
@@ -96,10 +102,15 @@ static char * first_order_lag_step_test()
 	double const stepValue = 5;
 
 	size_t const numSteps = numTimeSteps(dt, duration);
-	double * const time = malloc(numSteps * sizeof(double));
-	double * const U_t = malloc(numSteps * 1 * sizeof(double));
-	double * const eulerY = malloc(numSteps * 1 * sizeof(double));
-	double * const rk4Y = malloc(numSteps * 1 * sizeof(double));
+
+	time = malloc(numSteps * sizeof(double));
+	check_mem(time);
+	U_t = malloc(numSteps * 1 * sizeof(double));
+	check_mem(U_t);
+	eulerY = malloc(numSteps * 1 * sizeof(double));
+	check_mem(eulerY);
+	rk4Y = malloc(numSteps * 1 * sizeof(double));
+	check_mem(rk4Y);
 	initializeTime(numSteps, time, dt, startTime);
 	for (size_t i = 0; i < numSteps; i++)
 	{
@@ -110,7 +121,6 @@ static char * first_order_lag_step_test()
 
 	euler(&block, eulerY, dt, numSteps, time, Xi, U_t);
 	rk4(&block, rk4Y, dt, numSteps, time, Xi, U_t, U_t);
-
 	struct first_order_lag_step_solver_results euler_results = check_first_order_lag_step(numSteps, Xi[0], stepValue, eulerY);
 	struct first_order_lag_step_solver_results rk4_results = check_first_order_lag_step(numSteps, Xi[0], stepValue, rk4Y);
 
@@ -136,6 +146,12 @@ static char * first_order_lag_step_test()
 	mu_assert(rk4_smaller_than_euler, 		"rk4 is expected to have a smaller value than euler");
 
 	return NULL;
+error:
+	free(time);
+	free(U_t);
+	free(eulerY);
+	free(rk4Y);
+	return "check failed";
 }
 
 RUN_TESTS(

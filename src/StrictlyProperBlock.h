@@ -1,5 +1,6 @@
 #pragma once
 #include <stdlib.h>
+#include "dbg.h"
 
 struct StrictlyProperBlockInfo
 {
@@ -35,3 +36,4 @@ struct StrictlyProperBlock
 };
 
 #define NULL_StritclyProperBlock ((struct StrictlyProperBlock){{0,0,0,NULL},NULL,NULL})
+#define good_block(block) (block.f && block.h)

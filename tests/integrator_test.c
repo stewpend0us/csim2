@@ -16,11 +16,20 @@ char * integrator_test()
 	mu_assert(stepTime >= startTime && stepTime < (startTime + duration - dt), "bad arguments");
 	double const stepValue = 5;
 
+	double * time = NULL;
+	double * Xi = NULL;
+	double * input = NULL;
+	double * output = NULL;
+
 	size_t const numSteps = numTimeSteps(dt, duration);
-	double * const time = malloc(numSteps * sizeof(double));
-	double * const Xi = calloc(bi.numStates, sizeof(double));
-	double * const input = malloc(numSteps * bi.numInputs * sizeof(double));
-	double * const output = malloc(numSteps * bi.numOutputs * sizeof(double));
+	time = malloc(numSteps * sizeof(double));
+	check_mem(time);
+	Xi = calloc(bi.numStates, sizeof(double));
+	check_mem(Xi);
+	input = malloc(numSteps * bi.numInputs * sizeof(double));
+	check_mem(input);
+	output = malloc(numSteps * bi.numOutputs * sizeof(double));
+	check_mem(output);
 
 	initializeTime(numSteps, time, dt, startTime);
 
@@ -50,7 +59,18 @@ char * integrator_test()
 		mu_assert(((startTime + duration - stepTime)*stepValue + Xi[i]) == output[last_step*bi.numOutputs + i],"Final output");
 	}
 	
+	free(time);
+	free(Xi);
+	free(input);
+	free(output);
+
 	return NULL;
+error:
+	free(time);
+	free(Xi);
+	free(input);
+	free(output);
+	return "check failed";
 }
 
 RUN_TESTS(
