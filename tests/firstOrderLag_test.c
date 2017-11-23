@@ -88,7 +88,7 @@ static struct first_order_lag_step_solver_results check_first_order_lag_step
 static char * first_order_lag_step_test()
 {
 	double tau[1] = { 3 };
-	struct StrictlyProperBlock block = firstOrderLag(1, tau);
+	struct StrictlyProperBlock const block = firstOrderLag(1, tau);
 
 	double const dt = .01;
 	double const startTime = 0;
@@ -108,8 +108,8 @@ static char * first_order_lag_step_test()
 
 	double Xi[1] = { 0 };
 
-	euler(block, dt, numSteps, time, block.numStates, Xi, block.numInputs, U_t, block.numOutputs, eulerY);
-	rk4(block, dt, numSteps, time, block.numStates, Xi, block.numInputs, U_t, U_t, block.numOutputs, rk4Y);
+	euler(&block, eulerY, dt, numSteps, time, Xi, U_t);
+	rk4(&block, rk4Y, dt, numSteps, time, Xi, U_t, U_t);
 
 	struct first_order_lag_step_solver_results euler_results = check_first_order_lag_step(numSteps, Xi[0], stepValue, eulerY);
 	struct first_order_lag_step_solver_results rk4_results = check_first_order_lag_step(numSteps, Xi[0], stepValue, rk4Y);
