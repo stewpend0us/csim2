@@ -20,8 +20,8 @@ So here's me being optimistic:
 
 ### restructureInterface
 
-1. put all of the data in struct StrictlyProperBlock on it's own struct that can be passed into the functions rather than having the huge parameter lists
-2. install dbg.h macros in the solvers and blocks to make them more user friendly
+1. ~~put all of the data in struct StrictlyProperBlock on it's own struct that can be passed into the functions rather than having the huge parameter lists~~
+2. ~~install dbg.h macros in the solvers and blocks to make them more user friendly~~
 3. pass `output` as an input to physics function
 4. add a `void utility(time, input, state, output)` function to all blocks and call it from the solvers
 

@@ -7,6 +7,8 @@ char * integrator_test()
 	size_t const numBlocks = 2;
 
 	struct StrictlyProperBlock const block = integrator(numBlocks);
+	mu_assert(good_block(block),"block is bad");
+
 	struct StrictlyProperBlockInfo const bi = block.info;
 
 	double const dt = .1;

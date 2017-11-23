@@ -94,7 +94,7 @@ static char * first_order_lag_step_test()
 
 	double tau[1] = { 3 };
 	struct StrictlyProperBlock const block = firstOrderLag(1, tau);
-	mu_assert(good_block(block),"failed to construct");
+	mu_assert(good_block(block),"block is bad");
 
 	double const dt = .01;
 	double const startTime = 0;
