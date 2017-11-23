@@ -42,8 +42,8 @@ void euler_c
 		ctrlCommand = &C[i*ci.numFeedback];
 
 		c(&ci, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
-		h(&bi, ctrlFeedback, time[i], currentState);
-		euler_f_step(&bi, f, nextState, currentdState, dt, time[i], currentState, ctrlCommand);
+		//h(&bi, ctrlFeedback, time[i], currentState);
+		euler_step(&bi, h, f, nextState, currentdState, ctrlFeedback, dt, time[i], currentState, ctrlCommand);
 	}
 
 	//currentState = nextState;

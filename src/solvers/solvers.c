@@ -3,22 +3,26 @@
 #include "dbg.h"
 #include "solvers.h"
 
-void euler_f_step
+void euler_step
 (
-	struct StrictlyProperBlockInfo const * const info,
+	struct StrictlyProperBlockInfo const * const bi,
+	OutputFunction const h,
 	PhysicsFunction const f,
 	double * const nextState, // (1 x numStates)
 	double * const currentdState, // (1 x numStates)
-	double const dt, // time step
+	double * const currentOutput, // (1 x numOutputs)
+	double const dt,
 	double const currentTime,
-	double const * const currentState, // (1 x numStates) also initial conditions
+	double const * const currentState, // (1 x numStates)
 	double const * const currentInput // (1 x numInputs)
 )
 {
-	size_t i;
-	f(info, currentdState, currentTime, currentState, currentInput);
-	for (i = 0; i < info->numStates; i++)
-		nextState[i] = currentState[i] + currentdState[i] * dt;
+	size_t const numStates = bi->numStates;
+
+	h(bi, currentOutput, currentTime, currentState); // update output
+	f(bi, currentdState, currentTime, currentState, currentInput); // update dState
+	for (size_t i = 0; i < numStates; i++)
+		nextState[i] = currentState[i] + currentdState[i] * dt; // calculate next state
 }
 
 void rk4_f_step
@@ -44,11 +48,11 @@ void rk4_f_step
 	double const nextTime = currentTime + dt;
 	double * const A = currentdState;
 
-	check_debug(currentState != nextState, "current state cannot be the same location in memory");
-	check_debug(A != B && A != C && A != D && A != nextState && A != currentState, "B, C, D, nextState, and currentState cannot be the same location as A in memory");
-	check_debug(B != C && B != D && B != nextState && B != currentState, "C, D, nextState, and currentState cannot be the same location as B in memory");
-	check_debug(C != D && C != nextState && C != currentState, "D, C, nextState, and currentState cannot be the same location as C in memory");
-	check_debug(D != nextState && D != currentState, "nextState, and currentState cannot be the same location as D in memory");
+	check(currentState != nextState, "current state cannot be the same location in memory");
+	check(A != B && A != C && A != D && A != nextState && A != currentState, "B, C, D, nextState, and currentState cannot be the same location as A in memory");
+	check(B != C && B != D && B != nextState && B != currentState, "C, D, nextState, and currentState cannot be the same location as B in memory");
+	check(C != D && C != nextState && C != currentState, "D, C, nextState, and currentState cannot be the same location as C in memory");
+	check(D != nextState && D != currentState, "nextState, and currentState cannot be the same location as D in memory");
 
 	size_t const numStates = info->numStates;
 
@@ -101,14 +105,14 @@ void euler
 	double * currentOutput;
 
 	memcpy(currentState, Xi, numStates * sizeof(double));
+
 	size_t i;
 	for (i = 0; i < (numSteps - 1); i++)
 	{
 		currentInput = &U[i*numInputs];
 		currentOutput = &Y[i*numOutputs];
 
-		h(&bi, currentOutput, time[i], currentState);
-		euler_f_step(&bi, f, nextState, currentdState, dt, time[i], currentState, currentInput);
+		euler_step(&bi, h, f, nextState, currentdState, currentOutput, dt, time[i], currentState, currentInput);
 	}
 
 	//currentState = nextState;

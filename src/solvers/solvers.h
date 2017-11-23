@@ -2,15 +2,17 @@
 #include "StrictlyProperBlock.h"
 #include "ControllerBlock.h"
 
-void euler_f_step
+void euler_step
 (
-	struct StrictlyProperBlockInfo const * const info,
+	struct StrictlyProperBlockInfo const * const bi,
+	OutputFunction const h,
 	PhysicsFunction const f,
 	double * const nextState, // (1 x numStates)
 	double * const currentdState, // (1 x numStates)
-	double const dt, // time step
+	double * const currentOutput, // (1 x numOutputs)
+	double const dt,
 	double const currentTime,
-	double const * const currentState, // (1 x numStates) also initial conditions
+	double const * const currentState, // (1 x numStates)
 	double const * const currentInput // (1 x numInputs)
 );
 

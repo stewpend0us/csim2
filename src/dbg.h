@@ -34,7 +34,7 @@
         log_err(M, ##__VA_ARGS__); errno=0; goto error; }
 
 // use this after calling malloc
-#define check_mem(A) check((A), "Out of memory.")
+#define check_mem(A) check((A), "check_mem: out of memory")
 
 // this does nothing when NDEBUG is defined
 #define check_debug(A, M, ...) if(!(A)) {\
