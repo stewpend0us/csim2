@@ -1,6 +1,6 @@
 #include "minunit.h"
 #include "integrator.h"
-#include "solvers.h"
+#include "multistep.h"
 
 char * integrator_test()
 {
