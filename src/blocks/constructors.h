@@ -10,7 +10,8 @@ struct BlockSystemStorage * blockSystemStorage_new
 	size_t const numBlocks,
 	struct StrictlyProperBlock const * const blocks,
 	CalcBlockInputsFunction const calcBlockInputs,
-	CalcSystemOutputFunction const calcSystemOutputs,
+	BlockSystemOutputFunction const systemOutputs,
+	BlockSystemUtilityFunction const systemUtility,
 	void * const systemStorage
 );
 

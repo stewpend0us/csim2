@@ -47,8 +47,9 @@ struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const 
 			numBlocks,
 			tau,
 		},
-		physics,
 		output,
+		physics,
+		NULL,
 	};
 error:
 	return NULL_StritclyProperBlock;

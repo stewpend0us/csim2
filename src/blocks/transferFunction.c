@@ -71,8 +71,9 @@ struct StrictlyProperBlock transferFunction(size_t const numBlocks, struct trans
 			numBlocks,
 			tf_storage,
 		},
-		physics,
 		output,
+		physics,
+		NULL,
 	};
 error:
 	return NULL_StritclyProperBlock;

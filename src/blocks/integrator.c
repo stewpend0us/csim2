@@ -39,8 +39,9 @@ struct StrictlyProperBlock integrator(size_t const numBlocks)
 			numBlocks,
 			NULL,
 		},
-		physics,
 		output,
+		physics,
+		NULL,
 	};
 error:
 	return NULL_StritclyProperBlock;

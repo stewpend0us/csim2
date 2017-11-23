@@ -14,13 +14,22 @@ typedef void(*CalcBlockInputsFunction)(
 	);
 
 // update systemOutputs as a function of time, and blockOutputs
-typedef void(*CalcSystemOutputFunction)(
+typedef void(*BlockSystemOutputFunction)(
 	size_t const numSystemOutputs,
 	double * const systemOutputs,
 	double const time,
 	double const * const * const blockOutputs,
 	void * const systemStorage
 	);
+
+typedef void(*BlockSystemUtilityFunction)(
+	double const time,
+	size_t const numSystemInputs,
+	double const * const systemInputs,
+	size_t const numSystemOutputs,
+	double const * const systemOutputs,
+	void * const systemStorage
+);
 
 struct BlockSystemStorage
 {
@@ -29,7 +38,8 @@ struct BlockSystemStorage
 	double * const * blockInputs;
 	double * const * blockOutputs;
 	CalcBlockInputsFunction calcBlockInputs;
-	CalcSystemOutputFunction calcSystemOutput;
+	BlockSystemOutputFunction systemOutput;
+	BlockSystemUtilityFunction systemUtility;
 	void * systemStorage;
 };
 

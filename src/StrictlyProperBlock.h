@@ -28,13 +28,13 @@ typedef void(*OutputFunction)(
 	);
 
 typedef void(*UtilityFunction)(
-	struct StrictlyProperBlock const * const info,
+	struct StrictlyProperBlockInfo const * const info,
 	double const time,
 	double const * const dState,
 	double const * const state,
 	double const * const input,
 	double const * const output
-);
+	);
 
 // StrictlyProperBlock data
 struct StrictlyProperBlock

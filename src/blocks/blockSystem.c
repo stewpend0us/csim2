@@ -57,7 +57,6 @@ static void output
 	double * const * const blockOutputs = bss->blockOutputs;
 	double const * const * const blockOutputs_const = (double const * const * const)blockOutputs; //this gets around a warning
 
-	void * const storage = bss->systemStorage;
 	size_t xi = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
@@ -65,9 +64,38 @@ static void output
 		blocks[i].h(&bi, blockOutputs[i], time, &state[xi]);
 		xi += bi.numStates;
 	}
-	bss->calcSystemOutput(numOutputs, output, time, blockOutputs_const, storage);
+	void * const storage = bss->systemStorage;
+	bss->systemOutput(numOutputs, output, time, blockOutputs_const, storage);
 }
 
+static void util
+(
+	struct StrictlyProperBlockInfo const * const info,	
+	double const time,
+	double const * const dState,
+	double const * const state,
+	double const * const input,
+	double const * const output
+)
+{
+	struct BlockSystemStorage const * const bss = info->storage;
+	size_t const numBlocks = bss->numBlocks;
+	struct StrictlyProperBlock const * const blocks = bss->blocks;
+	double const * const * const blockInputs = (double const * const * const)bss->blockInputs;
+	double const * const * const blockOutputs = (double const * const * const)bss->blockOutputs;
+	
+	if (bss->systemUtility)
+		bss->systemUtility(time, info->numInputs, input, info->numOutputs, output, bss->systemStorage);
+	
+	size_t xi = 0;
+	for (size_t i = 0; i < numBlocks; i++)
+	{
+		struct StrictlyProperBlockInfo bi = blocks[i].info;
+		if (blocks[i].u)
+			blocks[i].u(&bi, time, &dState[xi], &state[xi], blockInputs[i], blockOutputs[i]);
+		xi += bi.numStates;
+	}
+}
 
 struct StrictlyProperBlock blockSystem
 (
@@ -93,8 +121,9 @@ struct StrictlyProperBlock blockSystem
 			numSystemOutputs,
 			storage,
 		},
-		physics,
 		output,
+		physics,
+		util,
 	};
 error:
 	return NULL_StritclyProperBlock;

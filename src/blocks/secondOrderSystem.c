@@ -57,8 +57,9 @@ struct StrictlyProperBlock secondOrderSystem(size_t const numBlocks, struct seco
 			numBlocks,
 			so_storage,
 		},
-		physics,
 		output,
+		physics,
+		NULL,
 	};
 error:
 	return NULL_StritclyProperBlock;

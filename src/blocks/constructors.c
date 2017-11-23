@@ -19,7 +19,8 @@ struct BlockSystemStorage * blockSystemStorage_new
 	size_t const numBlocks,
 	struct StrictlyProperBlock const * const blocks,
 	CalcBlockInputsFunction const calcBlockInputs,
-	CalcSystemOutputFunction const calcSystemOutputs,
+	BlockSystemOutputFunction const systemOutputs,
+	BlockSystemUtilityFunction const systemUtility,
 	void * const systemStorage
 )
 {
@@ -61,7 +62,8 @@ struct BlockSystemStorage * blockSystemStorage_new
 	bstack.blockInputs = input_storage;
 	bstack.blockOutputs = output_storage;
 	bstack.calcBlockInputs = calcBlockInputs;
-	bstack.calcSystemOutput = calcSystemOutputs;
+	bstack.systemOutput = systemOutputs;
+	bstack.systemUtility = systemUtility;
 	bstack.systemStorage = systemStorage;
 
 	*bheap = bstack;
