@@ -9,7 +9,7 @@
 
 typedef char*(*test_function)(); //return 0 if the test passed otherwise return a string literal
 
-#define mu_assert(test, message) if (!(test)) { log_err(message); return message; }
+#define mu_assert(test, message, ...) if (!(test)) { log_err(message, ##__VA_ARGS__); return message; }
 
 #define RUN_TESTS(...) int main(int argc, char const * const argv[])\
 {\
