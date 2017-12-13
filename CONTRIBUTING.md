@@ -22,7 +22,7 @@ So here's me being optimistic:
 
 1. ~~put all of the data in struct StrictlyProperBlock on it's own struct that can be passed into the functions rather than having the huge parameter lists~~
 2. ~~install dbg.h macros in the solvers and blocks to make them more user friendly~~
-3. ~~pass `output` as an input to physics function~~ Not going to do this. In rk4, for example, it would force a call to the output function every partial step wheather the result is used or not. You'll get the exact same perormance if you just call the output function from the physics function if you need it but the people who don't need it won't get the (probably negligable) performance hit.
+3. ~~pass `output` as an input to physics function~~ ~~Not going to do this. In rk4, for example, it would force a call to the output function every partial step wheather the result is used or not. You'll get the exact same perormance if you just call the output function from the physics function if you need it but the people who don't need it won't get the (probably negligable) performance hit.~~ That's not right either...you would save a function call because you're calling it anyway
 4. ~~add a `void utility(time, input, state, output)` function to all blocks and call it from the solvers~~
 
 ### tests
