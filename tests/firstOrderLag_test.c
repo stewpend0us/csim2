@@ -93,7 +93,7 @@ static char * first_order_lag_step_test()
 	double * rk4Y = NULL;
 
 	double tau[1] = { 3 };
-	struct StrictlyProperBlock const block = firstOrderLag(1, tau);
+	struct StrictlyProperBlock const block = firstOrderLag(1, tau, NULL);
 	mu_assert(good_block(block),"block is bad");
 
 	double const dt = .01;
