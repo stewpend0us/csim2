@@ -4,10 +4,7 @@
 
 void euler_step
 (
-	struct StrictlyProperBlockInfo const * const info,
-	OutputFunction const h,
-	PhysicsFunction const f,
-	UtilityFunction const u,
+	struct StrictlyProperBlock const * const info,
 	double * const nextState, // (1 x numStates)
 	double * const dState, // (1 x numStates)
 	double * const output, // (1 x numOutputs)
@@ -18,6 +15,9 @@ void euler_step
 )
 {
 	size_t const numStates = info->numStates;
+	OutputFunction const h = info->h;
+	PhysicsFunction const f = info->f;
+	UtilityFunction const u = info->u;
 	h(info, output, time, state);
 	f(info, dState, time, state, input);
 	if (u)
@@ -36,10 +36,7 @@ void euler_step
 
 void rk4_step
 (
-	struct StrictlyProperBlockInfo const * const info,
-	OutputFunction const h,
-	PhysicsFunction const f,
-	UtilityFunction const u,
+	struct StrictlyProperBlock const * const info,
 	double * const nextState, // (1 x numStates)
 	double * const dState, // (1 x numStates)
 	double * const dB, // (1 x numStates) temp
@@ -56,6 +53,9 @@ void rk4_step
 {
 	size_t i;
 	size_t const numStates = info->numStates;
+	OutputFunction const h = info->h;
+	PhysicsFunction const f = info->f;
+	UtilityFunction const u = info->u;
 	double const halfdt = dt / 2;
 	double const halfStepTime = time + halfdt;
 	double const nextTime = time + dt;

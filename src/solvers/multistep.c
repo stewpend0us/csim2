@@ -12,13 +12,10 @@ void euler
 	double const * const U // numSteps x numInputs input values over time
 )
 {
-	struct StrictlyProperBlockInfo const bi = block->info;
-	size_t const numStates = bi.numStates;
-	size_t const numInputs = bi.numInputs;
-	size_t const numOutputs = bi.numOutputs;
+	size_t const numStates = block->numStates;
+	size_t const numInputs = block->numInputs;
+	size_t const numOutputs = block->numOutputs;
 	OutputFunction const h = block->h;
-	PhysicsFunction const f = block->f;
-	UtilityFunction const u = block->u;
 
 	double * const temp_memory = malloc(numStates * 2 * sizeof(double));
 	check_mem(temp_memory);
@@ -38,12 +35,12 @@ void euler
 		currentInput = &U[i*numInputs];
 		currentOutput = &Y[i*numOutputs];
 
-		euler_step(&bi, h, f, u, nextState, currentdState, currentOutput, dt, time[i], currentState, currentInput);
+		euler_step( block, nextState, currentdState, currentOutput, dt, time[i], currentState, currentInput);
 	}
 
 	//currentState = nextState;
 	currentOutput = &Y[i*numOutputs];
-	h(&bi, currentOutput, time[i], currentState);
+	h( block, currentOutput, time[i], currentState);
 
 error:
 	free(temp_memory);
@@ -61,13 +58,10 @@ void rk4
 	double const * const U2 // numSteps x numInputs inputs
 )
 {
-	struct StrictlyProperBlockInfo const bi = block->info;
-	size_t const numStates = bi.numStates;
-	size_t const numInputs = bi.numInputs;
-	size_t const numOutputs = bi.numOutputs;
+	size_t const numStates = block->numStates;
+	size_t const numInputs = block->numInputs;
+	size_t const numOutputs = block->numOutputs;
 	OutputFunction const h = block->h;
-	PhysicsFunction const f = block->f;
-	UtilityFunction const u = block->u;
 
 	double * const temp_memory = malloc(numStates * 6 * sizeof(double));
 	check_mem(temp_memory);
@@ -93,12 +87,12 @@ void rk4
 		nextInput = &U1[(i + 1)*numInputs];
 		currentOutput = &Y[i*numOutputs];
 
-		rk4_step(&bi, h, f, u, nextState, currentdState, B, C, D, currentOutput, dt, time[i], currentState, currentInput, currentInput2, nextInput);
+		rk4_step( block, nextState, currentdState, B, C, D, currentOutput, dt, time[i], currentState, currentInput, currentInput2, nextInput);
 		memcpy(currentState, nextState, numStates * sizeof(double));
 	}
 
 	currentOutput = &Y[i*numOutputs];
-	h(&bi, currentOutput, time[i], currentState);
+	h( block, currentOutput, time[i], currentState);
 error:
 	free(temp_memory);
 }
