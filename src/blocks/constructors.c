@@ -28,8 +28,8 @@ struct BlockSystemStorage * blockSystemStorage_new
 	size_t totalBlockOutputs = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		totalBlockInputs += blocks[i].info.numInputs;
-		totalBlockOutputs += blocks[i].info.numOutputs;
+		totalBlockInputs += blocks[i].numInputs;
+		totalBlockOutputs += blocks[i].numOutputs;
 	}
 
 	double * storage = NULL;
@@ -52,8 +52,8 @@ struct BlockSystemStorage * blockSystemStorage_new
 	{
 		input_storage[i] = &storage[inputi];
 		output_storage[i] = &storage[outputi];
-		inputi += blocks[i].info.numInputs;
-		outputi += blocks[i].info.numOutputs;
+		inputi += blocks[i].numInputs;
+		outputi += blocks[i].numOutputs;
 	}
 
 	struct BlockSystemStorage bstack;

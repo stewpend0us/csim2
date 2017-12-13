@@ -3,7 +3,7 @@
 
 static void physics
 (
-	struct StrictlyProperBlockInfo const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const dState,
 	double const time,
 	double const * const state,
@@ -11,9 +11,9 @@ static void physics
 )
 {
 	(void)time;
-	size_t const numInputs = info->numInputs;
+	size_t const numInputs = block->numInputs;
 
-	struct transferFunctionStorage const * const tf_storage = info->storage;
+	struct transferFunctionStorage const * const tf_storage = block->storage;
 	size_t xi = 0;
 	size_t nStates;
 	for (size_t i = 0; i < numInputs; i++)
@@ -31,15 +31,15 @@ static void physics
 
 static void output
 (
-	struct StrictlyProperBlockInfo const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const output,
 	double const time,
 	double const * const state
 )
 {
 	(void)time;
-	size_t const numOutputs = info->numOutputs;
-	struct transferFunctionStorage const * const tf_storage = info->storage;
+	size_t const numOutputs = block->numOutputs;
+	struct transferFunctionStorage const * const tf_storage = block->storage;
 
 	size_t xi = 0;
 	for (size_t i = 0; i < numOutputs; i++)
@@ -50,7 +50,11 @@ static void output
 	}
 }
 
-struct StrictlyProperBlock transferFunction(size_t const numBlocks, struct transferFunctionStorage * const tf_storage)
+struct StrictlyProperBlock transferFunction(
+	size_t const numBlocks,
+	struct transferFunctionStorage * const tf_storage,
+	UtilityFunction const util
+)
 {
 	check(numBlocks > 0, "numBlocks must be greater than zero");
 	check(tf_storage, "tf_storage must not be NULL");
@@ -65,15 +69,13 @@ struct StrictlyProperBlock transferFunction(size_t const numBlocks, struct trans
 	}
 	return (struct StrictlyProperBlock)
 	{
-		{
-			totalStates,
-			numBlocks,
-			numBlocks,
-			tf_storage,
-		},
+		totalStates,
+		numBlocks,
+		numBlocks,
+		tf_storage,
 		output,
 		physics,
-		NULL,
+		util,
 	};
 error:
 	return NULL_StritclyProperBlock;

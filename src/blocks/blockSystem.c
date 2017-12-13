@@ -4,7 +4,7 @@
 // BlockSystem
 static void physics
 (
-	struct StrictlyProperBlockInfo const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const dState,
 	double const time,
 	double const * const state,
@@ -12,8 +12,8 @@ static void physics
 )
 {
 	
-	size_t const numInputs = info->numInputs;
-	struct BlockSystemStorage const * const bss = info->storage;
+	size_t const numInputs = block->numInputs;
+	struct BlockSystemStorage const * const bss = block->storage;
 	size_t const numBlocks = bss->numBlocks;
 	struct StrictlyProperBlock const * const blocks = bss->blocks;
 	double * const * const blockInputs = bss->blockInputs;
@@ -23,12 +23,10 @@ static void physics
 
 	// update all of the block outputs based on the latest state
 	size_t xi = 0;
-	struct StrictlyProperBlockInfo bi;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		bi = blocks[i].info;
-		blocks[i].h(&bi, blockOutputs[i], time, &state[xi]);
-		xi += bi.numStates;
+		blocks[i].h(&blocks[i], blockOutputs[i], time, &state[xi]);
+		xi += blocks[i].numStates;
 	}
 	// calculate the block inputs from the updated block outputs
 	bss->calcBlockInputs(numBlocks, blocks, blockInputs, time, blockOutputs_const, numInputs, input, storage);
@@ -36,22 +34,21 @@ static void physics
 	xi = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		bi = blocks[i].info;
-		blocks[i].f(&bi, &dState[xi], time, &state[xi], blockInputs[i]);
-		xi += bi.numStates;
+		blocks[i].f(&blocks[i], &dState[xi], time, &state[xi], blockInputs[i]);
+		xi += blocks[i].numStates;
 	}
 }
 
 static void output
 (
-	struct StrictlyProperBlockInfo const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const output,
 	double const time,
 	double const * const state
 )
 {
-	struct BlockSystemStorage const * const bss = info->storage;
-	size_t const numOutputs = info->numOutputs;
+	struct BlockSystemStorage const * const bss = block->storage;
+	size_t const numOutputs = block->numOutputs;
 	size_t const numBlocks = bss->numBlocks;
 	struct StrictlyProperBlock const * const blocks = bss->blocks;
 	double * const * const blockOutputs = bss->blockOutputs;
@@ -60,9 +57,8 @@ static void output
 	size_t xi = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		struct StrictlyProperBlockInfo bi = blocks[i].info;
-		blocks[i].h(&bi, blockOutputs[i], time, &state[xi]);
-		xi += bi.numStates;
+		blocks[i].h(&blocks[i], blockOutputs[i], time, &state[xi]);
+		xi += blocks[i].numStates;
 	}
 	void * const storage = bss->systemStorage;
 	bss->systemOutput(numOutputs, output, time, blockOutputs_const, storage);
@@ -70,7 +66,7 @@ static void output
 
 static void util
 (
-	struct StrictlyProperBlockInfo const * const info,	
+	struct StrictlyProperBlock const * const block,	
 	double const time,
 	double const * const dState,
 	double const * const state,
@@ -78,22 +74,21 @@ static void util
 	double const * const output
 )
 {
-	struct BlockSystemStorage const * const bss = info->storage;
+	struct BlockSystemStorage const * const bss = block->storage;
 	size_t const numBlocks = bss->numBlocks;
 	struct StrictlyProperBlock const * const blocks = bss->blocks;
 	double const * const * const blockInputs = (double const * const * const)bss->blockInputs;
 	double const * const * const blockOutputs = (double const * const * const)bss->blockOutputs;
 	
 	if (bss->systemUtility)
-		bss->systemUtility(time, info->numInputs, input, info->numOutputs, output, bss->systemStorage);
+		bss->systemUtility(time, block->numInputs, input, block->numOutputs, output, bss->systemStorage);
 	
 	size_t xi = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		struct StrictlyProperBlockInfo bi = blocks[i].info;
 		if (blocks[i].u)
-			blocks[i].u(&bi, time, &dState[xi], &state[xi], blockInputs[i], blockOutputs[i]);
-		xi += bi.numStates;
+			blocks[i].u(&blocks[i], time, &dState[xi], &state[xi], blockInputs[i], blockOutputs[i]);
+		xi += blocks[i].numStates;
 	}
 }
 
@@ -111,16 +106,14 @@ struct StrictlyProperBlock blockSystem
 	size_t totalBlockStates = 0;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		totalBlockStates += blocks[i].info.numStates;
+		totalBlockStates += blocks[i].numStates;
 	}
 	return (struct StrictlyProperBlock)
 	{
-		{
-			totalBlockStates,
-			numSystemInputs,
-			numSystemOutputs,
-			storage,
-		},
+		totalBlockStates,
+		numSystemInputs,
+		numSystemOutputs,
+		storage,
 		output,
 		physics,
 		util,

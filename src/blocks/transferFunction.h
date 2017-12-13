@@ -9,4 +9,8 @@ struct transferFunctionStorage
 	double const * denominator;
 };
 
-struct StrictlyProperBlock transferFunction(size_t const numBlocks, struct transferFunctionStorage * const storage);
+struct StrictlyProperBlock transferFunction(
+	size_t const numBlocks,
+	struct transferFunctionStorage * const storage,
+	UtilityFunction const util
+);

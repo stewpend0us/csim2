@@ -6,7 +6,7 @@ struct StrictlyProperBlock;
 
 // update dState as a function of time, state, input, and storage
 typedef void(*PhysicsFunction)(
-	struct StrictlyProperBlock const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const dState,
 	double const time,
 	double const * const state,
@@ -15,14 +15,14 @@ typedef void(*PhysicsFunction)(
 
 // update output as a function of time, state, and storage
 typedef void(*OutputFunction)(
-	struct StrictlyProperBlock const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const output,
 	double const time,
 	double const * const state
 	);
 
 typedef void(*UtilityFunction)(
-	struct StrictlyProperBlock const * const info,
+	struct StrictlyProperBlock const * const block,
 	double const time,
 	double const * const dState,
 	double const * const state,

@@ -3,7 +3,7 @@
 
 static void physics
 (
-	struct StrictlyProperBlockInfo const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const dState,
 	double const time,
 	double const * const state,
@@ -11,8 +11,8 @@ static void physics
 )
 {
 	(void)time;
-	size_t const numStates = info->numStates;
-	double const * const tau = info->storage;
+	size_t const numStates = block->numStates;
+	double const * const tau = block->storage;
 
 	for (size_t i = 0; i<numStates; i++)
 		dState[i] = (input[i] - state[i]) / tau[i];
@@ -20,18 +20,18 @@ static void physics
 
 static void output
 (
-	struct StrictlyProperBlockInfo const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const output,
 	double const time,
 	double const * const state
 )
 {
 	(void)time;
-	size_t const numStates = info->numStates;	
+	size_t const numStates = block->numStates;	
 	memcpy(output, state, numStates * sizeof(double));
 }
 
-struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau)
+struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau, UtilityFunction const util)
 {
 	check(numBlocks > 0,"numBlocks must be greater than zero");
 	check(tau, "tau must not be NULL");
@@ -41,15 +41,13 @@ struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const 
 	}
 	return (struct StrictlyProperBlock)
 	{
-		{
-			numBlocks,
-			numBlocks,
-			numBlocks,
-			tau,
-		},
+		numBlocks,
+		numBlocks,
+		numBlocks,
+		tau,
 		output,
 		physics,
-		NULL,
+		util,
 	};
 error:
 	return NULL_StritclyProperBlock;
