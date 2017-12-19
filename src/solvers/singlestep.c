@@ -4,7 +4,7 @@
 
 void euler_step
 (
-	struct StrictlyProperBlock const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const nextState, // (1 x numStates)
 	double * const dState, // (1 x numStates)
 	double * const output, // (1 x numOutputs)
@@ -14,14 +14,14 @@ void euler_step
 	double const * const input // (1 x numInputs)
 )
 {
-	size_t const numStates = info->numStates;
-	OutputFunction const h = info->h;
-	PhysicsFunction const f = info->f;
-	UtilityFunction const u = info->u;
-	h(info, output, time, state);
-	f(info, dState, time, state, input);
+	size_t const numStates = block->numStates;
+	OutputFunction const h = block->h;
+	PhysicsFunction const f = block->f;
+	UtilityFunction const u = block->u;
+	h(block, output, time, state);
+	f(block, dState, time, state, input);
 	if (u)
-		u(info, time, dState, state, input, output);
+		u(block, time, dState, state, input, output);
 	for (size_t i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dState[i] * dt;
 }
@@ -36,7 +36,7 @@ void euler_step
 
 void rk4_step
 (
-	struct StrictlyProperBlock const * const info,
+	struct StrictlyProperBlock const * const block,
 	double * const nextState, // (1 x numStates)
 	double * const dState, // (1 x numStates)
 	double * const dB, // (1 x numStates) temp
@@ -52,30 +52,30 @@ void rk4_step
 )
 {
 	size_t i;
-	size_t const numStates = info->numStates;
-	OutputFunction const h = info->h;
-	PhysicsFunction const f = info->f;
-	UtilityFunction const u = info->u;
+	size_t const numStates = block->numStates;
+	OutputFunction const h = block->h;
+	PhysicsFunction const f = block->f;
+	UtilityFunction const u = block->u;
 	double const halfdt = dt / 2;
 	double const halfStepTime = time + halfdt;
 	double const nextTime = time + dt;
 
-	h(info, output, time, state);
-	f(info, dState, time, state, input);
+	h(block, output, time, state);
+	f(block, dState, time, state, input);
 	if (u)
-		u(info, time, dState, state, input, output);
+		u(block, time, dState, state, input, output);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dState[i] * dt;
 
-	f(info, dB, halfStepTime, nextState, halfStepInput);
+	f(block, dB, halfStepTime, nextState, halfStepInput);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dB[i] * halfdt;
 
-	f(info, dC, halfStepTime, nextState, halfStepInput);
+	f(block, dC, halfStepTime, nextState, halfStepInput);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dC[i] * halfdt;
 
-	f(info, dD, nextTime, nextState, nextInput);
+	f(block, dD, nextTime, nextState, nextInput);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dt * (dState[i] + 2*dB[i] + 2*dC[i] + dD[i]) / 6;
 }
