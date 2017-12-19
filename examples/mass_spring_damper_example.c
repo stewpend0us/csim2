@@ -1,7 +1,7 @@
 #include "multistep.h"
 #include "dbg.h"
 #include <math.h>
-#include <time.h>
+#include <unistd.h>
 #include <string.h>
 
 struct mass_storage
@@ -41,7 +41,7 @@ static void physics(
 	double const mass = storage->mass;
 	double const stiffness = storage->stiffness;
 	double const damping = storage->damping;
-	
+
 	// calculate dState
 	//mass*xdotdot + damping*xdot + stiffness*x = Force
 	//mass*xdotdot = Force - damping*xdot - stiffness*x
@@ -51,11 +51,13 @@ error:
 	return;
 }
 
+/*
 void delay(unsigned int mseconds)
 {
     clock_t goal = mseconds + clock();
     while (goal > clock());
 }
+*/
 
 static void util(
 	struct StrictlyProperBlock const * const block,
@@ -73,7 +75,7 @@ static void util(
 	(void) output;
 	double const velocity = state[0];
 	double const position = state[1];
-	int const space = 40;
+	int const space = 20;
 	int pos = round(position*space)+space;
 	double const thresh = .1;
 	printf(":");
@@ -88,7 +90,7 @@ static void util(
 	for (int i = pos; i<2*space+1; i++)
 		printf(" ");
 	printf(":\n");
-	delay(storage->dt*1000);
+	usleep(1000*1000*storage->dt);
 }
 
 int main(int argc, char **argv)
@@ -117,8 +119,7 @@ int main(int argc, char **argv)
 				"damping:   %f\n"
 				"dt:        %f\n"
 				"tf:        %f\n", storage.mass, storage.stiffness, storage.damping, storage.dt, tf);
-		delay(1000);
-		
+		sleep(1);
 	}
 	struct StrictlyProperBlock block = {2, 1, 2, &storage, outputState, physics, util};
 	double const Xi[2] = {0, 1}; // initial velocity of 0, initial position of 1
@@ -127,7 +128,7 @@ int main(int argc, char **argv)
 	double * U = NULL;
 
 	size_t const numSteps = numTimeSteps(storage.dt, tf);
-	
+
 	time = malloc(numSteps * sizeof(double));
 	check_mem(time);
 	Y = malloc(2 * numSteps * sizeof(double));
