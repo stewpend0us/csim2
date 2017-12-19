@@ -18,19 +18,6 @@ static void physics
 		dState[i] = (input[i] - state[i]) / tau[i];
 }
 
-static void output
-(
-	struct StrictlyProperBlock const * const block,
-	double * const output,
-	double const time,
-	double const * const state
-)
-{
-	(void)time;
-	size_t const numStates = block->numStates;	
-	memcpy(output, state, numStates * sizeof(double));
-}
-
 struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau, UtilityFunction const util)
 {
 	check(numBlocks > 0,"numBlocks must be greater than zero");
@@ -45,7 +32,7 @@ struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const 
 		numBlocks,
 		numBlocks,
 		tau,
-		output,
+		outputState,
 		physics,
 		util,
 	};

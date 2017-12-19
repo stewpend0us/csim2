@@ -44,3 +44,12 @@ struct StrictlyProperBlock
 
 #define NULL_StritclyProperBlock ((struct StrictlyProperBlock){0,0,0,NULL,NULL,NULL,NULL})
 #define good_block(block) (block.h && block.f)
+
+// common output function
+void outputState
+(
+	struct StrictlyProperBlock const * const block,
+	double * const output,
+	double const time,
+	double const * const state
+);

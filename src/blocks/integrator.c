@@ -15,18 +15,6 @@ static void physics
 	memcpy(dState, input, block->numStates * sizeof(double));
 }
 
-static void output
-(
-	struct StrictlyProperBlock const * const block,
-	double * const output,
-	double const time,
-	double const * const state
-)
-{
-	(void)time;
-	memcpy(output, state, block->numStates * sizeof(double));
-}
-
 struct StrictlyProperBlock integrator(size_t const numBlocks, UtilityFunction const util)
 {
 	check(numBlocks > 0, "numBlocks must be greater than 0");
@@ -36,7 +24,7 @@ struct StrictlyProperBlock integrator(size_t const numBlocks, UtilityFunction co
 		numBlocks,
 		numBlocks,
 		NULL,
-		output,
+		outputState,
 		physics,
 		util,
 	};
