@@ -7,13 +7,13 @@ re-usable blocks and solvers for composing and running dynamic simulations.
 
 ## prerequisites
 Before this tool will make sense you'll need to know something about differential
-equations. I'll attempt to put it in a nutshell here but you may want to look around
-as well. If you are comfortable with differential equations and/or state space you
+equations. I'll attempt to put it in a nutshell here but you may want to study up
+yourself. If you are comfortable with differential equations and/or state space you
 can probably skip this section.
 
-A differential equation is an eqation that is a
-function of a variable and its derivatives. The classic (mechanical) example is a
-mass spring damper. The system looks like this:
+A differential equation is an eqation that is a function of a variable and its
+derivatives. The classic (mechanical) example is a mass spring damper.
+The system looks like this:
 
                |----> +x
                 _______
@@ -35,8 +35,8 @@ Summing the forces results in the following differential equation:
 
     M*xdotdot + C*xdot + K*x = F
 
-I've used `dot` to indcate a time derivative so `xdot` is the first derivative of
-position (velocity) and `xdotdot` is the seccond derivative of position (acceleration).
+I've used `dot` to indcate a time derivative so `xdot` is the first derivative of position
+dx/dt (velocity) and `xdotdot` is the seccond derivative of position d^2x/dt^2 (acceleration).
 
 In csim2 the differential equation is defined by the *physics* function for a block.
 The physics function calculates the state derivative as a function of state, input, and time.
@@ -44,10 +44,10 @@ The physics function calculates the state derivative as a function of state, inp
 What are the state derivative and state? Start by identifying the highest and lowest
 order derivatives of x that appear in the differential equation. In our case the highest
 is `xdotdot` and the lowest is `x`. That means that `xdotdot` is definitely a state derivative
-and `x` is definitely a state. Everything in-between `xdotdot` and `x` are both state
-derivatives *and* states. 
+and `x` is definitely a state. Everything in-between are both state
+derivatives *and* states. In our case that's `xdotdot`. 
 
-     state
+      state
     derivative        state
     [ xdotdot ]  ->  [ xdot ]
     [ xdot    ]  ->  [ x    ]
@@ -66,7 +66,7 @@ identify the state derivative versus the state.
     [ dx      ]  ->  [ x    ]
 
 Now back to the example. In the physics function we need to calculate the state derivative.
-So let solve our differential equation for the highest order derivative of x:
+So let solve our differential equation for the highest order derivative of `x`:
 
     xdotdot = (F - C*xdot - K*x)/M
 
@@ -82,6 +82,8 @@ All that's left is to implement the physics function. It will look something lik
     *dx = xdot; // this is why I use the naming convention otherwise both variables would have the same name
     *dxdot = (F - C*xdot - K*x) / M;
 
+See `examples/mass_spring_damper_example.c` for a working demo.
+
 ## blocks
 Blocks are the part of block diagrams that contain all of the dynamics. Connections
 between blocks define where the inputs to a block come from and where the outputs go.
@@ -96,7 +98,7 @@ Here the input signal goes into block B1. Inside B1 it's processed into the outp
 which is then passed into the input of block B2. The final output signal is just the
 output of block B2.
 
-This is what a block really looks like:  
+This is a more complete representation of a block:  
 
           ___________
          |           |
@@ -120,12 +122,15 @@ the same as general blocks but the relatonship between inputs and outputs is dif
 
 There is no direct connection between the outputs and inputs. This compromise is made to
 drastically simplify composing blocks together (I'll talk about why this works more in 
-the section on composing blocks).
+the section on composing blocks). Typically *real* systems don't have a direct connection
+between inputs and outputs anyway so this isn't a huge sacrafice. When a system does have
+a direct feedthrough relationship it can usually be handled by making the connection by 
+wrapping the block in a `blockSystem`.
 
-## solvers `solvers.c`
-Solvers only ever deal with an individual block (although the block may be composed of
-several other blocks). Their job is to integrate the state derivative and produce the next state.
-This is what the block and solver look like:
+## solvers
+Solvers only ever deal with a single block (although the block may be composed of several
+other blocks by using a `blockSystem`). Their job is to integrate the state derivative and
+produce the next state. This is what the block and solver look like:
 
                  _______
                 |       |
@@ -140,19 +145,10 @@ This is what the block and solver look like:
     input---->|u         y|---->output
               |___________|
 
-Here the laplace domain integrator `1/s` is used to represent the solver. The inputs to
-the standard solver functions are:
-- block to be solved
-- time vector
-- initial conditions
-- input vector
+Here the laplace domain integrator `1/s` is used to represent the solver. Currently there
+are two solvers: `euler` and `rk4`.
 
-The return values are:
-- block output
-- block state *(optional)*
-- block dstate *(optional)*
-
-## solvers with controller `solvers_controller.c`
+## solvers with controller
 Controller solvers do the same thing as standard solvers but instead of specifying the
 block input directly they are specified via a controller function and command. The block
 diagram looks like this:
