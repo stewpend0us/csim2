@@ -110,15 +110,15 @@ This is a more complete representation of a block:
 Where __x__ and __dx__ are the block __state__ and __state derviative__, __u__ is the
 block __input__, and __y__ is the block __output__. In the general case:
 
-    dx = f(t,x,u)
-    y  = h(t,x,u)
+    dState = f(time, state, input)
+    output = h(time, state, input)
 
 ## strictly proper blocks `StrictlyProperBlock.h`
 csim2 is __designed to only work with strictly proper blocks__. Strictly proper blocks look
 the same as general blocks but the relatonship between inputs and outputs is different.
 
-    dx = f(t,x,u)
-    y  = h(t,x)
+    dState = f(time, state, input)
+    output = h(time, state)
 
 There is no direct connection between the outputs and inputs. This compromise is made to
 drastically simplify composing blocks together (I'll talk about why this works more in 
@@ -171,7 +171,7 @@ diagram looks like this:
                 |  control  |
     command---->|i          |
                 |___________|
-              
+
 In this case the solver functions also return the output of the controller.
 
 The kink in the connections from y to f and o to u represent switches. That means
@@ -184,42 +184,19 @@ function should be run or not and then call it accordingly.
 
 ## implementing blocks 
 Blocks are implemented by writing a function that returns a `StrictlyProperBlock`
-struct (`StrictlyProperBlock.h`).
+struct. The struct definition looks like this:
 
-The struct contains the properties:
-- `numStates` number of States (size of the state and dstate array)
-- `numInputs` number of Inputs (size of the input array)
-- `numOutputs` number of Outputs (size of the output array)
-- `f` physics function pointer
-  - Note that the physics function should be *pure*
-- `h` output function pointer
-  - Note that the output function should be *pure*
-- `storage` void pointer can be used for storing anything needed in the physics/output functions
-  - Note that the storage values should remain constant. This isn't required but good practice.
+    struct StrictlyProperBlock
+    {
+    	size_t numStates; // number of states 
+    	size_t numInputs; // number of inputs
+    	size_t numOutputs; // number of outputs
+    	void * storage; // point to anything you want here
+    	OutputFunction h; // output = h(time, state) calculate the output
+    	PhysicsFunction f; // dState = f(time, state, input) calculate the dState
+    	UtilityFunction u; // u(time, dState, state, input, output) do whatever you want in this function
+    };
 
-The inputs to the physics function are:
-- `numStates` same as above
-- `numInputs` same as above
-- `dState` state derivative array *(output)*
-- `time` current time value
-- `state` current state array
-- `input` current input array
-- `storage` same as above
-
-The physics function updates the state derivative array (`dState`) as a function of the other inputs.
-This is the __differential equation__ that represents whatever we are trying to simulate. if you are
-familiar with __state space__ it represents the A and B matrices.
-
-The inputs to the output function are:
-- `numStates` same as above
-- `numOutputs` same as above
-- `output` output array *(output)*
-- `time` current time value
-- `state` current state array
-- `storage` same as above
-
-The output function defines the output of our system. If you are familiar with __state space__
-it represents the C matrix (there is no D matrix for strictly proper systems).
 
 ## composing blocks
 Blocks can be composed together to form one larger block. Here's a simple example:
@@ -231,71 +208,39 @@ Blocks can be composed together to form one larger block. Here's a simple exampl
                 |    |____|     |____|    |
                 |_________________________|
 
-Here we've taken the trivial example from above and enclosed it in it's
-own block so that it can be solved (remember the solvers only operate on a single block).
-To achieve this using csim2 you would construct a `blockSystem`
+Here we've taken the trivial example from above and enclosed it in it's own block so that
+it can be solved (remember the solvers only operate on a single block). To achieve this
+using csim2 you would construct a `blockSystem`.
 
-## blockSystem `blockSystem.c`
-The `blockSystem` block enables the composition of other blocks. Unlike implementing a new
-block the `blockSystem` block is already implemented. Instead you have to construct a
-`blockSystemStorage` struct which contains functions for calculating the input to all of the
-contained block and for calculating the output of the entire block system.
+Rather than write a new block from scratch a blockSystem just needs to be constructed passing
+in an array of blocks, and `calcBlockInputs` and `calcSystemOutput` functions. `calcBlockInputs`
+allows you to calculate the input for each individual block given the output from all of the blocks
+and the input to the system. `calcSystemOutput` allows you to calculate the system output given
+the output of each individual block.
 
 Here's a more complete diagram:
 
-                 ________________________________________
-                |           containing block             |
-                |      ___________                       |
-                |     | contained |      ____________    |
-                |     |  blocks   |     | calcSystem |   |      system
-                |  .->|u         y|--.--|   Output   |-->|----> output
-                |  |  |___________|  |  |____________|   |
-                |  |   ___________   |                   |
-                |  |  | calcBlock |  |                   |
-     system     |  '--|  Inputs   |<-'                   |
-     input ---->|---->|___________|                      |
-                |________________________________________|
+                 _________________________________________
+                |              block system               |
+                |      ____________                       |
+                |     |            |                      |
+                |     |  .->B1--.  |      ____________    |
+                |     |  |->B2--|  |     |            |   |
+                |     |  |->B3--|  |     | calcSystem |   |      system
+                |  .->|--'      '->|--.--|   Output   |-->|----> output
+                |  |  |____________|  |  |____________|   |
+                |  |   ____________   |                   |
+                |  |  |            |  |                   |
+                |  |  |  calcBlock |  |                   |
+     system     |  '--|u  Inputs  y|<-'                   |
+     input ---->|---->|____________|                      |
+                |_________________________________________|
 
 This is where the distinction between general blocks and strictly proper blocks comes in.
 If we were using general blocks and the output were a function of state and input `y = h(t,x,u)`
-then there would be an algebraic loop between the contained blocks and the calcBlockInputs function.
+then there would be an algebraic loop between the contained blocks and the `calcBlockInputs` function.
 Say we need to calculate the output of the block. First we will need the state which we have and the input
-which we don't have. So we'd need to follow the signal back to the calcBlockInputs function which requires
+which we don't have. So we'd need to follow the signal back to the `calcBlockInputs` function which requires
 the block output as input. Of cource the block output is what we were after in the first place so that's
 not going to work without getting fancy. Thankfully we're using strictly proper blocks `y = h(t,x)` so 
 the output of the block is guaranteed to be available and this problem goes away.
-
-The blockSystemStorage struct contains:
-- `numBlocks` number of blocks the blockSystem contains
-- `blocks` array of strictlyProperBlock structs
-- `blockInputs` array of input arrays (one for each block)
-- `blockOutputs` array of output arrays (one for each block)
-- `calcBlockInputs` function pointer for calculating the individual block inputs
-  - Note that the calcBlockInputs function should be *pure*
-- `calcSystemOutput` function pointer for calculating the blockSystem output
-  - Note that the calcSystemOutput function should be *pure*
-- `systemStorage` void pointer can be used for storing anything needed in the calcBlockInputs/calcSystemOutput functions
-  - Note that the storage values should remain constant. This isn't required but good practice.
-
-The inputs to the calcBlockInputs function are:
-- `numBlocks` same as above
-- `blocks` same as above
-- `blockInputs` same as above *(output)*
-- `time` current time value
-- `blockOutputs` same as above
-- `numSystemInputs` number of blockSystem inputs (size of the systemInputs array)
-- `systemInputs` current input array
-- `systemStorage` same as above
-
-You can think of the calcBlockInputs function as making the connections from the the containing
-block inputs and contained blocks outputs to the contained blocks inputs.
-
-The inputs to the calcSystemOutput function are:
-- `numSystemOutputs` number of blockSystem outputs (size of they systemOutputs array)
-- `systemOutputs` current output array *(output)*
-- `time` current time value
-- `blockOutputs` same as above
-- `systemStorage` same as above
-
-The calcSystemOutput makes the connection from the contained blocks output to the blockSystem
-output.
