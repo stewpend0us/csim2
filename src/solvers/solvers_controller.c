@@ -18,7 +18,6 @@ void euler_c
 	size_t const numStates = block->numStates;
 	OutputFunction const h = block->h;
 
-	struct ControllerBlockInfo const ci = controller->info;
 	ControllerFunction const c = controller->c;
 
 	double * const temp_memory = malloc(numStates * 2 * sizeof(double));
@@ -36,21 +35,20 @@ void euler_c
 	size_t i;
 	for (i = 0; i < (numSteps - 1); i++)
 	{
-		ctrlFeedback = &Y[i*ci.numCommands];
-		ctrlInput = &U[i*ci.numInputs];
-		ctrlCommand = &C[i*ci.numFeedback];
+		ctrlFeedback = &Y[i*controller->numCommands];
+		ctrlInput = &U[i*controller->numInputs];
+		ctrlCommand = &C[i*controller->numFeedback];
 
-		c(&ci, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
-		//h(&block, ctrlFeedback, time[i], currentState);
+		c(controller, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
 		euler_step(block, nextState, currentdState, ctrlFeedback, dt, time[i], currentState, ctrlCommand);
 	}
 
 	//currentState = nextState;
-	ctrlFeedback = &Y[i*ci.numCommands];
-	ctrlInput = &U[i*ci.numInputs];
-	ctrlCommand = &C[i*ci.numFeedback];
+	ctrlFeedback = &Y[i*controller->numCommands];
+	ctrlInput = &U[i*controller->numInputs];
+	ctrlCommand = &C[i*controller->numFeedback];
 
-	c(&ci, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
+	c(controller, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
 	h(block, ctrlCommand, time[i], currentState);
 
 error:
@@ -73,7 +71,6 @@ void rk4_c
 	size_t const numStates = block->numStates;
 	OutputFunction const h = block->h;
 
-	struct ControllerBlockInfo const ci = controller->info;
 	ControllerFunction const c = controller->c;
 
 	double * const temp_memory = malloc(numStates * 6 * sizeof(double));
@@ -94,19 +91,19 @@ void rk4_c
 	size_t i;
 	for (i = 0; i < (numSteps - 1); i++)
 	{
-		ctrlFeedback = &Y[i*ci.numFeedback];
-		ctrlInput = &U[i*ci.numInputs];
-		ctrlCommand = &uC[i*ci.numCommands];
+		ctrlFeedback = &Y[i*controller->numFeedback];
+		ctrlInput = &U[i*controller->numInputs];
+		ctrlCommand = &uC[i*controller->numCommands];
 		
-		c(&ci, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
+		c(controller, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
 		rk4_step(block,nextState,currentdState,B,C,D,ctrlFeedback,dt,time[i],currentState,ctrlCommand,ctrlCommand,ctrlCommand);
 		memcpy(currentState, nextState, numStates * sizeof(double));
 	}
-	ctrlFeedback = &Y[i*ci.numFeedback];
-	ctrlInput = &U[i*ci.numCommands];
-	ctrlCommand = &uC[i*ci.numCommands];
+	ctrlFeedback = &Y[i*controller->numFeedback];
+	ctrlInput = &U[i*controller->numCommands];
+	ctrlCommand = &uC[i*controller->numCommands];
 
-	c(&ci, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
+	c(controller, ctrlCommand, time[i], ctrlFeedback, ctrlInput);
 	h(block, ctrlFeedback, time[i], currentState);
 
 error:

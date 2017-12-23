@@ -1,16 +1,10 @@
 #pragma once
 #include <stdlib.h>
 
-struct ControllerBlockInfo
-{
-	size_t numFeedback;
-	size_t numInputs;
-	size_t numCommands;
-	void * storage;
-};
+struct ControllerBlock;
 
 typedef void(*ControllerFunction)(
-	struct ControllerBlockInfo const * const info,
+	struct ControllerBlock const * const block,
 	double * const command,
 	double const time,
 	double const * const feedback,
@@ -19,6 +13,9 @@ typedef void(*ControllerFunction)(
 
 struct ControllerBlock
 {
-	struct ControllerBlockInfo const info;
-	ControllerFunction const c;
+	size_t numFeedback;
+	size_t numInputs;
+	size_t numCommands;
+	void * storage;
+	ControllerFunction c;
 };
