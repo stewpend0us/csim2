@@ -12,8 +12,8 @@ yourself. If you are comfortable with differential equations and/or state space 
 can probably skip this section.
 
 A differential equation is an eqation that is a function of a variable and its
-derivatives. The classic (mechanical) example is a mass spring damper.
-The system looks like this:
+derivatives. The classic (mechanical) example is a mass spring damper. Where the variable
+is position and its derivatives are velocity and acceleration. The system looks like this:
 
                |----> +x
                 _______
