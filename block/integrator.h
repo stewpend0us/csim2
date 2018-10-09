@@ -1,4 +1,7 @@
-#pragma once
-#include "StrictlyProperBlock.h"
+#ifndef _INTEGRATOR_H_
+#define _INTEGRATOR_H_
 
-struct StrictlyProperBlock integrator(size_t const numBlocks, UtilityFunction const util);
+#include "block.h"
+struct block * integrator( struct block * block, size_t numBlocks );
+
+#endif

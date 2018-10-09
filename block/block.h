@@ -3,6 +3,16 @@
 
 #include <stdlib.h>
 
+struct block;
+
+typedef void(*dStateFunction)(
+	struct block const * block,
+	FLOAT_TYPE dState[],
+	FLOAT_TYPE time,
+	FLOAT_TYPE const state[],
+	FLOAT_TYPE const input[]
+	);
+
 struct block
 {
 	size_t numStates; // number of states 
@@ -10,14 +20,5 @@ struct block
 	void * storage; // point to anything you want here
 	dStateFunction f; // dState = f(time, state, input)
 };
-
-typedef void(*dStateFunction)(
-	struct block const * block,
-	double dState[],
-	double time,
-	double const state[],
-	double const input[]
-	);
-
 
 #endif

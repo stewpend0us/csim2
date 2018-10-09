@@ -1,33 +1,27 @@
-#include <dbg.h>
 #include "integrator.h"
+#include <string.h>
 
 static void physics
 (
-	struct StrictlyProperBlock const * const block,
-	double * const dState,
-	double const time,
-	double const * const state,
-	double const * const input
+	struct block const * block,
+	FLOAT_TYPE dState[],
+	FLOAT_TYPE time,
+	FLOAT_TYPE const state[],
+	FLOAT_TYPE const input[]
 )
 {
 	(void)time;
 	(void)state;
-	memcpy(dState, input, block->numStates * sizeof(double));
+	memcpy( dState, input, block->numStates * sizeof(FLOAT_TYPE) );
 }
 
-struct StrictlyProperBlock integrator(size_t const numBlocks, UtilityFunction const util)
+struct block * integrator( struct block * block, size_t numBlocks )
 {
-	check(numBlocks > 0, "numBlocks must be greater than 0");
-	return (struct StrictlyProperBlock)
-	{
-		numBlocks,
-		numBlocks,
-		numBlocks,
-		NULL,
-		outputState,
-		physics,
-		util,
-	};
-error:
-	return NULL_StritclyProperBlock;
+	if ( !block || !numBlocks ) return NULL;
+
+	block->numStates = numBlocks;
+	block->numInputs = numBlocks;
+	block->storage = NULL;
+	block->f = physics;
+	return block;
 }
