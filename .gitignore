@@ -1,8 +1,1 @@
-*.suo
-*.opendb
-*.db
 *.swp
-x64/
-Release/
-Debug/
-vgcore.*
