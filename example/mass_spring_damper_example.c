@@ -95,23 +95,17 @@ static void util(
 
 int main(int argc, char **argv)
 {
-	struct mass_storage storage = {10, 100, 10, .1};
+	struct mass_storage storage = {10, 100, 15, .1};
 	double tf = 10;
 	char solver = 'e';
 	switch (argc)
 	{
-		case 7:
-			solver = argv[6][0];
-		case 6:
-			tf = atof(argv[5]);
-		case 5:
-			storage.dt = atof(argv[4]);
-		case 4:
-			storage.damping = atof(argv[3]);
-		case 3:
-			storage.stiffness = atof(argv[2]);
-		case 2:
-			storage.mass = atof(argv[1]);
+		case 7: solver = argv[6][0];
+		case 6: tf = atof(argv[5]);
+		case 5: storage.dt = atof(argv[4]);
+		case 4: storage.damping = atof(argv[3]);
+		case 3: storage.stiffness = atof(argv[2]);
+		case 2: storage.mass = atof(argv[1]);
 		default:
 			printf(
 				"mass:      %f\n"
