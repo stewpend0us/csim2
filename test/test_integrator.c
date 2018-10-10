@@ -1,25 +1,28 @@
 #include "integrator.h"
-#include <stdio.h>
+#include "test.h"
+#include <string.h>
 
-#define fail(fmt, ...) warnx("%d: " fmt, __LINE__, #__VA_ARGS__)
 int main(void)
 {
 	struct block block;
-	size_t count = 3;
-	if ( integrator( NULL, 1 ) )
-		printf(__FILE__":%d: " "should return NULL", __LINE__);
-	if ( integrator( &block, 0 ) )
-		fail("should return NULL");
-	if ( integrator( &block, count ) != &block )
-		fail("should return the pointer we passed in");
-	if ( block.numStates != count )
-		fail("should be %zu", count);
-	if ( block.numInputs != count )
-		fail("should be %zu", count);
-	if ( block.storage )
-		fail("should be NULL");
-	if ( !block.f )
-		fail("should not be NULL");
+	#define count 3
+	FLOAT_TYPE dState[count] = {0};
+	FLOAT_TYPE state[count] = {0};
+	FLOAT_TYPE input[count] = {0};
+	FLOAT_TYPE time = 10.0;
 
-	warnx("passed");
+	ASSERT( !integrator( NULL, 1 ), "should return NULL" );
+	ASSERT( !integrator( &block, 0 ), "should return NULL");
+	ASSERT( integrator( &block, count ) == &block, "should return the pointer we passed in");
+	ASSERT( block.numStates == count, "should be %d", count);
+	ASSERT( block.numInputs == count, "should be %d", count);
+	ASSERT( !block.storage, "should be NULL");
+	ASSERT( block.f, "should not be NULL");
+	block.f( &block, dState, time, state, input );
+	ASSERT( memcmp( dState, input, count * sizeof( FLOAT_TYPE ) ) == 0, "should just move input to dState" );
+	for (int i = 0; i<count; i++)
+		input[i] = i;
+	block.f( &block, dState, time, state, input );
+	ASSERT( memcmp( dState, input, count * sizeof( FLOAT_TYPE ) ) == 0, "should just move input to dState" );
+	PASS;
 }
