@@ -1,4 +1,4 @@
 #pragma once
-#include "StrictlyProperBlock.h"
+#include "block.h"
 
-struct StrictlyProperBlock firstOrderLag(size_t const numBlocks, double * const tau, UtilityFunction const util);
+struct block * firstOrderLag( struct block * block, size_t numBlocks, double * tau );

@@ -11,7 +11,7 @@ int main(void)
 	FLOAT_TYPE input[count] = {0};
 	FLOAT_TYPE time = 10.0;
 
-	ASSERT( !integrator( NULL, 1 ), "should return NULL" );
+	ASSERT( !integrator( NULL, count ), "should return NULL" );
 	ASSERT( !integrator( &block, 0 ), "should return NULL");
 	ASSERT( integrator( &block, count ) == &block, "should return the pointer we passed in");
 	ASSERT( block.numStates == count, "should be %d", count);
