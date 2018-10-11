@@ -5,7 +5,7 @@
 
 struct block;
 
-typedef void(*dStateFunction)(
+typedef void(*physicsFunction)(
 	struct block const * block,
 	FLOAT_TYPE dState[],
 	FLOAT_TYPE time,
@@ -18,7 +18,7 @@ struct block
 	size_t numStates; // number of states 
 	size_t numInputs; // number of inputs
 	void * storage; // point to anything you want here
-	dStateFunction f; // dState = f(time, state, input)
+	physicsFunction f; // dState = f(time, state, input)
 };
 
 #endif

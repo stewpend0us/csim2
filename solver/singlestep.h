@@ -1,31 +1,33 @@
-#pragma once
-#include "StrictlyProperBlock.h"
+#ifndef _SINGLESTEP_H_
+#define _SINGLESTEP_H_
+
+#include "block.h"
 
 void euler_step
 (
-	struct StrictlyProperBlock const * const bi,
-	double * const nextState, // (1 x numStates)
-	double * const currentdState, // (1 x numStates)
-	double * const currentOutput, // (1 x numOutputs)
-	double const dt,
-	double const currentTime,
-	double const * const currentState, // (1 x numStates)
-	double const * const currentInput // (1 x numInputs)
+	struct block const * block,
+	double nextState[], // (1 x numStates)
+	double dState[], // (1 x numStates)
+	double dt,
+	double time,
+	double const state[], // (1 x numStates)
+	double const input[] // (1 x numInputs)
 );
 
 void rk4_step
 (
-	struct StrictlyProperBlock const * const info,
-	double * const nextState, // (1 x numStates)
-	double * const dState, // (1 x numStates)
-	double * const dB, // (1 x numStates) temp
-	double * const dC, // (1 x numStates) temp
-	double * const dD, // (1 x numStates) temp
-	double * const output, // (1 x numOutputs)
-	double const dt,
-	double const time,
-	double const * const state, // (1 x numStates)
-	double const * const input, // (1 x numInputs)
-	double const * const halfStepInput, // (1 x numInputs)
-	double const * const nextInput // (1 x numInputs)
+	struct block const * block,
+	double nextState[], // (1 x numStates)
+	double dState[], // (1 x numStates)
+	double dB[], // (1 x numStates) temp
+	double dC[], // (1 x numStates) temp
+	double dD[], // (1 x numStates) temp
+	double dt,
+	double time,
+	double const state[], // (1 x numStates)
+	double const input[], // (1 x numInputs)
+	double const halfStepInput[], // (1 x numInputs)
+	double const nextInput[] // (1 x numInputs)
 );
+
+#endif
