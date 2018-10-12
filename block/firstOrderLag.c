@@ -11,13 +11,13 @@ static void physics
 {
 	(void)time;
 	size_t numStates = block->numStates;
-	double const * tau = block->storage;
+	FLOAT_TYPE const * tau = block->storage;
 
 	for (size_t i = 0; i<numStates; i++)
 		dState[i] = (input[i] - state[i]) / tau[i];
 }
 
-struct block * firstOrderLag( struct block * block, size_t numBlocks, double * tau )
+struct block * firstOrderLag( struct block * block, size_t numBlocks, FLOAT_TYPE * tau )
 {
 	if ( !block || !numBlocks || !tau ) return NULL;
 	for (size_t i = 0; i < numBlocks; i++)

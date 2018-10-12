@@ -17,13 +17,14 @@ test_rk4: test/test_rk4.c solver.o block/integrator.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 TEST=test_integrator test_firstOrderLag test_euler
+test: CFLAGS+=-O3
 test: $(TEST)
 	for x in $^; do ./$$x; done
 
-profile_euler: CFLAGS+=-pg -O3 -ftree-vectorize -ffast-math
 profile_euler: example/profile_euler.c solver.o block/firstOrderLag.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
+profile: CFLAGS+=-pg -O3
 profile: clean profile_euler
 	./profile_euler
 	gprof profile_euler -b
