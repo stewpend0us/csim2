@@ -14,6 +14,7 @@ void euler
 	size_t i;
 	size_t numStates = block->numStates;
 	physicsFunction f = block->f;
+
 	f(block, dState, time, state, input);
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dt * dState[i];
