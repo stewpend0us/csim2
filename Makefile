@@ -16,7 +16,7 @@ test_euler: test/test_euler.c solver.o block/integrator.o
 test_rk4: test/test_rk4.c solver.o block/integrator.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-TEST=test_integrator test_firstOrderLag test_euler
+TEST=test_integrator test_firstOrderLag test_euler test_rk4
 test: CFLAGS+=-O3
 test: $(TEST)
 	for x in $^; do ./$$x; done

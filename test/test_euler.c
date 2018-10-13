@@ -18,8 +18,8 @@ int main(void)
 	euler( &block, nextState, dState, dt, time, state, input );
 	for (int i = 0; i<count; i++)
 	{
-		ASSERT( nextState[i] == dt*input[i], "iteration %d: %f should equal %f", i, nextState[i], dt*input[i]);
 		ASSERT( dState[i] == input[i], "iteration %d: %f should equal %f", i, dState[i], input[i] );
+		ASSERT( nextState[i] == dt*input[i], "iteration %d: %f should equal %f error %g", i, nextState[i], dt*input[i], nextState[i] - dt*input[i]);
 	}
 	PASS;
 }
