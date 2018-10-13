@@ -16,7 +16,7 @@ int main(void)
 	ASSERT( !firstOrderLag( &block, 0, tau ), "should return NULL");
 	ASSERT( !firstOrderLag( &block, count, NULL ), "should return NULL");
 	ASSERT( !firstOrderLag( &block, count, tau ), "should return NULL");
-	for (int i = 0; i<count; i++)
+	for (size_t i = 0; i<count; i++)
 		tau[i] = i+1;
 	ASSERT( firstOrderLag( &block, count, tau ) == &block, "should return the pointer we passed in");
 	ASSERT( block.numStates == count, "should be %d", count);
@@ -25,10 +25,10 @@ int main(void)
 	ASSERT( block.f, "should not be NULL");
 	block.f( &block, dState, time, state, input );
 	ASSERT( memcmp( dState, input, count * sizeof( FLOAT_TYPE ) ) == 0, "should return zero dState" );
-	for (int i = 0; i<count; i++)
+	for (size_t i = 0; i<count; i++)
 		input[i] = i;
 	block.f( &block, dState, time, state, input );
-	for (int i = 0; i<count; i++)
+	for (size_t i = 0; i<count; i++)
 		ASSERT( dState[i] <= input[i], "dState has to be less than or equal to the input" );
 	PASS;
 }

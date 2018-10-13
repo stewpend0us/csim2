@@ -22,7 +22,7 @@ struct block * firstOrderLag( struct block * block, size_t numBlocks, FLOAT_TYPE
 	if ( !block || !numBlocks || !tau ) return NULL;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
-		if (tau[i] <= 0)
+		if (tau[i] == 0.0)
 			return NULL;
 	}
 	block->numStates = numBlocks;

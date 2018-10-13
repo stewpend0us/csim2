@@ -32,7 +32,7 @@ int main(void)
 		return 1;
 	fwrite(&time, sizeof(FLOAT_TYPE), 1, F);
 	fwrite(state, sizeof(FLOAT_TYPE)*count, 1, F);
-	while ( time < 5*60 )
+	while ( time < 5*60/4 )
 	{
 		rk4( &block, nextState, dState, dB, dC, dD, dt, time, state, input, input, input );
 		time += dt;
