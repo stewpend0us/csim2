@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Wextra -Wpedantic -Iblock -I. -DFLOAT_TYPE=double
+CFLAGS=-Wall -Wextra -Wpedantic -Iblock -DFLOAT_TYPE=double
 
 .PHONY: all clean test profile
 
@@ -10,10 +10,10 @@ test_integrator: test/test_integrator.c block/integrator.o
 test_firstOrderLag: test/test_firstOrderLag.c block/firstOrderLag.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_euler: test/test_euler.c solver.o block/integrator.o
+test_euler: test/test_euler.c block/solver.o block/integrator.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_rk4: test/test_rk4.c solver.o block/integrator.o
+test_rk4: test/test_rk4.c block/solver.o block/integrator.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 TEST=test_integrator test_firstOrderLag test_euler test_rk4
@@ -21,13 +21,19 @@ test: CFLAGS+=-O3
 test: $(TEST)
 	for x in $^; do ./$$x; done
 
-profile_euler: example/profile_euler.c solver.o block/firstOrderLag.o
+profile_euler: example/profile_euler.c block/solver.o block/firstOrderLag.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
+profile_rk4: example/profile_rk4.c block/solver.o block/firstOrderLag.o
+	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+PROFILE=profile_euler profile_rk4
 profile: CFLAGS+=-pg -O3
-profile: clean profile_euler
+profile: clean $(PROFILE)
 	./profile_euler
 	gprof profile_euler -b
+	./profile_rk4
+	gprof profile_rk4 -b
 
 clean:
-	rm -rf gmon.* *.bin *.o *~ block/*.o block/*~ test/*.o test/*~ example/*.o example/*~ $(TEST) profile_euler
+	rm -rf *.o *~ block/*.o block/*~ test/*.o test/*~ example/*.o example/*~ $(TEST) $(PROFILE) gmon.* *.profile
