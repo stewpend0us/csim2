@@ -1,51 +1,29 @@
-#pragma once
-#include "StrictlyProperBlock.h"
+#ifndef _BLOCKSYSTEM_H_
+#define _BLOCKSYSTEM_H_
 
-// update blockInputs as a function of time, blockOutputs, and systemInputs
-typedef void(*CalcBlockInputsFunction)(
-	size_t const numBlocks,
-	struct StrictlyProperBlock const * const blocks,
-	double * const * const blockInputs,
-	double const time,
-	double const * const * const blockOutputs,
-	size_t const numSystemInputs,
-	double const * const systemInputs,
-	void * const systemStorage
+#include "block.h"
+
+typedef void(*updateChildInputFunction)(
+	struct blockSystem const * blockSystem,
+	FLOAT_TYPE time,
+	FLOAT_TYPE * childState[], // array of child block state arrays
+	FLOAT_TYPE const systemInput[],
 	);
 
-// update systemOutputs as a function of time, and blockOutputs
-typedef void(*BlockSystemOutputFunction)(
-	size_t const numSystemOutputs,
-	double * const systemOutputs,
-	double const time,
-	double const * const * const blockOutputs,
-	void * const systemStorage
-	);
-
-typedef void(*BlockSystemUtilityFunction)(
-	double const time,
-	size_t const numSystemInputs,
-	double const * const systemInputs,
-	size_t const numSystemOutputs,
-	double const * const systemOutputs,
-	void * const systemStorage
-);
-
-struct BlockSystemStorage
+struct blockSystem
 {
-	size_t numBlocks;
-	struct StrictlyProperBlock const * blocks;
-	double * const * blockInputs;
-	double * const * blockOutputs;
-	CalcBlockInputsFunction calcBlockInputs;
-	BlockSystemOutputFunction systemOutput;
-	BlockSystemUtilityFunction systemUtility;
-	void * systemStorage;
+	size_t numChildren; // number of child blocks
+	size_t numInputs; // number of inputs
+	struct block const child[]; // array of child blocks
+	FLOAT_TYPE * childInput[]; // array of child block inputs
+	void * storage; // put anything you want here
+	updateChildInputFunction calcChildInput; // childInput = f(time, childStates, systemInput)
 };
 
-struct StrictlyProperBlock blockSystem
+
+struct block * blockSystem
 (
-	size_t const numSystemInputs,
-	size_t const numSystemOutputs,
-	struct BlockSystemStorage * const storage
+	struct blockSystem * system
 );
+
+#endif
