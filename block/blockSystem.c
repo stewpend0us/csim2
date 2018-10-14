@@ -9,25 +9,19 @@ static void physics
 	FLOAT_TYPE const input[]
 )
 {
-	
-//	size_t const numInputs = block->numInputs;
-//	struct BlockSystemStorage const * const bss = block->storage;
-//	size_t const numBlocks = bss->numBlocks;
-//	struct StrictlyProperBlock const * const blocks = bss->blocks;
-//	double * const * const blockInputs = bss->blockInputs;
-//	double * const * const blockOutputs = bss->blockOutputs;
-//	double const * const * const blockOutputs_const = (double const * const * const)blockOutputs; //this gets around a warning
-//	void * const storage = bss->systemStorage;
-//
-//	// calculate the block inputs from the updated block outputs
-//	bss->calcBlockInputs(numBlocks, blocks, blockInputs, time, blockState, numInputs, input, storage);
-//	// finally calculate the block dstate from the updated block inputs
-//	xi = 0;
-//	for (size_t i = 0; i < numBlocks; i++)
-//	{
-//		blocks[i].f(&blocks[i], &dState[xi], time, &state[xi], blockInputs[i]);
-//		xi += blocks[i].numStates;
-//	}
+	struct blockSystem * system = block->storage;
+	FLOAT_TYPE ** childInput = system->childInput;
+	system->updateChildInput( system, time, childState, systemInput );
+
+	// calculate the block inputs from the updated block outputs
+	bss->calcBlockInputs(numBlocks, blocks, blockInputs, time, blockState, numInputs, input, storage);
+	// finally calculate the block dstate from the updated block inputs
+	xi = 0;
+	for (size_t i = 0; i < numBlocks; i++)
+	{
+		blocks[i].f(&blocks[i], &dState[xi], time, &state[xi], blockInputs[i]);
+		xi += blocks[i].numStates;
+	}
 }
 
 struct block * blockSystem( struct block * block, struct blockSystem * system )
