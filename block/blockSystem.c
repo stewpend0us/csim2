@@ -32,7 +32,7 @@ static void physics
 
 struct block * blockSystem( struct block * block, struct blockSystem * system )
 {
-	if ( !block || !system || !system->numChildren || !system->child || !system->childInput )
+	if ( !block || !system || !system->numChildren || !system->child || !system->childInput || !system->updateChildInput )
 		return NULL;
 
 	size_t numChildren = system->numChildren;
