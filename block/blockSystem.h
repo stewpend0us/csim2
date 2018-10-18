@@ -8,7 +8,7 @@ struct blockSystem;
 typedef void(*updateChildInputFunction)(
 	struct blockSystem const * system,
 	FLOAT_TYPE time,
-	FLOAT_TYPE * childState[], // array of child block state arrays
+	FLOAT_TYPE const * childState[], // array of child block state arrays
 	FLOAT_TYPE const systemInput[]
 	);
 
@@ -18,6 +18,7 @@ struct blockSystem
 	size_t numInputs; // number of inputs
 	struct block * child; // array of child blocks
 	FLOAT_TYPE ** childInput; // array of child block input arrays
+	FLOAT_TYPE const ** childState; // array of child block state arrays
 	void * storage; // put anything you want here
 	updateChildInputFunction updateChildInput; // childInput = f(time, childStates, systemInput)
 };

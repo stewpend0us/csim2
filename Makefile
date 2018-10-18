@@ -1,6 +1,6 @@
 CFLAGS=-Wall -Wextra -Wpedantic -Iblock -DFLOAT_TYPE=double
 
-.PHONY: all clean test profile
+.PHONY: all clean test profile status
 
 all: test
 
@@ -23,7 +23,7 @@ test_rk4: test/test_rk4.c block/solver.o block/integrator.o
 TEST=test_integrator test_firstOrderLag test_blockSystem test_euler test_rk4
 test: CFLAGS+=-O3
 test: $(TEST)
-	for x in $^; do ./$$x; done
+	for x in $^; do echo "./$$x"; ./$$x; done
 
 profile_euler: example/profile_euler.c block/solver.o block/firstOrderLag.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
@@ -39,5 +39,7 @@ profile: clean $(PROFILE)
 	./profile_rk4
 	gprof profile_rk4 -b
 
+status: clean
+	git status
 clean:
 	rm -rf *.o *~ block/*.o block/*~ test/*.o test/*~ example/*.o example/*~ $(TEST) $(PROFILE) gmon.* *.profile

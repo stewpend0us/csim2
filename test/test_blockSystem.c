@@ -9,7 +9,7 @@ void update
 (
 	struct blockSystem const * system,
 	FLOAT_TYPE time,
-	FLOAT_TYPE * childState[], // array of child block state arrays
+	FLOAT_TYPE const * childState[], // array of child block state arrays
 	FLOAT_TYPE const systemInput[]
 )
 {
@@ -22,7 +22,7 @@ void update
 	ASSERT( system->child, "should not be NULL" );
 	ASSERT( system->childInput, "should not be NULL" );
 	ASSERT( !system->storage, "should be NULL" );
-	ASSERT( system->updateChildInput == &update, "should be a pointer to this function");
+	ASSERT( system->updateChildInput == update, "should be a pointer to this function");
 	for ( size_t i = 0; i<count; i++ )
 	{
 		ASSERT( childState[i], "should not be NULL %zu", i );
@@ -44,7 +44,6 @@ int main(void)
 	struct blockSystem system = {0};
 	struct block child[count] = {{0}};
 	FLOAT_TYPE * childInput[count] = {0};
-
 	ASSERT( !blockSystem( NULL, &system ), "should return NULL" );
 	ASSERT( !blockSystem( &block, NULL ), "should return NULL" );
 
@@ -95,6 +94,7 @@ int main(void)
 	for (size_t i = 0; i<count; i++)
 		state[i] = i;
 
+printf("hi1\n");
 	block.f( &block, dState, time, state, input );
 	ASSERT( dState[0] == input[0], "should just move input to dState" )
 	for (size_t i = 1; i<count; i++)
