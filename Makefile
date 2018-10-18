@@ -28,10 +28,13 @@ test: $(TEST)
 profile_euler: example/profile_euler.c block/solver.o block/firstOrderLag.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
+profile_euler_inline: example/profile_euler_inline.c block/firstOrderLag.o
+	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
 profile_rk4: example/profile_rk4.c block/solver.o block/firstOrderLag.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-PROFILE=profile_euler profile_rk4
+PROFILE=profile_euler profile_euler_inline profile_rk4
 profile: CFLAGS+=-pg -O3
 profile: clean $(PROFILE)
 	./profile_euler
