@@ -34,13 +34,13 @@ profile_euler_inline: example/profile_euler_inline.c block/firstOrderLag.o
 profile_rk4: example/profile_rk4.c block/solver.o block/firstOrderLag.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-PROFILE=profile_euler profile_euler_inline profile_rk4
-profile: CFLAGS+=-pg -O3
+profile_rk4_inline: example/profile_rk4_inline.c block/firstOrderLag.o
+	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+PROFILE=profile_euler profile_euler_inline profile_rk4 profile_rk4_inline
+profile: CFLAGS+=-pg -O0
 profile: clean $(PROFILE)
-	./profile_euler
-	gprof profile_euler -b
-	./profile_rk4
-	gprof profile_rk4 -b
+	for x in $(PROFILE); do echo "./$$x"; ./$$x; gprof $$x -b; done
 
 status: clean
 	git status

@@ -15,7 +15,7 @@ int main(void)
 	FLOAT_TYPE time = 0.0;
 	FLOAT_TYPE state[count] = {0};
 	FLOAT_TYPE input[count];
-	#define path ("euler_profile_t_" str(count) "_" str(FLOAT_TYPE) ".profile")
+	#define path ("euler_profile_inline_t_" str(count) "_" str(FLOAT_TYPE) ".profile")
 	remove(path);
 	FILE * F = fopen(path, "ab");
 
