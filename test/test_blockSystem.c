@@ -9,23 +9,22 @@ void update
 (
 	struct blockSystem const * system,
 	FLOAT_TYPE time,
-	FLOAT_TYPE const * childState[], // array of child block state arrays
 	FLOAT_TYPE const systemInput[]
 )
 {
 	ASSERT( system, "should not be NULL" );
 	ASSERT( time == 10.0, "should be %f", 10.0 );
-	ASSERT( childState, "should not be NULL" );
 	ASSERT( systemInput, "should not be NULL" );
+	ASSERT( system->childState, "should not be NULL" );
 	ASSERT( system->numChildren == count, "should be %d", count );
 	ASSERT( system->numInputs == 1, "should be 1" );
 	ASSERT( system->child, "should not be NULL" );
 	ASSERT( system->childInput, "should not be NULL" );
 	ASSERT( !system->storage, "should be NULL" );
-	ASSERT( system->updateChildInput == update, "should be a pointer to this function");
+	ASSERT( system->updateChildInputs == update, "should be a pointer to this function");
 	for ( size_t i = 0; i<count; i++ )
 	{
-		ASSERT( childState[i], "should not be NULL %zu", i );
+		ASSERT( system->childState[i], "should not be NULL %zu", i );
 		ASSERT( system->child[i].numStates == 1, "expecting 1 state %zu", i );
 		ASSERT( system->child[i].numInputs == 1, "expecting 1 unput %zu", i );
 		ASSERT( system->childInput[i], "should not be NULL" );
@@ -34,7 +33,7 @@ void update
 	system->childInput[0][0] = systemInput[0];
 	for ( size_t i = 1; i<count; i++ )
 	{
-		system->childInput[i][0] = childState[i-1][0];
+		system->childInput[i][0] = system->childState[i-1][0];
 	}
 }
 
@@ -51,7 +50,7 @@ int main(void)
 	system.numChildren = 0;
 	system.child = child;
 	system.childInput = childInput;
-	system.updateChildInput = update;
+	system.updateChildInputs = update;
 	system.storage = NULL;
 	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
 
@@ -64,10 +63,10 @@ int main(void)
 	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
 
 	system.childInput = childInput;
-	system.updateChildInput = NULL;
+	system.updateChildInputs = NULL;
 	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
 
-	system.updateChildInput = update;
+	system.updateChildInputs = update;
 	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
 
 	for (size_t i = 0; i<count; i++)
