@@ -9,13 +9,16 @@ void update
 (
 	struct blockSystem const * system,
 	FLOAT_TYPE time,
+	FLOAT_TYPE const systemState[],
 	FLOAT_TYPE const systemInput[]
 )
 {
+	FLOAT_TYPE const * childState[count];
+	for (size_t i = 0, xi = 0; i < system->numChildren; xi += system->child[i++].numStates)
+		childState[i] = &systemState[xi];
 	ASSERT( system, "should not be NULL" );
 	ASSERT( time == 10.0, "should be %f", 10.0 );
 	ASSERT( systemInput, "should not be NULL" );
-	ASSERT( system->childState, "should not be NULL" );
 	ASSERT( system->numChildren == count, "should be %d", count );
 	ASSERT( system->numInputs == 1, "should be 1" );
 	ASSERT( system->child, "should not be NULL" );
@@ -24,7 +27,6 @@ void update
 	ASSERT( system->updateChildInputs == update, "should be a pointer to this function");
 	for ( size_t i = 0; i<count; i++ )
 	{
-		ASSERT( system->childState[i], "should not be NULL %zu", i );
 		ASSERT( system->child[i].numStates == 1, "expecting 1 state %zu", i );
 		ASSERT( system->child[i].numInputs == 1, "expecting 1 unput %zu", i );
 		ASSERT( system->childInput[i], "should not be NULL" );
@@ -33,7 +35,7 @@ void update
 	system->childInput[0][0] = systemInput[0];
 	for ( size_t i = 1; i<count; i++ )
 	{
-		system->childInput[i][0] = system->childState[i-1][0];
+		system->childInput[i][0] = childState[i-1][0];
 	}
 }
 

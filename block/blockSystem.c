@@ -13,18 +13,15 @@ static void physics
 	size_t numChildren = system->numChildren;
 	struct block * child = system->child;
 	FLOAT_TYPE ** childInput = system->childInput;
-	FLOAT_TYPE const ** childState = system->childState;
 	size_t i, xi;
-	for (i = 0, xi = 0; i < numChildren; xi += child[i++].numStates)
-		childState[i] = &state[xi];
-	system->updateChildInputs( system, time, input );
+	system->updateChildInputs( system, time, state, input );
 	for (i = 0, xi = 0; i < numChildren; xi += child[i++].numStates)
 		child[i].f(&child[i], &dState[xi], time, &state[xi], childInput[i]);
 }
 
 struct block * blockSystem( struct block * block, struct blockSystem * system )
 {
-	if ( !block || !system || !system->numChildren || !system->child || !system->childInput || !system->childState || !system->updateChildInputs )
+	if ( !block || !system || !system->numChildren || !system->child || !system->childInput || !system->updateChildInputs )
 		return NULL;
 
 	size_t numChildren = system->numChildren;
