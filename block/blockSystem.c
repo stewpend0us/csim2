@@ -10,10 +10,9 @@ static void physics
 )
 {
 	struct blockSystem * system = block->storage;
-	size_t numChildren = system->numChildren;
+	size_t i, xi, numChildren = system->numChildren;
 	struct block * child = system->child;
 	FLOAT_TYPE ** childInput = system->childInput;
-	size_t i, xi;
 	system->updateChildInputs( system, time, state, input );
 	for (i = 0, xi = 0; i < numChildren; xi += child[i++].numStates)
 		child[i].f(&child[i], &dState[xi], time, &state[xi], childInput[i]);
@@ -28,14 +27,14 @@ struct block * blockSystem( struct block * block, struct blockSystem * system )
 	struct block * child = system->child;
 	FLOAT_TYPE ** childInput = system->childInput;
 
-	size_t numStates = 0;
+	size_t totalStates = 0;
 	for (size_t i = 0; i < numChildren; i++)
 	{
 		if ( child[i].numStates == 0 || childInput[i] == NULL )
 			return NULL;
-		numStates += child[i].numStates;
+		totalStates += child[i].numStates;
 	}
-	block->numStates = numStates;
+	block->numStates = totalStates;
 	block->numInputs = system->numInputs;
 	block->storage = system;
 	block->f = physics;

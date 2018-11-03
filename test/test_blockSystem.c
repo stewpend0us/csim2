@@ -3,7 +3,7 @@
 #include "test.h"
 #include <string.h>
 
-#define count 3
+#define count 30
 
 void update
 (
@@ -95,12 +95,11 @@ int main(void)
 	for (size_t i = 0; i<count; i++)
 		state[i] = i;
 
-printf("hi1\n");
 	block.f( &block, dState, time, state, input );
 	ASSERT( dState[0] == input[0], "should just move input to dState" )
 	for (size_t i = 1; i<count; i++)
 	{
-		ASSERT( dState[i] == state[i], "should just move input (state in this case) to dState %zu", i )
+		ASSERT( dState[i] == state[i-1], "should just move input (state in this case) to dState %zu", i )
 	}
 	PASS;
 }
