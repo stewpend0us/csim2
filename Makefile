@@ -1,6 +1,6 @@
 CFLAGS=-Wall -Wextra -Wpedantic -Iblock -DFLOAT_TYPE=double
 
-.PHONY: all clean test profile status
+.PHONY: all clean test status
 
 all: test
 
@@ -25,24 +25,5 @@ test: CFLAGS+=-O3
 test: $(TEST)
 	for x in $^; do echo "./$$x"; ./$$x; done
 
-profile_euler: example/profile_euler.c block/solver.o block/firstOrderLag.o
-	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
-profile_euler_inline: example/profile_euler_inline.c block/firstOrderLag.o
-	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
-profile_rk4: example/profile_rk4.c block/solver.o block/firstOrderLag.o
-	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
-profile_rk4_inline: example/profile_rk4_inline.c block/firstOrderLag.o
-	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
-PROFILE=profile_euler profile_euler_inline profile_rk4 profile_rk4_inline
-profile: CFLAGS+=-pg -O0
-profile: clean $(PROFILE)
-	for x in $(PROFILE); do echo "./$$x"; ./$$x; gprof $$x -b; done
-
-status: clean
-	git status
 clean:
-	rm -rf *.o *~ block/*.o block/*~ test/*.o test/*~ example/*.o example/*~ $(TEST) $(PROFILE) gmon.* *.profile
+	rm -rf *.o *~ block/*.o block/*~ test/*.o test/*~ example/*.o example/*~ $(TEST)
