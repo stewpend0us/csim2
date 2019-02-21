@@ -3,66 +3,43 @@
 
 static void physics
 (
-	struct StrictlyProperBlock const * const block,
-	double * const dState,
-	double const time,
-	double const * const state,
-	double const * const input
+	struct block const * block,
+	FLOAT_TYPE dState[],
+	FLOAT_TYPE time,
+	FLOAT_TYPE const state[],
+	FLOAT_TYPE const input[]
 )
 {
 	(void)time;
-	size_t const numInputs = block->numInputs;
+	size_t numStates = block->numStates;
+	struct secondOrderSystemStorage const * storage = block->storage;
 
-	struct secondOrderSystemStorage const * const so_storage = block->storage;
+	FLOAT_TYPE const state1[] = state;
+	FLOAT_TYPE const state2[] = state + numInputs;
+	FLOAT_TYPE const dState1[] = dState;
+	FLOAT_TYPE const dState2[] = dState + numInputs;
 
-	double const * const state1 = state;
-	double const * const state2 = state + numInputs;
-	double * const dState1 = dState;
-	double * const dState2 = dState + numInputs;
-
-	memcpy(dState1, state2, numInputs * sizeof(double));
+	memcpy(dState1, state2, numInputs * sizeof(FLOAT_TYPE));
 
 	for (size_t i = 0; i < numInputs; i++)
-		dState2[i] = -2 * so_storage[i].zeta * so_storage[i].omega_n * state2[i] - so_storage[i].omega_n * so_storage[i].omega_n * ( state1[i] - input[i] );
+		dState2[i] = -2 * storage[i].zeta * storage[i].omega_n * state2[i] - storage[i].omega_n * storage[i].omega_n * ( state1[i] - input[i] );
 }
 
-static void output
-(
-	struct StrictlyProperBlock const * const block,
-	double * const output,
-	double const time,
-	double const * const state
-)
+FLOAT_TYPE * secondOrderSystemOutput( FLOAT_TYPE output[], size_t numOutputs, FLOAT_TYPE const state[] )
 {
-	(void)time;
-	size_t const numOutputs = block->numOutputs;
-	double const * const state1 = state; // just a reminder that there are 2 groups of state (2nd order)
-	memcpy(output, state1, numOutputs * sizeof(double));
+	if ( numOutputs != block->numInputs)
+		return NULL;
+	memcpy(output, state, numOutputs*sizeof(FLOAT_TYPE));
+	return output;
 }
 
-struct StrictlyProperBlock secondOrderSystem(
-	size_t const numBlocks,
-	struct secondOrderSystemStorage * const so_storage,
-	UtilityFunction const util
-)
+struct block * secondOrderSystem( struct block * block, size_t numBlocks, struct secondOrderSystemStorage storage[] )
 {
-	check(numBlocks > 0,"numBlocks must be greater than zero");
-	check(so_storage, "so_storage must not be NULL");
-	for (size_t i = 0; i < numBlocks; i++)
-	{
-		check(so_storage[i].omega_n > 0,"so_storage[%zu].omega_n must be greater than zero",i);
-		check(so_storage[i].zeta > 0,"so_storage[%zu].zeta must be greater than zero",i);
-	}
-	return (struct StrictlyProperBlock)
-	{
-		2*numBlocks,
-		numBlocks,
-		numBlocks,
-		so_storage,
-		output,
-		physics,
-		util,
-	};
-error:
-	return NULL_StritclyProperBlock;
+	if ( !block || !numBlocks || !storage )
+		return NULL;
+	block->numStates = numBlocks*2;
+	block->numInputs = numBlocks;
+	block->storage = storage;
+	block->f = physics;
+	return block;
 }

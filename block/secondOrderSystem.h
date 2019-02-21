@@ -1,14 +1,13 @@
-#pragma once
-#include "StrictlyProperBlock.h"
+#ifndef _SECONDORDERSYSTEM_H_
+#define _SECONDORDERSYSTEM_H_
+
+#include "block.h"
 
 struct secondOrderSystemStorage
 {
-	double zeta;
-	double omega_n;
+	FLOAT_TYPE zeta;
+	FLOAT_TYPE omega_n;
 };
 
-struct StrictlyProperBlock secondOrderSystem(
-	size_t const numBlocks,
-	struct secondOrderSystemStorage * const storage,
-	UtilityFunction const util
-);
+struct block * secondOrderSystem( struct block * block, size_t numBlocks, struct secondOrderSystemStorage storage[] );
+FLOAT_TYPE * secondOrderSystemOutput( FLOAT_TYPE output[], size_t numOutputs, FLOAT_TYPE const state[] );
