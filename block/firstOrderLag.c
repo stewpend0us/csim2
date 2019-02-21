@@ -17,9 +17,10 @@ static void physics
 		dState[i] = (input[i] - state[i]) / tau[i];
 }
 
-struct block * firstOrderLag( struct block * block, size_t numBlocks, FLOAT_TYPE * tau )
+struct block * firstOrderLag( struct block * block, size_t numBlocks, FLOAT_TYPE tau[] )
 {
-	if ( !block || !numBlocks || !tau ) return NULL;
+	if ( !block || !numBlocks || !tau )
+		return NULL;
 	for (size_t i = 0; i < numBlocks; i++)
 	{
 		if (tau[i] == 0.0)
