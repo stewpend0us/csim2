@@ -64,18 +64,19 @@ void rk4_step
 	f(block, dState, time, state, input);
 	if (u)
 		u(block, time, dState, state, input, output);
+	
 	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + dState[i] * dt;
-
+		nextState[i] = state[i] + dState[i] * halfdt;
 	f(block, dB, halfStepTime, nextState, halfStepInput);
+	
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dB[i] * halfdt;
-
 	f(block, dC, halfStepTime, nextState, halfStepInput);
+	
 	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + dC[i] * halfdt;
-
+		nextState[i] = state[i] + dC[i] * dt;
 	f(block, dD, nextTime, nextState, nextInput);
+	
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dt * (dState[i] + 2*dB[i] + 2*dC[i] + dD[i]) / 6;
 }
