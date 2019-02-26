@@ -44,18 +44,19 @@ void rk4
 	FLOAT_TYPE nextTime = time + dt;
 
 	f(block, dState, time, state, input);
+	
 	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + dt * dState[i];
-
+		nextState[i] = state[i] + halfdt * dState[i];
 	f(block, dB, halfTime, nextState, halfInput);
+	
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + halfdt * dB[i];
-
 	f(block, dC, halfTime, nextState, halfInput);
+	
 	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + halfdt * dC[i];
-
+		nextState[i] = state[i] + dt * dC[i];
 	f(block, dD, nextTime, nextState, nextInput);
+	
 	for (i = 0; i < numStates; i++)
 		nextState[i] = state[i] + dt * (dState[i] + 2*dB[i] + 2*dC[i] + dD[i]) / 6;
 }
