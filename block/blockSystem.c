@@ -4,7 +4,7 @@ static void physics
 (
 	FLOAT_TYPE time,
 	size_t num_states,
-	FLOAT_TYPE dState[],
+	FLOAT_TYPE dstate[],
 	FLOAT_TYPE const state[],
 	size_t num_inputs,
 	FLOAT_TYPE input[],
@@ -25,7 +25,7 @@ static void physics
 	}
 	system->updateChildInputs( time, num_children, c, c_input, c_state, num_system_inputs, input, system->storage );
 	for ( i = 0, xi = 0; i < num_children; xi += c[i++].num_states )
-		c[i].f(time, c[i].num_states, &dState[xi], c_state[i], c[i].num_inputs, c_input[i], c[i].storage);
+		c[i].f(time, c[i].num_states, &dstate[xi], c_state[i], c[i].num_inputs, c_input[i], c[i].storage);
 }
 
 struct block * blockSystem( struct block * block, struct blockSystem * system )

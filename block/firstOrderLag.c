@@ -4,10 +4,10 @@ static void physics
 (
 	FLOAT_TYPE time,
 	size_t num_states,
-	FLOAT_TYPE dState[],
+	FLOAT_TYPE dstate[],
 	FLOAT_TYPE const state[],
 	size_t num_inputs,
-	FLOAT_TYPE const input[],
+	FLOAT_TYPE input[],
 	void * storage
 )
 {
@@ -16,7 +16,7 @@ static void physics
 	FLOAT_TYPE const * tau = storage;
 
 	for ( size_t i = 0; i < num_states; i++ )
-		dState[i] = (input[i] - state[i]) / tau[i];
+		dstate[i] = (input[i] - state[i]) / tau[i];
 }
 
 struct block * firstOrderLag( struct block * block, size_t num_blocks, FLOAT_TYPE tau[] )

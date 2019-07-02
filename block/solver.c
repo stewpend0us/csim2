@@ -8,7 +8,7 @@ void euler
 	FLOAT_TYPE dt,
 	FLOAT_TYPE * time,
 	FLOAT_TYPE const state[],
-	FLOAT_TYPE const input[]
+	FLOAT_TYPE input[]
 )
 {
 	size_t i;
@@ -32,9 +32,9 @@ void rk4
 	FLOAT_TYPE dt,
 	FLOAT_TYPE * time,
 	FLOAT_TYPE const state[],
-	FLOAT_TYPE const input[],
-	FLOAT_TYPE const half_step_input[],
-	FLOAT_TYPE const next_input[]
+	FLOAT_TYPE input[],
+	FLOAT_TYPE half_step_input[],
+	FLOAT_TYPE next_input[]
 )
 {
 	size_t i;

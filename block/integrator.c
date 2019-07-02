@@ -5,7 +5,7 @@ static void physics
 (
 	FLOAT_TYPE time,
 	size_t num_states,
-	FLOAT_TYPE dState[],
+	FLOAT_TYPE dstate[],
 	FLOAT_TYPE const state[],
 	size_t num_inputs,
 	FLOAT_TYPE input[],
@@ -16,7 +16,7 @@ static void physics
 	(void)state;
 	(void)num_inputs;
 	(void)storage;
-	memcpy( dState, input, num_states * sizeof(FLOAT_TYPE) );
+	memcpy( dstate, input, num_states * sizeof(FLOAT_TYPE) );
 }
 
 struct block * integrator( struct block * block, size_t num_blocks )
