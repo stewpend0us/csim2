@@ -15,7 +15,7 @@ int main(void)
 	FLOAT_TYPE input[count];
 	for (int i = 0; i<count; i++)
 		input[i] = i+1;
-	euler( &block, nextState, dState, dt, time, state, input );
+	euler( &block, nextState, dState, dt, &time, state, input );
 	for (int i = 0; i<count; i++)
 	{
 		ASSERT( dState[i] == input[i], "iteration %d: %f should equal %f", i, dState[i], input[i] );

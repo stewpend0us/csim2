@@ -3,60 +3,65 @@
 void euler
 (
 	struct block const * block,
-	FLOAT_TYPE nextState[],
-	FLOAT_TYPE dState[],
+	FLOAT_TYPE next_state[],
+	FLOAT_TYPE dstate[],
 	FLOAT_TYPE dt,
-	FLOAT_TYPE time,
+	FLOAT_TYPE * time,
 	FLOAT_TYPE const state[],
 	FLOAT_TYPE const input[]
 )
 {
 	size_t i;
-	size_t numStates = block->numStates;
-	physicsFunction f = block->f;
+	size_t num_states = block->num_states;
 
-	f(block, dState, time, state, input);
-	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + dt * dState[i];
+	block->f( *time, num_states, dstate, state, block->num_inputs, input, block->storage );
+	for (i = 0; i < num_states; i++)
+		next_state[i] = state[i] + dt * dstate[i];
+
+	*time += dt;
 }
 
 void rk4
 (
 	struct block const * block,
-	FLOAT_TYPE nextState[],
-	FLOAT_TYPE dState[],
+	FLOAT_TYPE next_state[],
+	FLOAT_TYPE dstate[],
 	FLOAT_TYPE dB[],
 	FLOAT_TYPE dC[],
 	FLOAT_TYPE dD[],
 	FLOAT_TYPE dt,
-	FLOAT_TYPE time,
+	FLOAT_TYPE * time,
 	FLOAT_TYPE const state[],
 	FLOAT_TYPE const input[],
-	FLOAT_TYPE const halfInput[],
-	FLOAT_TYPE const nextInput[]
+	FLOAT_TYPE const half_step_input[],
+	FLOAT_TYPE const next_input[]
 )
 {
 	size_t i;
-	size_t numStates = block->numStates;
+	size_t num_states = block->num_states;
+	size_t num_inputs = block->num_inputs;
+	void * storage = block->storage;
 	physicsFunction f = block->f;
-	FLOAT_TYPE halfdt = dt / 2;
-	FLOAT_TYPE halfTime = time + halfdt;
-	FLOAT_TYPE nextTime = time + dt;
+	FLOAT_TYPE half_dt = dt / 2;
+	FLOAT_TYPE half_time = *time + half_dt;
+	FLOAT_TYPE next_time = *time + dt;
 
-	f(block, dState, time, state, input);
+	f( *time, num_states, dstate, state, num_inputs, input, storage );
 	
-	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + halfdt * dState[i];
-	f(block, dB, halfTime, nextState, halfInput);
+	for (i = 0; i < num_states; i++)
+		next_state[i] = state[i] + half_dt * dstate[i];
+	f( half_time, num_states, dB, next_state, num_inputs, half_step_input, storage );
 	
-	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + halfdt * dB[i];
-	f(block, dC, halfTime, nextState, halfInput);
+	for (i = 0; i < num_states; i++)
+		next_state[i] = state[i] + half_dt * dB[i];
+	f( half_time, num_states, dC, next_state, num_inputs, half_step_input, storage );
 	
-	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + dt * dC[i];
-	f(block, dD, nextTime, nextState, nextInput);
+	for (i = 0; i < num_states; i++)
+		next_state[i] = state[i] + dt * dC[i];
+	f( next_time, num_states, dD, next_state, num_inputs, next_input, storage );
 	
-	for (i = 0; i < numStates; i++)
-		nextState[i] = state[i] + dt * (dState[i] + 2*dB[i] + 2*dC[i] + dD[i]) / 6;
+	for (i = 0; i < num_states; i++)
+		next_state[i] = state[i] + dt * (dstate[i] + 2.0*dB[i] + 2.0*dC[i] + dD[i]) / 6.0;
+
+	*time = next_time;
 }

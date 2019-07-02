@@ -11,7 +11,7 @@ typedef void(*physicsFunction)(
 	FLOAT_TYPE dState[],
 	FLOAT_TYPE const state[],
 	size_t num_inputs,
-	FLOAT_TYPE const input[],
+	FLOAT_TYPE input[],
 	void * storage
 	);
 

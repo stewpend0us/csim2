@@ -7,35 +7,34 @@
 
 void update
 (
-	struct blockSystem const * system,
 	FLOAT_TYPE time,
-	FLOAT_TYPE const systemState[],
-	FLOAT_TYPE const systemInput[]
+	size_t num_children,
+	struct block * child,
+	FLOAT_TYPE * const child_input[],
+	FLOAT_TYPE const * const child_state[],
+	size_t num_inputs,
+	FLOAT_TYPE const system_input[],
+	void * storage
 )
 {
-	FLOAT_TYPE const * childState[count];
-	for (size_t i = 0, xi = 0; i < system->numChildren; xi += system->child[i++].numStates)
-		childState[i] = &systemState[xi];
-	ASSERT( system, "should not be NULL" );
 	ASSERT( time == 10.0, "should be %f", 10.0 );
-	ASSERT( systemInput, "should not be NULL" );
-	ASSERT( system->numChildren == count, "should be %d", count );
-	ASSERT( system->numInputs == 1, "should be 1" );
-	ASSERT( system->child, "should not be NULL" );
-	ASSERT( system->childInput, "should not be NULL" );
-	ASSERT( !system->storage, "should be NULL" );
-	ASSERT( system->updateChildInputs == update, "should be a pointer to this function");
+	ASSERT( system_input, "should not be NULL" );
+	ASSERT( num_children == count, "should be %d", count );
+	ASSERT( num_inputs == 1, "should be 1" );
+	ASSERT( child, "should not be NULL" );
+	ASSERT( child_input, "should not be NULL" );
+	ASSERT( !storage, "should be NULL" );
 	for ( size_t i = 0; i<count; i++ )
 	{
-		ASSERT( system->child[i].numStates == 1, "expecting 1 state %zu", i );
-		ASSERT( system->child[i].numInputs == 1, "expecting 1 unput %zu", i );
-		ASSERT( system->childInput[i], "should not be NULL" );
+		ASSERT( child[i].num_states == 1, "expecting 1 state %zu", i );
+		ASSERT( child[i].num_inputs == 1, "expecting 1 unput %zu", i );
+		ASSERT( child_input[i], "should not be NULL" );
 	}
 
-	system->childInput[0][0] = systemInput[0];
+	child_input[0][0] = system_input[0];
 	for ( size_t i = 1; i<count; i++ )
 	{
-		system->childInput[i][0] = childState[i-1][0];
+		child_input[i][0] = child_state[i-1][0];
 	}
 }
 
@@ -44,47 +43,50 @@ int main(void)
 	struct block block;
 	struct blockSystem system = {0};
 	struct block child[count] = {{0}};
-	FLOAT_TYPE * childInput[count] = {0};
+	FLOAT_TYPE * child_state[count] = {0};
+	FLOAT_TYPE * child_input[count] = {0};
 	ASSERT( !blockSystem( NULL, &system ), "should return NULL" );
 	ASSERT( !blockSystem( &block, NULL ), "should return NULL" );
 
-	system.numInputs = 1;
-	system.numChildren = 0;
+	system.num_children = count;
+	system.num_inputs = 1;
 	system.child = child;
-	system.childInput = childInput;
-	system.updateChildInputs = update;
+	system.child_state = child_state;
+	system.child_input = child_input;
 	system.storage = NULL;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
+	system.updateChildInputs = update;
 
-	system.numChildren = count;
+	system.num_children = 0;
+	ASSERT( !blockSystem( &block, &system ), "should return NULL. must have children" );
+
+	system.num_children = count;
 	system.child = NULL;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
+	ASSERT( !blockSystem( &block, &system ), "should return NULL. must allocate children" );
 
 	system.child = child;
-	system.childInput = NULL;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
+	system.child_state = NULL;
+	ASSERT( !blockSystem( &block, &system ), "should return NULL. must have child state" );
 
-	system.childInput = childInput;
+	system.child_state = child_state;
+	system.child_input = NULL;
+	ASSERT( !blockSystem( &block, &system ), "should return NULL. must have child input" );
+
+	system.child_input = child_input;
 	system.updateChildInputs = NULL;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
+	ASSERT( !blockSystem( &block, &system ), "should return NULL. must have update function" );
 
 	system.updateChildInputs = update;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
+	ASSERT( !blockSystem( &block, &system ), "should return NULL. children must be initialized" );
 
 	for (size_t i = 0; i<count; i++)
 	{
 		ASSERT( integrator( &child[i], 1 ) == &child[i], "failed to create integrator %zu", i );
 	}
-	ASSERT( !blockSystem( &block, &system ), "should return NULL" );
-	for (size_t i = 0; i<count; i++)
-	{
-		childInput[i] = malloc( child[i].numInputs*sizeof(FLOAT_TYPE) );
-		ASSERT( childInput[i], "malloc failed %zu", i );
-	}
-	ASSERT( blockSystem( &block, &system ) == &block, "should return the pointer we passed in");
+	struct block * result = blockSystem( &block, &system );
+	ASSERT( result == &block, "should return the pointer we passed in %p != %p", (void*)&block, (void*)result );
 	ASSERT( block.storage == &system, "should be the pointer we passed in");
-	ASSERT( block.numStates == count, "should be %d", count );
-	ASSERT( block.numInputs == system.numInputs, "should be %zu", system.numInputs );
+	ASSERT( block.num_states == count, "should be %d", count );
+	ASSERT( block.num_inputs == system.num_inputs + count, "should be %zu", system.num_inputs + count );
 	ASSERT( block.f, "should not be NULL" );
 
 	FLOAT_TYPE dState[count] = {0};
@@ -95,7 +97,7 @@ int main(void)
 	for (size_t i = 0; i<count; i++)
 		state[i] = i;
 
-	block.f( &block, dState, time, state, input );
+	block.f( time, block.num_states, dState, state, block.num_inputs, input, block.storage );
 	ASSERT( dState[0] == input[0], "should just move input to dState" )
 	for (size_t i = 1; i<count; i++)
 	{

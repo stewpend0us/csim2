@@ -3,24 +3,28 @@
 
 static void physics
 (
-	struct block const * block,
-	FLOAT_TYPE dState[],
 	FLOAT_TYPE time,
+	size_t num_states,
+	FLOAT_TYPE dState[],
 	FLOAT_TYPE const state[],
-	FLOAT_TYPE const input[]
+	size_t num_inputs,
+	FLOAT_TYPE input[],
+	void * storage
 )
 {
 	(void)time;
 	(void)state;
-	memcpy( dState, input, block->numStates * sizeof(FLOAT_TYPE) );
+	(void)num_inputs;
+	(void)storage;
+	memcpy( dState, input, num_states * sizeof(FLOAT_TYPE) );
 }
 
-struct block * integrator( struct block * block, size_t numBlocks )
+struct block * integrator( struct block * block, size_t num_blocks )
 {
-	if ( !block || !numBlocks ) return NULL;
+	if ( !block || !num_blocks ) return NULL;
 
-	block->numStates = numBlocks;
-	block->numInputs = numBlocks;
+	block->num_states = num_blocks;
+	block->num_inputs = num_blocks;
 	block->storage = NULL;
 	block->f = physics;
 	return block;

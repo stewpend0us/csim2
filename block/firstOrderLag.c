@@ -2,32 +2,34 @@
 
 static void physics
 (
-	struct block const * block,
-	FLOAT_TYPE dState[],
 	FLOAT_TYPE time,
+	size_t num_states,
+	FLOAT_TYPE dState[],
 	FLOAT_TYPE const state[],
-	FLOAT_TYPE const input[]
+	size_t num_inputs,
+	FLOAT_TYPE const input[],
+	void * storage
 )
 {
 	(void)time;
-	size_t numStates = block->numStates;
-	FLOAT_TYPE const * tau = block->storage;
+	(void)num_inputs;
+	FLOAT_TYPE const * tau = storage;
 
-	for (size_t i = 0; i<numStates; i++)
+	for ( size_t i = 0; i < num_states; i++ )
 		dState[i] = (input[i] - state[i]) / tau[i];
 }
 
-struct block * firstOrderLag( struct block * block, size_t numBlocks, FLOAT_TYPE tau[] )
+struct block * firstOrderLag( struct block * block, size_t num_blocks, FLOAT_TYPE tau[] )
 {
-	if ( !block || !numBlocks || !tau )
+	if ( !block || !num_blocks || !tau )
 		return NULL;
-	for (size_t i = 0; i < numBlocks; i++)
+	for (size_t i = 0; i < num_blocks; i++)
 	{
 		if (tau[i] == 0.0)
 			return NULL;
 	}
-	block->numStates = numBlocks;
-	block->numInputs = numBlocks;
+	block->num_states = num_blocks;
+	block->num_inputs = num_blocks;
 	block->storage = tau;
 	block->f = physics;
 	return block;

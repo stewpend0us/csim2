@@ -22,7 +22,7 @@ int main(void)
 		input[i] = i+1;
 		inputHalf[i] = input[i];
 	}
-	rk4( &block, nextState, dState, dB, dC, dD, dt, time, state, input, inputHalf, input );
+	rk4( &block, nextState, dState, dB, dC, dD, dt, &time, state, input, inputHalf, input );
 	for (int i = 0; i<count; i++)
 	{
 		ASSERT( dState[i] == input[i], "iteration %d: %f should equal %f", i, dState[i], input[i] );
