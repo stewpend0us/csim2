@@ -2,40 +2,51 @@
 
 static void physics
 (
-	struct block const * block,
-	FLOAT_TYPE dState[],
 	FLOAT_TYPE time,
+	size_t num_states,
+	FLOAT_TYPE dState[],
 	FLOAT_TYPE const state[],
-	FLOAT_TYPE const input[]
+	size_t num_inputs,
+	FLOAT_TYPE const input[],
+	void * storage
 )
 {
-	struct blockSystem * system = block->storage;
-	size_t i, xi, numChildren = system->numChildren;
-	struct block * child = system->child;
-	FLOAT_TYPE ** childInput = system->childInput;
-	system->updateChildInputs( system, time, state, input );
-	for (i = 0, xi = 0; i < numChildren; xi += child[i++].numStates)
-		child[i].f(&child[i], &dState[xi], time, &state[xi], childInput[i]);
+	struct blockSystem * system = storage;
+	size_t i, xi, ui, num_system_inputs = system->num_inputs, num_children = system->num_children;
+	struct block * c = system->child;
+	FLOAT_TYPE ** c_input = system->child_input;
+	FLOAD_TYPE ** c_state = system->child_state;
+	for ( i = 0, xi = 0, ui = num_system_inputs; i < num_children; xi += c[i].num_states, ui += c[i].num_inputs, i++ )
+	{
+		c_state[i] = &state[xi];
+		c_input[i] = &input[ui];
+	}
+	system->updateChildInputs( time, num_children, c, c_input, c_state, num_system_inputs, input, time, system->storage );
+	for ( i = 0, xi = 0; i < num_children; xi += c[i++].num_states )
+		c[i].f(time, c[i].num_states, &dState[xi], c_state[i], c[i].num_inputs, c_input[i], c[i].storage);
 }
 
 struct block * blockSystem( struct block * block, struct blockSystem * system )
 {
-	if ( !block || !system || !system->numChildren || !system->child || !system->childInput || !system->updateChildInputs )
+	if ( !block || !system )
 		return NULL;
 
-	size_t numChildren = system->numChildren;
 	struct block * child = system->child;
-	FLOAT_TYPE ** childInput = system->childInput;
+	size_t num_children = system->num_children;
+	if ( !child || !num_children || !system->child_state || !system->child_input || !system->updateChildInputs )
+		return NULL;
 
-	size_t totalStates = 0;
-	for (size_t i = 0; i < numChildren; i++)
+	size_t total_states = 0;
+	size_t totalInputs = system->num_inputs;
+	for (size_t i = 0; i < num_children; i++)
 	{
-		if ( child[i].numStates == 0 || childInput[i] == NULL )
+		if ( !child[i].num_states || !child[i].f)
 			return NULL;
-		totalStates += child[i].numStates;
+		total_states += child[i].num_states;
+		total_inputs += child[i].num_inputs;
 	}
-	block->numStates = totalStates;
-	block->numInputs = system->numInputs;
+	block->num_states = total_states;
+	block->num_inputs = total_inputs;
 	block->storage = system;
 	block->f = physics;
 	return block;

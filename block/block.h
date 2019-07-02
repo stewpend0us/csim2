@@ -6,17 +6,19 @@
 struct block;
 
 typedef void(*physicsFunction)(
-	struct block const * block,
-	FLOAT_TYPE dState[],
 	FLOAT_TYPE time,
+	size_t num_states,
+	FLOAT_TYPE dState[],
 	FLOAT_TYPE const state[],
-	FLOAT_TYPE const input[]
+	size_t num_inputs,
+	FLOAT_TYPE const input[],
+	void * storage
 	);
 
 struct block
 {
-	size_t numStates; // number of states 
-	size_t numInputs; // number of inputs
+	size_t num_states; // number of states 
+	size_t num_inputs; // number of inputs
 	void * storage; // point to anything you want here
 	physicsFunction f; // dState = f(time, state, input)
 };
