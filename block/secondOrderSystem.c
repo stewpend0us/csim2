@@ -1,44 +1,44 @@
 #include <dbg.h>
 #include "secondOrderSystem.h"
 
+// note that the typical "output" of this block would be the first half of the state vector
 static void physics
 (
-	struct block const * block,
-	FLOAT_TYPE dState[],
 	FLOAT_TYPE time,
+	size_t num_states,
+	FLOAT_TYPE dState[],
 	FLOAT_TYPE const state[],
-	FLOAT_TYPE const input[]
+	size_t num_inputs,
+	FLOAT_TYPE input[],
+	void * storage
 )
 {
 	(void)time;
-	size_t numStates = block->numStates;
-	struct secondOrderSystemStorage const * storage = block->storage;
+	(void)num_states;
+	struct secondOrderSystemStorage * so_storage = storage;
 
 	FLOAT_TYPE const state1[] = state;
-	FLOAT_TYPE const state2[] = state + numInputs;
-	FLOAT_TYPE const dState1[] = dState;
-	FLOAT_TYPE const dState2[] = dState + numInputs;
+	FLOAT_TYPE const state2[] = state + num_inputs;
+	FLOAT_TYPE dState1[] = dState;
+	FLOAT_TYPE dState2[] = dState + num_inputs;
 
-	memcpy(dState1, state2, numInputs * sizeof(FLOAT_TYPE));
+	memcpy(dState1, state2, num_inputs * sizeof(FLOAT_TYPE));
 
-	for (size_t i = 0; i < numInputs; i++)
-		dState2[i] = -2 * storage[i].zeta * storage[i].omega_n * state2[i] - storage[i].omega_n * storage[i].omega_n * ( state1[i] - input[i] );
+	for ( size_t i = 0; i < num_inputs; i++ )
+	{
+		FLOAT_TYPE zeta = so_storage[i].zeta;
+		FLOAT_TYPE omega_n = so_storage[i].omega_n;
+		FLOAT_TYPE numerator = so_storage[i].numerator;
+		dState2[i] = -2 * zeta * omega_n * state2[i] - omega_n * omega_n * ( state1[i] - input[i] );
+	}
 }
 
-FLOAT_TYPE * secondOrderSystemOutput( FLOAT_TYPE output[], size_t numOutputs, FLOAT_TYPE const state[] )
+struct block * secondOrderSystem( struct block * block, size_t num_blocks, struct secondOrderSystemStorage storage[] )
 {
-	if ( numOutputs != block->numInputs)
+	if ( !block || !num_blocks || !storage )
 		return NULL;
-	memcpy(output, state, numOutputs*sizeof(FLOAT_TYPE));
-	return output;
-}
-
-struct block * secondOrderSystem( struct block * block, size_t numBlocks, struct secondOrderSystemStorage storage[] )
-{
-	if ( !block || !numBlocks || !storage )
-		return NULL;
-	block->numStates = numBlocks*2;
-	block->numInputs = numBlocks;
+	block->num_states = num_blocks*2.0;
+	block->num_inputs = num_blocks;
 	block->storage = storage;
 	block->f = physics;
 	return block;
