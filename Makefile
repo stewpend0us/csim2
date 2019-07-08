@@ -10,7 +10,6 @@ test_integrator: test/test_integrator.c block/integrator.o
 test_firstOrderLag: test/test_firstOrderLag.c block/firstOrderLag.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_blockSystem: CFLAGS+=-Wno-missing-field-initializers
 test_blockSystem: test/test_blockSystem.c block/blockSystem.o block/integrator.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 

@@ -24,18 +24,19 @@ void update
 	ASSERT( child, "should not be NULL" );
 	ASSERT( child_input, "should not be NULL" );
 	ASSERT( !storage, "should be NULL" );
-	for ( size_t i = 0; i<count; i++ )
+	for ( size_t i = 0; i<num_children; i++ )
 	{
 		ASSERT( child[i].num_states == 1, "expecting 1 state %zu", i );
 		ASSERT( child[i].num_inputs == 1, "expecting 1 unput %zu", i );
 		ASSERT( child_input[i], "should not be NULL" );
+		ASSERT( child_state[i][0] == i, "expecting child state %zu to be initialized this way", i );
 	}
 
+	ASSERT(system_input[0] == 1, "expecting system input of 1");
 	child_input[0][0] = system_input[0];
-	for ( size_t i = 1; i<count; i++ )
-	{
+	ASSERT(child_input[0][0] == 1, "expecting system input of 1 to be assigned to child_input[0][0]");
+	for ( size_t i = 1; i<num_children; i++ )
 		child_input[i][0] = child_state[i-1][0];
-	}
 }
 
 int main(void)
@@ -82,6 +83,7 @@ int main(void)
 	{
 		ASSERT( integrator( &child[i], 1 ) == &child[i], "failed to create integrator %zu", i );
 	}
+
 	struct block * result = blockSystem( &block, &system );
 	ASSERT( result == &block, "should return the pointer we passed in %p != %p", (void*)&block, (void*)result );
 	ASSERT( block.storage == &system, "should be the pointer we passed in");
@@ -91,12 +93,14 @@ int main(void)
 
 	FLOAT_TYPE dState[count] = {0};
 	FLOAT_TYPE state[count];
-	FLOAT_TYPE input[1] = {1};
+	FLOAT_TYPE input[count+1] = {0};
+	input[0] = 1;
 	FLOAT_TYPE time = 10.0;
 
-	for (size_t i = 0; i<count; i++)
+	for ( size_t i = 0; i<count; i++ )
 		state[i] = i;
 
+	ASSERT( block.num_inputs == count+1, "expecting the block input count to be count+1");
 	block.f( time, block.num_states, dState, state, block.num_inputs, input, block.storage );
 	ASSERT( dState[0] == input[0], "should just move input to dState" )
 	for (size_t i = 1; i<count; i++)
