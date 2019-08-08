@@ -60,7 +60,11 @@ static void ascii_plot(
 	char row[] = ":                                                                                  :";
 	int space = sizeof(row)/sizeof(row[0]) - 1;
 	int pos = round((position*space + space)/2) + 1;
-	if ( 0 < pos && pos < space-1 )
+	if ( pos < 0 )
+		row[0] = '<';
+	else if ( pos > space-1 )
+		row[space-1] = '>';
+	else
 	{
 		if (velocity < -thresh) row[pos] = '/';
 		else if (velocity > thresh) row[pos] = '\\';
