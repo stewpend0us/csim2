@@ -2,7 +2,7 @@ CFLAGS=-Wall -Wextra -Wpedantic -Iblock -DFLOAT_TYPE=double
 
 .PHONY: all clean test status
 
-all: test
+all: test example_mass_spring_damper
 
 test_integrator: test/test_integrator.c block/integrator.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
@@ -24,5 +24,9 @@ test: CFLAGS+=-O3
 test: $(TEST)
 	for x in $^; do echo "./$$x"; ./$$x; done
 
+example_mass_spring_damper: example/mass_spring_damper.c block/solver.o
+	cc $(CFLAGS) -o $@ $^ $(LDFLAGS) -lm
+
+EXAMPLE=example_mass_spring_damper
 clean:
-	rm -rf *.o *~ block/*.o block/*~ test/*.o test/*~ example/*.o example/*~ $(TEST)
+	rm -rf *.o *~ block/*.o block/*~ test/*.o test/*~ example/*.o example/*~ $(TEST) $(EXAMPLE)
