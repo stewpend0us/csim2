@@ -1,5 +1,5 @@
-#include <dbg.h>
 #include "secondOrderSystem.h"
+#include <string.h>
 
 // note that the typical "output" of this block would be the first half of the state vector
 static void physics
@@ -17,10 +17,10 @@ static void physics
 	(void)num_states;
 	struct secondOrderSystemStorage * so_storage = storage;
 
-	FLOAT_TYPE const state1[] = state;
-	FLOAT_TYPE const state2[] = state + num_inputs;
-	FLOAT_TYPE dState1[] = dState;
-	FLOAT_TYPE dState2[] = dState + num_inputs;
+	FLOAT_TYPE const * state1 = state;
+	FLOAT_TYPE const * state2 = state + num_inputs;
+	FLOAT_TYPE * dState1 = dState;
+	FLOAT_TYPE * dState2 = dState + num_inputs;
 
 	memcpy(dState1, state2, num_inputs * sizeof(FLOAT_TYPE));
 
@@ -29,7 +29,7 @@ static void physics
 		FLOAT_TYPE zeta = so_storage[i].zeta;
 		FLOAT_TYPE omega_n = so_storage[i].omega_n;
 		FLOAT_TYPE numerator = so_storage[i].numerator;
-		dState2[i] = -2 * zeta * omega_n * state2[i] - omega_n * omega_n * ( state1[i] - input[i] );
+		dState2[i] = -2 * zeta * omega_n * state2[i] - omega_n * omega_n * state1[i] + numerator * input[i];
 	}
 }
 

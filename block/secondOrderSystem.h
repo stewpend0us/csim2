@@ -11,3 +11,5 @@ struct secondOrderSystemStorage
 };
 
 struct block * secondOrderSystem( struct block * block, size_t num_blocks, struct secondOrderSystemStorage storage[] );
+
+#endif

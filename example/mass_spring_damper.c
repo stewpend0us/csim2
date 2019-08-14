@@ -1,9 +1,9 @@
 #include "block.h"
 #include "solver.h"
-#include <math.h>
+#include "ascii_plot.h"
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdio.h>
 
 struct mass_storage
 {
@@ -50,53 +50,20 @@ static void physics(
 	*dx = xdot;
 }
 
-static void ascii_plot(
-	FLOAT_TYPE const * state
-)
-{
-	FLOAT_TYPE velocity = state[0];
-	FLOAT_TYPE position = state[1];
-	FLOAT_TYPE thresh = .1;
-	char row[] = ":                                                                                  :";
-	int space = sizeof(row)/sizeof(row[0]) - 1;
-	int pos = round((position*space + space)/2) + 1;
-	if ( pos < 0 )
-		row[0] = '<';
-	else if ( pos > space-1 )
-		row[space-1] = '>';
-	else
-	{
-		if (velocity < -thresh) row[pos] = '/';
-		else if (velocity > thresh) row[pos] = '\\';
-		else row[pos] = '|';
-	}
-	printf("%s\n",row);
-}
-
 int main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	struct mass_storage storage = {10, 100, 15};
 	FLOAT_TYPE dt = .1;
 	FLOAT_TYPE tf = 10;
-	char solver = 'e';
-	switch (argc)
-	{
-		case 7: solver = argv[6][0];
-		case 6: tf = atof(argv[5]);
-		case 5: dt = atof(argv[4]);
-		case 4: storage.damping = atof(argv[3]);
-		case 3: storage.stiffness = atof(argv[2]);
-		case 2: storage.mass = atof(argv[1]);
-	}
-	printf(
-		"mass:      %f\n"
-		"stiffness: %f\n"
-		"damping:   %f\n"
-		"dt:        %f\n"
-		"tf:        %f\n", storage.mass, storage.stiffness, storage.damping, dt, tf);
-	sleep(1);
+	char solver = 'e'; // e for euler r for rk4
 	
+	// initialize our block
 	struct block block = {2, 1, &storage, physics};
+
+	// allocate memory for the solvers
 	FLOAT_TYPE state[2] = {0, 1}; // initial velocity of 0, initial position of 1
 	FLOAT_TYPE next_state[2];
 	FLOAT_TYPE dstate[2];
@@ -106,21 +73,20 @@ int main(int argc, char **argv)
 	FLOAT_TYPE time = 0;
 	FLOAT_TYPE input[1] = {0};
 
-	if (solver != 'e' && solver != 'r')
-	{
-		printf("No %c solver\n",solver);
-		return 1;
-	}
-
 	while ( time < tf )
 	{
-		ascii_plot( state );
+		ascii_plot( state[1], state[0] );
 //		printf("%5.2f %5.2f\n",state[0],state[1]);
 
 		if (solver == 'e')
 			euler( &block, next_state, dstate, dt, &time, state, input );
-		if (solver == 'r')
+		else if (solver == 'r')
 			rk4( &block, next_state, dstate, dB, dC, dD, dt, &time, state, input, input, input );
+		else
+		{
+			printf("bad solver %c\n", solver);
+			return 1;
+		}
 
 		memcpy(state, next_state, 2*sizeof(FLOAT_TYPE));
 		usleep(1000*1000*dt);
