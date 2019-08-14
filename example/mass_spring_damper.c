@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
+// define our storage struct
 struct mass_storage
 {
 	FLOAT_TYPE mass;
@@ -12,6 +13,7 @@ struct mass_storage
 	FLOAT_TYPE damping;
 };
 
+// define our physics function
 static void physics(
 	FLOAT_TYPE time,
 	size_t num_states,
@@ -50,14 +52,13 @@ static void physics(
 	*dx = xdot;
 }
 
-int main(int argc, char **argv)
+int main( void )
 {
-	(void)argc;
-	(void)argv;
-
+	// block properties
 	struct mass_storage storage = {10, 100, 15};
+
+	//solver properties
 	FLOAT_TYPE dt = .1;
-	FLOAT_TYPE tf = 10;
 	char solver = 'e'; // e for euler r for rk4
 	
 	// initialize our block
@@ -73,10 +74,10 @@ int main(int argc, char **argv)
 	FLOAT_TYPE time = 0;
 	FLOAT_TYPE input[1] = {0};
 
-	while ( time < tf )
+	// solver loop
+	for(;;)
 	{
-		ascii_plot( state[1], state[0] );
-//		printf("%5.2f %5.2f\n",state[0],state[1]);
+		ascii_plot( time, state[1], state[0] );
 
 		if (solver == 'e')
 			euler( &block, next_state, dstate, dt, &time, state, input );

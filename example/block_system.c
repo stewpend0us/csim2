@@ -23,7 +23,7 @@ void updateCInputs(
 	(void)num_children;
 	(void)child;
 	(void)num_inputs;
-	(void)storage;
+
 	FLOAT_TYPE scale = *(FLOAT_TYPE*)storage;
 	child_input[0][0] = scale*system_input[0];
 	child_input[1][0] = child_state[0][0];
@@ -31,17 +31,16 @@ void updateCInputs(
 
 #define CHILD_COUNT 2
 #define NUM_STATE 3	
-int main(int argc, char **argv)
+int main( void )
 {
-	(void)argc;
-	(void)argv;
-
+	// block properties
 	FLOAT_TYPE tau = 1.0;
 	struct secondOrderSystemStorage storage = { 0.2, 1.0, 1.0};
-	FLOAT_TYPE dt = .1;
-	FLOAT_TYPE tf = 10;
-	char solver = 'e'; // e for euler r for rk4
 	FLOAT_TYPE scale = 0.5;
+
+	//solver properties
+	FLOAT_TYPE dt = .1;
+	char solver = 'e'; // e for euler r for rk4
 
 	//Initialize the struct blockSystem
 	struct block children[CHILD_COUNT];
@@ -68,9 +67,9 @@ int main(int argc, char **argv)
 	FLOAT_TYPE input[3] = {1,0,0}; // this must be large enough for ALL inputs {system, block1, block2}
 
 	// the solver loop
-	while ( time < tf )
+	for(;;)
 	{
-		ascii_plot( state[1], state[2] );
+		ascii_plot( time, state[1], state[2] );
 
 		if (solver == 'e')
 			euler( &block, next_state, dstate, dt, &time, state, input );

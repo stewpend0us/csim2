@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 void ascii_plot(
+	FLOAT_TYPE time,
 	FLOAT_TYPE position,
 	FLOAT_TYPE velocity
 )
@@ -20,6 +21,6 @@ void ascii_plot(
 		row[pos] = '\\';
 	else
 		row[pos] = '|';
-	printf("%s\n",row);
+	printf("%6.1f%s\n",time,row);
 }
 
