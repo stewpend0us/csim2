@@ -62,17 +62,22 @@ int main( void )
 	char solver = 'e'; // e for euler r for rk4
 	
 	// initialize our block
-	struct block block = {2, 1, &storage, physics};
+	struct block const block = {2, 1, &storage, physics};
 
 	// allocate memory for the solvers
-	FLOAT_TYPE state[2] = {0, 1}; // initial velocity of 0, initial position of 1
-	FLOAT_TYPE next_state[2];
-	FLOAT_TYPE dstate[2];
-	FLOAT_TYPE dB[2];
-	FLOAT_TYPE dC[2];
-	FLOAT_TYPE dD[2];
+	FLOAT_TYPE state[block.num_states];
+	FLOAT_TYPE next_state[block.num_states];
+	FLOAT_TYPE dstate[block.num_states];
+	FLOAT_TYPE dB[block.num_states];
+	FLOAT_TYPE dC[block.num_states];
+	FLOAT_TYPE dD[block.num_states];
 	FLOAT_TYPE time = 0;
-	FLOAT_TYPE input[1] = {0};
+	FLOAT_TYPE input[block.num_inputs];
+
+	// initial conditions
+	state[0] = 0;
+	state[1] = 1;
+	input[0] = 1;
 
 	// solver loop
 	for(;;)
