@@ -3,8 +3,8 @@
 
 struct transferFunctionStorage
 {
-	size_t numSize;
-	size_t denSize;
+	size_t num_size;
+	size_t den_size;
 	double const * numerator;
 	double const * denominator;
 };
