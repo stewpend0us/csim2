@@ -1,4 +1,4 @@
-#include "firstOrderLag.h"
+#include "block_basic.h"
 #include "test.h"
 #include <string.h>
 
@@ -12,13 +12,13 @@ int main(void)
 	FLOAT_TYPE tau[count] = {0};
 	FLOAT_TYPE time = 10.0;
 
-	ASSERT( !firstOrderLag( NULL, count, tau ), "should return NULL" );
-	ASSERT( !firstOrderLag( &block, 0, tau ), "should return NULL");
-	ASSERT( !firstOrderLag( &block, count, NULL ), "should return NULL");
-	ASSERT( !firstOrderLag( &block, count, tau ), "should return NULL");
+	ASSERT( !first_order_lag( NULL, count, tau ), "should return NULL" );
+	ASSERT( !first_order_lag( &block, 0, tau ), "should return NULL");
+	ASSERT( !first_order_lag( &block, count, NULL ), "should return NULL");
+	ASSERT( !first_order_lag( &block, count, tau ), "should return NULL");
 	for (size_t i = 0; i<count; i++)
 		tau[i] = i+1;
-	ASSERT( firstOrderLag( &block, count, tau ) == &block, "should return the pointer we passed in");
+	ASSERT( first_order_lag( &block, count, tau ) == &block, "should return the pointer we passed in");
 	ASSERT( block.num_states == count, "should be %d", count);
 	ASSERT( block.num_inputs == count, "should be %d", count);
 	ASSERT( block.storage == tau, "should be the array we passed in");

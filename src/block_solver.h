@@ -1,5 +1,5 @@
-#ifndef _SOLVER_H_
-#define _SOLVER_H_
+#ifndef _BLOCK_SOLVER_H_
+#define _BLOCK_SOLVER_H_
 
 #include "block.h"
 

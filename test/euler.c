@@ -1,5 +1,5 @@
-#include "solver.h"
-#include "integrator.h"
+#include "block_solver.h"
+#include "block_basic.h"
 #include "test.h"
 
 int main(void)

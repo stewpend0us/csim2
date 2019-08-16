@@ -1,8 +1,7 @@
 #include "block.h"
-#include "blockSystem.h"
-#include "firstOrderLag.h"
-#include "secondOrderSystem.h"
-#include "solver.h"
+#include "block_system.h"
+#include "block_basic.h"
+#include "block_solver.h"
 #include "ascii_plot.h"
 #include <stdio.h>
 #include <string.h>
@@ -35,26 +34,26 @@ int main( void )
 {
 	// block properties
 	FLOAT_TYPE tau = 1.0;
-	struct secondOrderSystemStorage storage = { 0.2, 1.0, 1.0};
+	struct second_order_system_storage storage = { 0.2, 1.0, 1.0};
 	FLOAT_TYPE scale = 0.5;
 
 	//solver properties
 	FLOAT_TYPE dt = .1;
 	char solver = 'e'; // e for euler r for rk4
 
-	//Initialize the struct blockSystem
+	//Initialize the struct block_system
 	struct block children[CHILD_COUNT];
 	FLOAT_TYPE * cstate[CHILD_COUNT];
 	FLOAT_TYPE * cinput[CHILD_COUNT];
-	struct blockSystem system = { CHILD_COUNT, 1, children, cstate, cinput, &scale, updateCInputs };
+	struct block_system system = { CHILD_COUNT, 1, children, cstate, cinput, &scale, updateCInputs };
 
 	// initialize the child blocks
-	firstOrderLag( &children[0], 1, &tau );
-	secondOrderSystem( &children[1], 1, &storage );
+	first_order_lag( &children[0], 1, &tau );
+	second_order_system( &children[1], 1, &storage );
 
 	// initialize the system block
 	struct block block;
-	blockSystem( &block, &system );
+	block_system( &block, &system );
 
 	// allocate memory for the solvers
 	FLOAT_TYPE state[NUM_STATE] = { 0.0 };

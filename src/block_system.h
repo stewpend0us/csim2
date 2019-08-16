@@ -1,9 +1,9 @@
-#ifndef _BLOCKSYSTEM_H_
-#define _BLOCKSYSTEM_H_
+#ifndef _BLOCK_SYSTEM_H_
+#define _BLOCK_SYSTEM_H_
 
 #include "block.h"
 
-struct blockSystem;
+struct block_system;
 
 typedef void(*updateChildInputsFunction)(
 	FLOAT_TYPE time,
@@ -16,10 +16,10 @@ typedef void(*updateChildInputsFunction)(
 	void * storage
 	);
 
-struct blockSystem
+struct block_system
 {
 	size_t num_children; // number of child blocks
-	size_t num_inputs; // number of inputs for this blockSystem (not the total number of inputs of all the children)
+	size_t num_inputs; // number of inputs for this block_system (not the total number of inputs of all the children)
 	struct block * child; // array of child blocks
 	FLOAT_TYPE ** child_state; // one pointer for each child (just need room for the pointers no data)
 	FLOAT_TYPE ** child_input; // one pointer for each child (just need room for the pointers no data)
@@ -27,6 +27,6 @@ struct blockSystem
 	updateChildInputsFunction updateChildInputs; // child_input = f(time, child_state, system_input)
 };
 
-struct block * blockSystem( struct block * block, struct blockSystem * system );
+struct block * block_system( struct block * block, struct block_system * system );
 
 #endif

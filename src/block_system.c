@@ -1,6 +1,6 @@
-#include "blockSystem.h"
+#include "block_system.h"
 
-static void physics
+static void block_system_physics
 (
 	FLOAT_TYPE time,
 	size_t num_states,
@@ -13,7 +13,7 @@ static void physics
 {
 	(void)num_states;
 	(void)num_inputs;
-	struct blockSystem * system = storage;
+	struct block_system * system = storage;
 	size_t i, xi, ui, num_system_inputs = system->num_inputs, num_children = system->num_children;
 	struct block * c = system->child;
 	FLOAT_TYPE ** c_input = system->child_input;
@@ -28,7 +28,7 @@ static void physics
 		c[i].f(time, c[i].num_states, &dstate[xi], c_state[i], c[i].num_inputs, c_input[i], c[i].storage);
 }
 
-struct block * blockSystem( struct block * block, struct blockSystem * system )
+struct block * block_system( struct block * block, struct block_system * system )
 {
 	if ( !block || !system )
 		return NULL;
@@ -50,6 +50,6 @@ struct block * blockSystem( struct block * block, struct blockSystem * system )
 	block->num_states = total_states;
 	block->num_inputs = total_inputs;
 	block->storage = system;
-	block->f = physics;
+	block->f = block_system_physics;
 	return block;
 }

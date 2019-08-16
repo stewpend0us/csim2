@@ -1,37 +1,44 @@
-CFLAGS=-Wall -Wextra -Wpedantic -Iblock -DFLOAT_TYPE=double
+CFLAGS=-Wall -Wextra -Wpedantic -Isrc -DFLOAT_TYPE=double
 
-.PHONY: all clean test
+.PHONY: all clean test example
 
-all: test example_mass_spring_damper
+all: example test
 
-test_integrator: test/test_integrator.c block/integrator.o
+src/%.o: src/%.c src/%.h src/block.h
+	cc $(CFLAGS) -c -o $@ $< $(LDFLAGS)
+
+lib/%.o: lib/%.c lib/%.h
+	cc $(CFLAGS) -c -o $@ $< $(LDFLAGS)
+
+test/integrator: test/integrator.c src/block_basic.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_firstOrderLag: test/test_firstOrderLag.c block/firstOrderLag.o
+test/first_order_lag: test/first_order_lag.c src/block_basic.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_blockSystem: test/test_blockSystem.c block/blockSystem.o block/integrator.o
+test/block_system: test/block_system.c src/block_basic.o src/block_system.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_euler: test/test_euler.c block/solver.o block/integrator.o
+test/euler: test/euler.c src/block_basic.o src/block_solver.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_rk4: test/test_rk4.c block/solver.o block/integrator.o
+test/rk4: test/rk4.c src/block_basic.o src/block_solver.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-TEST=test_integrator test_firstOrderLag test_blockSystem test_euler test_rk4
+TEST=test/integrator test/first_order_lag test/block_system test/euler test/rk4
 
 test: CFLAGS+=-O3
 test: $(TEST)
-	for x in $^; do echo "./$$x"; ./$$x; done
+	for x in $^; do ./$$x; done
 
-example_mass_spring_damper: example/mass_spring_damper.c block/solver.o example/ascii_plot.o
-	cc $(CFLAGS) -Iexample -o $@ $^ $(LDFLAGS) -lm
+example/mass_spring_damper: example/mass_spring_damper.c src/block_solver.o lib/ascii_plot.o
+	cc $(CFLAGS) -Ilib -o $@ $^ $(LDFLAGS) -lm
 
-example_block_system: example/block_system.c block/solver.o example/ascii_plot.o block/blockSystem.o block/firstOrderLag.o block/secondOrderSystem.o
-	cc $(CFLAGS) -Iexample -o $@ $^ $(LDFLAGS) -lm
+example/block_system: example/block_system.c src/block_solver.o src/block_system.o src/block_basic.o lib/ascii_plot.o
+	cc $(CFLAGS) -Ilib -o $@ $^ $(LDFLAGS) -lm
 
-EXAMPLE=example_mass_spring_damper example_block_system
+EXAMPLE=example/mass_spring_damper example/block_system
+example: $(EXAMPLE)
 
 clean:
 	rm -rf */*.o */*~ $(TEST) $(EXAMPLE)

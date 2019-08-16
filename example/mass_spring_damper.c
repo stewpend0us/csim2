@@ -1,5 +1,5 @@
 #include "block.h"
-#include "solver.h"
+#include "block_solver.h"
 #include "ascii_plot.h"
 #include <stdio.h>
 #include <string.h>

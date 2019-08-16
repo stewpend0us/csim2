@@ -1,5 +1,5 @@
-#include "integrator.h"
-#include "blockSystem.h"
+#include "block_basic.h"
+#include "block_system.h"
 #include "test.h"
 #include <string.h>
 
@@ -42,12 +42,12 @@ void update
 int main(void)
 {
 	struct block block;
-	struct blockSystem system = {0};
+	struct block_system system = {0};
 	struct block child[count] = {{0}};
 	FLOAT_TYPE * child_state[count] = {0};
 	FLOAT_TYPE * child_input[count] = {0};
-	ASSERT( !blockSystem( NULL, &system ), "should return NULL" );
-	ASSERT( !blockSystem( &block, NULL ), "should return NULL" );
+	ASSERT( !block_system( NULL, &system ), "should return NULL" );
+	ASSERT( !block_system( &block, NULL ), "should return NULL" );
 
 	system.num_children = count;
 	system.num_inputs = 1;
@@ -58,33 +58,33 @@ int main(void)
 	system.updateChildInputs = update;
 
 	system.num_children = 0;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL. must have children" );
+	ASSERT( !block_system( &block, &system ), "should return NULL. must have children" );
 
 	system.num_children = count;
 	system.child = NULL;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL. must allocate children" );
+	ASSERT( !block_system( &block, &system ), "should return NULL. must allocate children" );
 
 	system.child = child;
 	system.child_state = NULL;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL. must have child state" );
+	ASSERT( !block_system( &block, &system ), "should return NULL. must have child state" );
 
 	system.child_state = child_state;
 	system.child_input = NULL;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL. must have child input" );
+	ASSERT( !block_system( &block, &system ), "should return NULL. must have child input" );
 
 	system.child_input = child_input;
 	system.updateChildInputs = NULL;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL. must have update function" );
+	ASSERT( !block_system( &block, &system ), "should return NULL. must have update function" );
 
 	system.updateChildInputs = update;
-	ASSERT( !blockSystem( &block, &system ), "should return NULL. children must be initialized" );
+	ASSERT( !block_system( &block, &system ), "should return NULL. children must be initialized" );
 
 	for (size_t i = 0; i<count; i++)
 	{
 		ASSERT( integrator( &child[i], 1 ) == &child[i], "failed to create integrator %zu", i );
 	}
 
-	struct block * result = blockSystem( &block, &system );
+	struct block * result = block_system( &block, &system );
 	ASSERT( result == &block, "should return the pointer we passed in %p != %p", (void*)&block, (void*)result );
 	ASSERT( block.storage == &system, "should be the pointer we passed in");
 	ASSERT( block.num_states == count, "should be %d", count );
