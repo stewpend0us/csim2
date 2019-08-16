@@ -1,6 +1,8 @@
 CFLAGS=-Wall -Wextra -Wpedantic -Isrc -DFLOAT_TYPE=double
+TEST=$(patsubst %.c, %, $(wildcard test/*.c))
+EXAMPLE=$(patsubst %.c, %, $(wildcard example/*.c))
 
-.PHONY: all clean test example
+.PHONY: all clean example test
 
 all: example test
 
@@ -25,19 +27,16 @@ test/euler: test/euler.c src/block_basic.o src/block_solver.o
 test/rk4: test/rk4.c src/block_basic.o src/block_solver.o
 	cc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-TEST=test/integrator test/first_order_lag test/block_system test/euler test/rk4
-
-test: CFLAGS+=-O3
-test: $(TEST)
-	for x in $^; do ./$$x; done
-
 example/mass_spring_damper: example/mass_spring_damper.c src/block_solver.o lib/ascii_plot.o
 	cc $(CFLAGS) -Ilib -o $@ $^ $(LDFLAGS) -lm
 
 example/block_system: example/block_system.c src/block_solver.o src/block_system.o src/block_basic.o lib/ascii_plot.o
 	cc $(CFLAGS) -Ilib -o $@ $^ $(LDFLAGS) -lm
 
-EXAMPLE=example/mass_spring_damper example/block_system
+test: CFLAGS+=-O3
+test: $(TEST)
+	for x in $^; do ./$$x; done
+
 example: $(EXAMPLE)
 
 clean:
