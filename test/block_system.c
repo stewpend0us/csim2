@@ -55,7 +55,7 @@ int main(void)
 	system.child_state = child_state;
 	system.child_input = child_input;
 	system.storage = NULL;
-	system.updateChildInputs = update;
+	system.update_child_inputs = update;
 
 	system.num_children = 0;
 	ASSERT( !block_system( &block, &system ), "should return NULL. must have children" );
@@ -73,10 +73,10 @@ int main(void)
 	ASSERT( !block_system( &block, &system ), "should return NULL. must have child input" );
 
 	system.child_input = child_input;
-	system.updateChildInputs = NULL;
+	system.update_child_inputs = NULL;
 	ASSERT( !block_system( &block, &system ), "should return NULL. must have update function" );
 
-	system.updateChildInputs = update;
+	system.update_child_inputs = update;
 	ASSERT( !block_system( &block, &system ), "should return NULL. children must be initialized" );
 
 	for (size_t i = 0; i<count; i++)

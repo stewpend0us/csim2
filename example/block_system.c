@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 
-void updateCInputs(
+void update_c_inputs(
 	FLOAT_TYPE time,
 	size_t num_children,
 	struct block * child,
@@ -45,7 +45,7 @@ int main( void )
 	struct block children[CHILD_COUNT];
 	FLOAT_TYPE * cstate[CHILD_COUNT];
 	FLOAT_TYPE * cinput[CHILD_COUNT];
-	struct block_system system = { CHILD_COUNT, 1, children, cstate, cinput, &scale, updateCInputs };
+	struct block_system system = { CHILD_COUNT, 1, children, cstate, cinput, &scale, update_c_inputs };
 
 	// initialize the child blocks
 	first_order_lag( &children[0], 1, &tau );

@@ -23,7 +23,7 @@ static void block_system_physics
 		c_state[i] = &state[xi];
 		c_input[i] = &input[ui];
 	}
-	system->updateChildInputs( time, num_children, c, c_input, c_state, num_system_inputs, input, system->storage );
+	system->update_child_inputs( time, num_children, c, c_input, c_state, num_system_inputs, input, system->storage );
 	for ( i = 0, xi = 0; i < num_children; xi += c[i++].num_states )
 		c[i].f(time, c[i].num_states, &dstate[xi], c_state[i], c[i].num_inputs, c_input[i], c[i].storage);
 }
@@ -35,7 +35,7 @@ struct block * block_system( struct block * block, struct block_system * system 
 
 	struct block * child = system->child;
 	size_t num_children = system->num_children;
-	if ( !child || !num_children || !system->child_state || !system->child_input || !system->updateChildInputs )
+	if ( !child || !num_children || !system->child_state || !system->child_input || !system->update_child_inputs )
 		return NULL;
 
 	size_t total_states = 0;

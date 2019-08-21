@@ -5,7 +5,7 @@
 
 struct block_system;
 
-typedef void(*updateChildInputsFunction)(
+typedef void(*update_child_inputs_function)(
 	FLOAT_TYPE time,
 	size_t num_children,
 	struct block * child,
@@ -24,7 +24,7 @@ struct block_system
 	FLOAT_TYPE ** child_state; // one pointer for each child (just need room for the pointers no data)
 	FLOAT_TYPE ** child_input; // one pointer for each child (just need room for the pointers no data)
 	void * storage; // put anything you want here
-	updateChildInputsFunction updateChildInputs; // child_input = f(time, child_state, system_input)
+	update_child_inputs_function update_child_inputs; // child_input = f(time, child_state, system_input)
 };
 
 struct block * block_system( struct block * block, struct block_system * system );
