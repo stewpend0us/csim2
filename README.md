@@ -21,9 +21,8 @@ like this:
     >|         |   M   |---->F
     >|----C----|_______|
            
-*This is supposed to look like a wall on the left (>|) connected to a weight on the right (M)
-via a spring (K) and damper (C). An external force (F) is applied to the mass. The positive X
-direction is also indicated (+x).*
+*This is supposed to look like a wall on the left connected to a weight on the right
+via a spring and damper.*
 
 Where:
 - M is the mass (force due to acceleration = mass * acceleration)
@@ -37,9 +36,9 @@ Summing the forces results in the following differential equation:
     M*xdotdot + C*xdot + K*x = F
 
 I've used `dot` to indcate a time derivative so `xdot` is the first derivative of position
-dx/dt (velocity) and `xdotdot` is the seccond derivative of position d^2x/dt^2 (acceleration).
+dx/dt (velocity) and `xdotdot` is the second derivative of position d^2x/dt^2 (acceleration).
 
-In csim2 the differential equation is defined by the *physics_function* for a block (see src/block.h).
+In csim2 the differential equation is defined by the `physics_function` for a block (see `src/block.h`).
 The physics function calculates the state derivative as a function of state, input, and time.
 
 What are the state derivative and state? Start by identifying the highest and lowest
@@ -52,9 +51,6 @@ derivatives *and* states. In our case that's `xdot`.
     derivative        state
     [ xdotdot ]  ->  [ xdot ]
     [ xdot    ]  ->  [ x    ]
-
-Clearly the state derivative is called the state derivative because it's simply the derivative
-of the state.
 
 Notice how `xdot` appears in both the state and state derivative. This isn't a problem but
 calling them the same thing can get messy. I fix this by prefixing the state derivatives with
@@ -79,7 +75,7 @@ For the purposes of this library a block is basically just the physics function 
 See `src/block.h` for the definition of `physics_function` and `struct block`. The physics function
 is the differential equation that converts input and state into state derivative. The library includes
 the definition of some basic blocks (see `src/block_basic.c`) but the more interesting blocks will
-be the ones that `you` implement. The blocks that represent the physics that you care about.
+be the ones that *you* implement. The blocks that implement the physics that *you* care about.
 
 ## solvers
 Solvers only ever deal with a single block (although the block may be composed of several
@@ -88,9 +84,9 @@ produce the next state. See `src/block_solver.c`.
 
 ## composing blocks
 `src/block_system.c` is intended to simplify the composition of multiple blocks into a new block.
-Unlike a standard block, block systems do not have a physics function or state (at least not one that you need
-to worry about). Instead the state is made up of all of the child block states and you have to implement
-an `update_child_inputs_function` (see `src/block_system.h). The update child inputs function is where
+Unlike a standard block, block systems do not have a physics function (at least not one that you need
+to worry about) or state. Instead the state is made up of all of the child block states and you have to implement
+an `update_child_inputs_function` (see `src/block_system.h`). The update child inputs function is where
 the wiring between blocks happens. The following block diagram is implemented in `example/block_system.c`:
 
               _____________________________________________________
@@ -116,6 +112,6 @@ important detail when it comes time to allocate memory for the solver*
 
 In this example the system input is scaled (multiplied by some constant) before being sent on to block[0].
 Then the first (and only) state of block[0] is used as the input into block[1]. Hopefully this is fairly
-obvious after looking at the example `update_c_inputs` implementation. The rest of the diagram is 
-showing what the block system is doing for you. Essentially each blocks physics function is called
-in turn and the results are stacked in the block system output.
+obvious after looking at the example `update_c_inputs` implementation in `example/block_system.c`.
+The rest of the diagram is showing what the block system is doing for you. Essentially each blocks
+physics function is called in turn and the results are stacked in the block system output.
