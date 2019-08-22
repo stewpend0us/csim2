@@ -93,7 +93,7 @@ static void second_order_system_physics
 		FLOAT_TYPE zeta = so_storage[i].zeta;
 		FLOAT_TYPE omega_n = so_storage[i].omega_n;
 		FLOAT_TYPE numerator = so_storage[i].numerator;
-		dState2[i] = -2 * zeta * omega_n * state2[i] - omega_n * omega_n * state1[i] + numerator * input[i];
+		dState2[i] = -2.0 * zeta * omega_n * state2[i] - omega_n * omega_n * state1[i] + numerator * input[i];
 	}
 }
 
@@ -101,7 +101,7 @@ struct block * second_order_system( struct block * block, size_t num_blocks, str
 {
 	if ( !block || !num_blocks || !storage )
 		return NULL;
-	block->num_states = num_blocks*2.0;
+	block->num_states = num_blocks*2;
 	block->num_inputs = num_blocks;
 	block->storage = storage;
 	block->f = second_order_system_physics;

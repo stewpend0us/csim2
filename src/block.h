@@ -8,7 +8,7 @@ struct block;
 typedef void(*physics_function)(
 	FLOAT_TYPE time,
 	size_t num_states,
-	FLOAT_TYPE dState[],
+	FLOAT_TYPE dstate[],
 	FLOAT_TYPE const state[],
 	size_t num_inputs,
 	FLOAT_TYPE input[],
