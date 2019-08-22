@@ -41,7 +41,7 @@ void rk4
 	size_t num_states = block->num_states;
 	size_t num_inputs = block->num_inputs;
 	void * storage = block->storage;
-	physicsFunction f = block->f;
+	physics_function f = block->f;
 	FLOAT_TYPE half_dt = dt / 2;
 	FLOAT_TYPE half_time = *time + half_dt;
 	FLOAT_TYPE next_time = *time + dt;
