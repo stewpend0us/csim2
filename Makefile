@@ -1,5 +1,6 @@
 MAKEFLAGS+=-j4
 CFLAGS=-Wall -Wextra -Wpedantic -Isrc -DFLOAT_TYPE=double
+# may want -fsingle-precision-constant if using float
 TEST=$(patsubst %.c, %, $(wildcard test/*.c))
 EXAMPLE=$(patsubst %.c, %, $(wildcard example/*.c))
 
