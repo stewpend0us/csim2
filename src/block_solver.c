@@ -21,6 +21,7 @@ void euler
 	size_t num_inputs = block->num_inputs;
 	size_t num_outputs = block->num_outputs;
 	physics_function f = block->f;
+	(void)solver_storage;
 
 	inputf( *time, num_inputs, input );
 	f( *time, num_states, dstate, state, num_inputs, input, num_outputs, output, storage );
@@ -53,10 +54,10 @@ void rk4
 	physics_function f = block->f;
 
 	struct rk4_storage * rk4_storage = (struct rk4_storage *)solver_storage;
-	FLOAT_TYPE next_input[] = rk4_storage.next_input;
-	FLOAT_TYPE dB[] = rk4_storage.dB;
-	FLOAT_TYPE dC[] = rk4_storage.dC;
-	FLOAT_TYPE dD[] = rk4_storage.dD;
+	FLOAT_TYPE * next_input = rk4_storage->next_input;
+	FLOAT_TYPE * dB = rk4_storage->dB;
+	FLOAT_TYPE * dC = rk4_storage->dC;
+	FLOAT_TYPE * dD = rk4_storage->dD;
 
 	FLOAT_TYPE half_dt = dt / 2.0;
 	FLOAT_TYPE half_time = *time + half_dt;
@@ -76,7 +77,7 @@ void rk4
 	
 	for (i = 0; i < num_states; i++)
 		next_state[i] = state[i] + dt * dC[i];
-	inputf( time, num_inputs, next_input );
+	inputf( *time, num_inputs, next_input );
 	f( next_time, num_states, dD, next_state, num_inputs, next_input, 0, NULL, storage );
 	
 	for (i = 0; i < num_states; i++)

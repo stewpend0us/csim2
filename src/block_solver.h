@@ -25,10 +25,10 @@ typedef void (*solver_function)
 
 struct rk4_storage
 {
-	FLOAT_TYPE next_input[], // (1 x numInputs) temp
-	FLOAT_TYPE dB[], // (1 x numStates) temp
-	FLOAT_TYPE dC[], // (1 x numStates) temp
-	FLOAT_TYPE dD[], // (1 x numStates) temp
+	FLOAT_TYPE * next_input; // (1 x numInputs) temp
+	FLOAT_TYPE * dB; // (1 x numStates) temp
+	FLOAT_TYPE * dC; // (1 x numStates) temp
+	FLOAT_TYPE * dD; // (1 x numStates) temp
 };
 
 void euler

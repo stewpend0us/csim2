@@ -17,24 +17,28 @@ struct mass_storage
 static void physics(
 	FLOAT_TYPE time,
 	size_t num_states,
-	FLOAT_TYPE dState[],
+	FLOAT_TYPE dstate[],
 	FLOAT_TYPE const state[],
 	size_t num_inputs,
-	FLOAT_TYPE input[],
+	FLOAT_TYPE const input[],
+	size_t num_outputs,
+	FLOAT_TYPE output[],
 	void * storage
 )
 {
 	(void)time;
 	(void)num_inputs;
 	(void)num_states;
+	(void)num_outputs;
+	(void)output;
 
 	// decompose state
 	FLOAT_TYPE xdot = state[0];
 	FLOAT_TYPE x = state[1];
 
 	// decompose dState
-	FLOAT_TYPE * dxdot = &dState[0];
-	FLOAT_TYPE * dx = &dState[1];
+	FLOAT_TYPE * dxdot = &dstate[0];
+	FLOAT_TYPE * dx = &dstate[1];
 
 	// decompose input
 	FLOAT_TYPE Force = input[0];
@@ -62,7 +66,7 @@ int main( void )
 	char solver = 'e'; // e for euler r for rk4
 	
 	// initialize our block
-	struct block const block = {2, 1, &storage, physics};
+	struct block const block = {2, 1, 0, &storage, physics};
 
 	// allocate memory for the solvers
 	FLOAT_TYPE state[block.num_states];
